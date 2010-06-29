@@ -2,7 +2,7 @@
 #include "hello.nsmap" 
 #include <cstring>
 #include <string>
-#include <omp.h>
+//#include <omp.h>
 
 #include <sstream>
 using namespace std;
@@ -28,20 +28,16 @@ int main(int argc, char **argv)
 
 int helloService::hello(struct soap *soap, char*&s)
 {
-s = new char[256];
-
-#pragma omp parallel 
-{
-  cerr<<"test:" <<endl;
+  //#pragma parallel 
+{ 
   string tmp;
-  tmp = "Hello World id: ";
+  strcpy(s,"Hello World123");
   ostringstream os;
-  os << omp_get_thread_num();
-  tmp = tmp+os.str()+" end ";
+//  os << omp_get_thread_num();
+  tmp = os.str();
+  strcpy(s,tmp.c_str());
 
-  strcat(s,tmp.c_str());
+  strcpy(s,"\n");
 }
-
-
  return SOAP_OK;
 } 

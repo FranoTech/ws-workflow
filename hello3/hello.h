@@ -1,8 +1,11 @@
-//gsoap h service name: hello
-//gsoap h service style: rpc
-//gsoap h service namespace: http://localhost/hello.wsdl
-//gsoap h service location: http://localhost/cgi-bin/hello
-//gsoap h service 
-h_hello(char* )
+//gsoap ns service name:        hello Simple hello service
+//gsoap ns service style:       rpc
+//gsoap ns service encoding:    encoded
+//gsoap ns service namespace:   http://localhost/hello.wsdl
+//gsoap ns service location:    http://localhost/cgi-bin/helloserver
+ 
+//gsoap ns schema namespace:    urn:hello
 
+//gsoap ns service method-documentation: print hello
+int ns__hello(struct soap*, char*&);
 
