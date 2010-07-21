@@ -35,7 +35,7 @@ int helloService::hello(struct soap *soap, char*&s)
 	//strcpy(s,"test test");
 #pragma omp parallel 
 {
-  	cout<<"test:" <<endl;
+  	cerr<<"test:" <<endl;
  	string tmp;
   	tmp = "hello from thread id: ";
   	ostringstream os;
