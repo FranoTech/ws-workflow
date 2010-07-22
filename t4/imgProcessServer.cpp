@@ -44,7 +44,7 @@ int ns__getImage(struct soap *soap, char *name, ns__base64Binary &image)
 
     image.__ptr = (unsigned char*)soap_malloc(soap, MAX_FILE_SIZE);
     for (i = 0; i < MAX_FILE_SIZE; i++)
-    { if ((c = fgetc(dest)) == EOF)
+    { if ((c = fgetc(fd)) == EOF)
         break;
       image.__ptr[i] = c;
     }

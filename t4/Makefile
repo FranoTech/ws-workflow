@@ -13,13 +13,13 @@ $(PROGRAM): soapC.o soapServer.o stdsoap2.o imgProcessServer.o
 
 soapC.o: soapC.cpp
 	$(CC) $(FLAGS) -c soapC.cpp
-soaphelloService.o:  soapServer.cpp
-	$(CC) $(CFLAGS) -c soaphelloService.cpp
+soapServer.o:  soapServer.cpp
+	$(CC) $(CFLAGS) -c soapServer.cpp
 
 stdsoap2.o: stdsoap2.h stdsoap2.cpp
 	$(CC) $(CFLAGS) -c stdsoap2.cpp
 
-helloserver.o: imgProcessServer.cpp
+imgProcessServer.o: imgProcessServer.cpp
 	$(CC) $(CFLAGS) -c imgProcessServer.cpp
 
 install:
