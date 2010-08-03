@@ -23,6 +23,11 @@ int ns__getImage(struct soap *soap, char *name, ns__base64Binary &image)
   { 
     cerr<<"In if"<<endl;
     FILE *fd = fopen(name, "r");
+	
+	fseek(fd,0,SEEK_END);
+	int size = ftell(fd);
+	fseek(fd,0,SEEK_SET);
+
     int i, c;
     if (!fd)
     { soap_fault(soap);
@@ -30,8 +35,8 @@ int ns__getImage(struct soap *soap, char *name, ns__base64Binary &image)
       soap->fault->faultstring = "Cannot open file";
       return SOAP_FAULT;
     }
-    image.__ptr = (unsigned char*)soap_malloc(soap, MAX_FILE_SIZE);
-    for (i = 0; i < MAX_FILE_SIZE; i++)
+    image.__ptr = (unsigned char*)soap_malloc(soap, size);
+    for (i = 0; i < size; i++)
     { if ((c = fgetc(fd)) == EOF)
         break;
       image.__ptr[i] = c;
