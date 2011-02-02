@@ -7,7 +7,12 @@ using namespace std;
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <stdio.h>
-#include "27_1.h"
+
+struct shared_stuff {
+    CvMat *output1Ch;
+    IplImage *tmpImage;
+};
+
 
 int main (int argc, char** argv){
     
@@ -17,8 +22,8 @@ int main (int argc, char** argv){
     char *stuff_addr;  // addr for adding data space
     
     /*  load image and create header */ 
-    IplImage *img = cvLoadImage(argv[0]);
-	stuff->tmpImage = cvCreateImageHeader(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
+    IplImage *img = cvLoadImage(argv[0],CV_LOAD_IMAGE_GRAYSCALE);
+	stuff->tmpImage = cvCreateImageHeader(cvSize(img->width, img->height), IPL_DEPTH_8U, 1);
     stuff->output1Ch = cvCreateMatHeader(img->height, img->width, CV_32FC1);
     
     /* Create the segment */
@@ -36,10 +41,14 @@ int main (int argc, char** argv){
     stuff = (struct shared_stuff *)stuff_addr;
     cvCopy(img,stuff->tmpImage);
     
-    cvcvCreateData(stuff->output1Ch);
+    //cvCreateData(stuff->output1Ch);
     cvConvertScale(stuff->tmpImage, stuff->output1Ch);
     
     /* Realease Memory */
+    if (shmdt(stuff_addr) == -1) {
+        perror("shmdt");
+        exit(1);
+    }
     cvReleaseImage(&img);
     
     return 0;
