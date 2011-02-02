@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
 int ns__getImage(struct soap *soap, char *name, ns__base64Binary &image)
 { 
-    if (name)
+    if(name)
     { 
         //find execution time
 	    timeval tm;

@@ -4,7 +4,10 @@
 #include <unistd.h >
 #include <stdlib.h>
 
+#include <sys/types.h>
+#include <sys/ipc.h>
 #include <sys/shm.h>
+#include <stdio.h>
 #include "shmstruct.h"
 
 int main (int argc, char** argv){
@@ -14,11 +17,15 @@ int main (int argc, char** argv){
     int shmid;
     void *shared_mem = (void *)0;
     srand((unsigned int)getpid());
+    
+    /* Create the segment */
     shmid = shmget((key_t)1234, size0f(struct shm_var), 0666 | IPC_CREATE);
     if(shmid = -1){
         cerr<<"shmget failed"<<endl;
         exit(EXIT_FAILURE);
     }
+    
+    /* Attach the segment to our data space */
     shared_mem = shmat(shmid,(void *)0, 0);
     if(shared_mem == (void *)-1)
         cerr<<"shmat failed"<<endl;

@@ -7,5 +7,5 @@ struct shm_var{
 	CvSeq *cur = nullptr;
 	CvMat *out_single = nullptr;
 	CvMat *output_morph = nullptr;
-    
 }
+
