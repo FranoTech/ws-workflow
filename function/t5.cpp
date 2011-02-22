@@ -7,33 +7,22 @@ using namespace std;
 
 int main (int argc, char** argv){
     
-    /*  init  */ 
+
     IplImage* img = 0;
     IplImage* tmpImage = 0; 
     
-    if((img = cvLoadImage(argv[1],-1)) == 0 ) {
+    if((img = cvLoadImage(argv[1],CV_LOAD_IMAGE_GRAYSCALE)) == 0 ) {
         perror("cvLoadImage");
     }
     
-    tmpImage = cvCreateImage(cvSize(img->width, img->height), IPL_DEPTH_32F, 3);
-    //tmpImage->imageData = img->imageData;
-    //cvCopy(img,tmpImage);
+    tmpImage = cvCreateImage(cvSize(img->width, img->height), IPL_DEPTH_32F, 1);
     cvConvertScale(img,tmpImage);
-
+    
     CvMat *output1Ch = cvCreateMat(img->height, img->width, CV_32FC1);
-    cvConvertScale(tmpImage, output1Ch);
-    
-    //cvSave( "output1Ch.xml", &output1Ch);
-    
-    /* view image */
-    //cvNamedWindow("result", CV_WINDOW_AUTOSIZE);
-    //cvShowImage("result", tmpImage);
-    ////cvShowImage("result", img);
-    //cvWaitKey(10000);
-    //cvDestroyWindow("result");
+    output1Ch = cvGetMat(tmpImage,output1Ch,0,0);
     
     CvMat *input_morph = cvCreateMat(output1Ch->height, output1Ch->width, CV_32FC1);
-    cvThreshold(output1Ch, input_morph, -0.5, 255.0, CV_THRESH_BINARY);
+    cvThreshold(output1Ch, input_morph, 0.5, 255.0, CV_THRESH_BINARY);
     
     IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
     cvMorphologyEx(input_morph, input_morph, NULL, se1, CV_MOP_OPEN);
@@ -42,17 +31,15 @@ int main (int argc, char** argv){
     cvConvert(input_morph, tmp8UC1);
     
     cvNamedWindow("result", CV_WINDOW_AUTOSIZE);
-    cvShowImage("result", tmp8UC1);
+    cvShowImage("result", img);
     cvWaitKey(10000);
     cvDestroyWindow("result");
-    cvReleaseImage(&tmp8UC1);
     
-    
-    /* release memory */
     cvReleaseImage(&img);
     cvReleaseImage(&tmpImage);
+    cvReleaseImage(&tmp8UC1);
+    cvReleaseMat(&output1Ch);
+    cvReleaseMat(&input_morph);
     
     return 0;
 }
-
-

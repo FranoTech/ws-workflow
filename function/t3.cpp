@@ -1,4 +1,4 @@
-//s = image w/ color, why ?
+//we can transfrom 8U 3ch to 32FC3 already
 
 #include <iostream>
 #include <cv.h>
@@ -16,7 +16,10 @@ int main (int argc, char** argv){
     CvMat *input3Ch = cvCreateMat(320, 240, CV_32FC3);
     
     printf("before\n");
-    CV_IMAGE_ELEM( img, uchar, row, col * img->nChannels + ch )
+    /* CV_IMAGE_ELEM( img, uchar, row, col * img->nChannels + ch )*/
+    int element32 = CV_IMAGE_ELEM( tmpImage, uchar, 3, 2);
+    cout<<"element 3 2 : "<<element32<<endl;
+     
     //for(int row=0; row<input3Ch->rows; row++ ) 
     //{
         //const float* ptr = (const float*)(input3Ch->data.ptr + row * input3Ch->step);
@@ -25,10 +28,17 @@ int main (int argc, char** argv){
             //printf("data %d, %d = %f\n", row, col, *ptr);
         //}
     //}
+    
     printf("After\n");
     cvSetZero(tmpImage);
     cvConvertScale(tmpImage,img);
     input3Ch = cvGetMat(img,input3Ch,0,0);
+    
+    float e32 = CV_IMAGE_ELEM( img, float, 3, 2);
+    cout<<"element 3 2 : "<<e32<<endl;
+    
+    float element_3_2 = CV_MAT_ELEM( *input3Ch, float, 3, 2 );
+    cout<<"element 3 2 : "<<element_3_2<<endl;
     //cvConvertScale(tmpImage, input3Ch, 1/255.);
     //cvConvertScale(tmpImage, input3Ch);
     //for(int row=0; row<input3Ch->rows; row++ ) 
