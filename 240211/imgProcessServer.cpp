@@ -24,6 +24,7 @@
 using namespace std;
 static timeval start_time;
 
+
 //function
 void init_time();
 void get_time(char);
@@ -115,7 +116,7 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, char *filename, char
     
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
         cvConvertScale(src, output1Ch);
-        cvSave("o1Ch.xml",output1Ch);
+        cvSave(filename,output1Ch);
     
         if(!filename)
         { 	
@@ -125,9 +126,62 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, char *filename, char
             return SOAP_FAULT;
         }
         cvReleaseImage(&src);
+
+        OutputFilename = new char[strlen(filename)+1];
+        memcpy(OutputFilename,filename,strlen(filename)+1);
+  }
+  else
+  { 
+    cerr<<"File Name require"<<endl;
+    soap_fault(soap);
+    soap->fault->faultstring = "Name required";
+    return SOAP_FAULT;
+  }
+  return SOAP_OK;
+}
+
+
+int ns__MatToIpl1Ch(struct soap *soap, char *InputFilename, char *filename, char *&OutputFilename)
+{ 
+    init_time();
+    cerr<<"imgProcessServer started\n"<<endl;
+    if(InputFilename)
+    { 
         
-        char* OutputFilename = new char[strlen(filename)];
-        memcpy(OutputFilename,filename,sizeof(filename)+1);
+        CvMat* output1Ch;
+        output1Ch = (CvMat*)cvLoad(filename);
+        
+        if (!output1Ch)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not open image file"<<endl;
+            soap->fault->faultstring = "Cannot open image file";
+            return SOAP_FAULT;
+        }
+        IplImage *tmp8UC1 = cvCreateImage(cvGetSize(output1Ch), IPL_DEPTH_8U, 1);
+        cvConvert(output1Ch, tmp8UC1);
+        cvSave(filename,tmp8UC1);
+        
+        if(!filename)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not save to new image"<<endl;
+            soap->fault->faultstring = "Cannot save to new image";
+            return SOAP_FAULT;
+        }
+        
+        if(!cvSaveImage(filename, tmp8UC1))
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not save to new image"<<endl;
+            soap->fault->faultstring = "Cannot save to new image";
+            return SOAP_FAULT;
+        }
+        
+        cvReleaseImage(&tmp8UC1);
+
+        OutputFilename = new char[strlen(filename)+1];
+        memcpy(OutputFilename,filename,strlen(filename)+1);
   }
   else
   { 
