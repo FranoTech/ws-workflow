@@ -1,6 +1,7 @@
 // แตกมาจาก 060111
 // แยกฟังก์ชันแล้ว
-// 
+// src1Ch = source image/mat 1Ch
+// output1Ch = output mat 1Ch
 
 #include "soapH.h"
 #include "imgProcess.nsmap"
@@ -48,7 +49,7 @@ void init_time() {
     gettimeofday(&start_time, NULL);
     time_t init = time(0);
     tm* tm = localtime(&init);
-    cerr<<"******Test started at"<<1900+tm->tm_year<<'-'<<1+tm->tm_mon<<'-'<<tm->tm_mday<<' time'<<tm->tm_hour<<':'<<tm->tm_min<<"******"<<endl;
+    cerr<<"******Start Time :"<<1900+tm->tm_year<<'-'<<1+tm->tm_mon<<'-'<<tm->tm_mday<<' time'<<tm->tm_hour<<':'<<tm->tm_min<<"******"<<endl;
 }
 
 void get_time(char *msg) {
@@ -98,7 +99,8 @@ int ns__getImage(struct soap *soap, char *name, ns__ImageData &image)
 }
 
 
-int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, char *filename, char *&OutputFilename)
+int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, 
+                    char *filename, char *&OutputFilename) // can't change image solution
 { 
     init_time();
     cerr<<"imgProcessServer started\n"<<endl;
@@ -121,27 +123,29 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, char *filename, char
         if(!filename)
         { 	
             soap_fault(soap);
-            cerr<<"Can not save to new image"<<endl;
-            soap->fault->faultstring = "Cannot save to new image";
+            cerr<<"Can not save to mat"<<endl;
+            soap->fault->faultstring = "Cannot save to mat";
             return SOAP_FAULT;
         }
         cvReleaseImage(&src);
+        cvReleaseMat(&output1Ch);
 
         OutputFilename = new char[strlen(filename)+1];
         memcpy(OutputFilename,filename,strlen(filename)+1);
-  }
-  else
-  { 
-    cerr<<"File Name require"<<endl;
-    soap_fault(soap);
-    soap->fault->faultstring = "Name required";
-    return SOAP_FAULT;
-  }
-  return SOAP_OK;
+    }
+    else
+    { 
+        cerr<<"File Name require"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "Name required";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
 }
 
 
-int ns__MatToIpl1Ch(struct soap *soap, char *InputFilename, char *filename, char *&OutputFilename)
+int ns__MatToIpl1Ch(struct soap *soap, char *InputFilename, 
+                    char *filename, char *&OutputFilename)
 { 
     init_time();
     cerr<<"imgProcessServer started\n"<<endl;
@@ -191,4 +195,99 @@ int ns__MatToIpl1Ch(struct soap *soap, char *InputFilename, char *filename, char
     return SOAP_FAULT;
   }
   return SOAP_OK;
+}
+
+
+int ns__BinaryThreshold(struct soap *soap, char *InputFilename, 
+                        double threshold, double maxValue, 
+                        char *filename, char *&OutputFilename)
+{ 
+    init_time();
+    cerr<<"imgProcessServer started\n"<<endl;
+    if(InputFilename)
+    { 
+        // load image from directory
+        CvMat* src1Ch;
+        src1Ch = (CvMat*)cvLoad(InputFileName);
+        if (!src1Ch)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not open image file"<<endl;
+            soap->fault->faultstring = "Cannot open image file";
+            return SOAP_FAULT;
+        }
+    
+        CvMat *matThreshold = cvCreateMat(src1Ch->height, src1Ch->width, CV_32FC1);
+        cvThreshold(src1Ch, matThreshold, threshold, maxValue, CV_THRESH_BINARY);
+        cvSave(filename,matThreshold);
+    
+        if(!filename)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not save to mat"<<endl;
+            soap->fault->faultstring = "Cannot save to mat";
+            return SOAP_FAULT;
+        }
+        cvReleaseImage(&src1Ch);
+        cvReleaseMat(&matThreshold);
+
+        OutputFilename = new char[strlen(filename)+1];
+        memcpy(OutputFilename,filename,strlen(filename)+1);
+    }
+    else
+    { 
+        cerr<<"File Name require"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "Name required";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
+
+
+
+
+int ns__Morph(  struct soap *soap, char *InputFilename, 
+                char *filename, char *&OutputFilename)
+{ 
+    init_time();
+    cerr<<"imgProcessServer started\n"<<endl;
+    if(InputFilename)
+    { 
+        // load image from directory
+        CvMat* input_morph;
+        input_morph = (CvMat*)cvLoad(InputFileName);
+        if (!input_morph)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not open image file"<<endl;
+            soap->fault->faultstring = "Cannot open image file";
+            return SOAP_FAULT;
+        }
+    
+        IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
+        cvMorphologyEx(input_morph, input_morph, NULL, se1, CV_MOP_OPEN);
+        
+        cvSave(filename,input_morph);
+        if(!filename)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not save to mat"<<endl;
+            soap->fault->faultstring = "Cannot save to mat";
+            return SOAP_FAULT;
+        }
+        
+        cvReleaseMat(&input_morph);
+
+        OutputFilename = new char[strlen(filename)+1];
+        memcpy(OutputFilename,filename,strlen(filename)+1);
+    }
+    else
+    { 
+        cerr<<"File Name require"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "Name required";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
 }

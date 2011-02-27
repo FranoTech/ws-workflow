@@ -97,7 +97,7 @@ int ns__getImage(struct soap *soap, char *name, ns__ImageData &image)
 }
 
 
-int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, char *filename, char *&OutputFilename)
+int ns__1ChIplToMat(struct soap *soap, char *InputFilename, char *filename, int depth, char *&OutputFilename)
 { 
     init_time();
     cerr<<"imgProcessServer started\n"<<endl;
@@ -108,16 +108,15 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, char *filename, char
         if (!src)
         { 	
             soap_fault(soap);
-            cerr<<"Can not open image file"<<endl;
-            soap->fault->faultstring = "Cannot open image file";
+            cerr<<"Can not open file"<<endl;
+            soap->fault->faultstring = "Cannot open file";
             return SOAP_FAULT;
         }
-    
+        
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
         cvConvertScale(src, output1Ch);
-        cvSave("o1Ch.xml",output1Ch);
-    
-        if(!filename)
+
+        if(!cvSave(filename,output1Ch))
         { 	
             soap_fault(soap);
             cerr<<"Can not save to new image"<<endl;
@@ -125,9 +124,7 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, char *filename, char
             return SOAP_FAULT;
         }
         cvReleaseImage(&src);
-        
-        char* OutputFilename = new char[strlen(filename)];
-        memcpy(OutputFilename,filename,sizeof(filename)+1);
+        OutputFilename = filename;
   }
   else
   { 
