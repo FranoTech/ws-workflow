@@ -100,7 +100,8 @@ int ns__getImage(struct soap *soap, char *name, ns__ImageData &image)
 
 
 int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, 
-                    char *filename, char *&OutputFilename) // can't change image solution
+                    char *filename, char *&OutputFilename) 
+// can't change image solution
 { 
     init_time();
     cerr<<"imgProcessServer started\n"<<endl;
@@ -292,5 +293,54 @@ int ns__Morph(  struct soap *soap, char *InputFilename,
     return SOAP_OK;
 }
 
-//
-int ns__
+//new adding 19/5/54
+// removed input filename
+int ns__FindContours(	struct soap *soap, char *InputFilename, 
+						char *&OutputFilename)
+{
+
+}
+
+int ns__Convert(  	struct soap *soap, char *InputFilename, 
+					char *&OutputFilename)
+{
+	init_time();
+    if(InputFilename)
+    { 
+        // load image from directory
+        CvMat* input_morph;
+        input_morph = (CvMat*)cvLoad(InputFileName);
+        if (!input_morph)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not open image file"<<endl;
+            soap->fault->faultstring = "Cannot open image file";
+            return SOAP_FAULT;
+        }
+    
+        IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
+        cvMorphologyEx(input_morph, input_morph, NULL, se1, CV_MOP_OPEN);
+        
+        cvSave(filename,input_morph);
+        if(!filename)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not save to mat"<<endl;
+            soap->fault->faultstring = "Cannot save to mat";
+            return SOAP_FAULT;
+        }
+        
+        cvReleaseMat(&input_morph);
+
+        OutputFilename = new char[strlen(filename)+1];
+        memcpy(OutputFilename,filename,strlen(filename)+1);
+    }
+    else
+    { 
+        cerr<<"File Name require"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "Name required";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
