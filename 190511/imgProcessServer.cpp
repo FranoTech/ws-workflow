@@ -128,7 +128,7 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename,
             soap->fault->faultstring = "Cannot save to mat";
             return SOAP_FAULT;
         }
-        cvReleaseImage(&src);
+        cvReleaseImage(&src); 
         cvReleaseMat(&output1Ch);
 
         OutputFilename = new char[strlen(filename)+1];
@@ -301,27 +301,99 @@ int ns__FindContours(	struct soap *soap, char *InputFilename,
 
 }
 
-int ns__Convert(  	struct soap *soap, char *InputFilename, 
+
+//fixing output channel, good or bad ?
+int ns__ConvertFromMatToIpl8UC1(  	struct soap *soap, char *InputFilename, 
 					char *&OutputFilename)
 {
 	init_time();
     if(InputFilename)
     { 
         // load image from directory
-        CvMat* input_morph;
-        input_morph = (CvMat*)cvLoad(InputFileName);
-        if (!input_morph)
+        CvMat* src;
+        src = (CvMat*)cvLoad(InputFileName);
+        if (!src)
         { 	
             soap_fault(soap);
             cerr<<"Can not open image file"<<endl;
-            soap->fault->faultstring = "Cannot open image file";
+            soap->fault->faultstring = "Cannot open file";
             return SOAP_FAULT;
         }
-    
-        IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
-        cvMorphologyEx(input_morph, input_morph, NULL, se1, CV_MOP_OPEN);
+// do anything
         
-        cvSave(filename,input_morph);
+        IplImage *dst8UC1 = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 1);
+        cvConvert(src, dst8UC1);
+
+// end  
+
+        //preparing filename to save
+        ostringstream sout;
+        char* filename;
+        time_t init = time(0);
+        tm* tm = localtime(&init);
+        sout<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour<<tm->tm_min<<"ConvertFromMatToIpl8UC1"<<<<".xml";
+        filename = sout.str();
+        
+        //save result
+        cvSave(filename,dst8UC1);
+        if(!filename)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not save to mat"<<endl;
+            soap->fault->faultstring = "Cannot save to mat";
+            return SOAP_FAULT;
+        }
+        
+        cvReleaseMat(&input_morph);
+
+        OutputFilename = new char[strlen(filename)+1];
+        memcpy(OutputFilename,filename,strlen(filename)+1);
+    }
+    else
+    { 
+        cerr<<"File Name require"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "Name required";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
+
+
+//convert from ipl to mat
+int ns__ConvertFromMatToIpl8UC1(  	struct soap *soap, char *InputFilename, 
+					char *&OutputFilename)
+{
+	init_time();
+    if(InputFilename)
+    { 
+        // load image from directory
+        CvMat* src;
+        src = (CvMat*)cvLoad(InputFileName);
+        if (!src)
+        { 	
+            soap_fault(soap);
+            cerr<<"Can not open image file"<<endl;
+            soap->fault->faultstring = "Cannot open file";
+            return SOAP_FAULT;
+        }
+// do anything
+        
+        IplImage *dst8UC1 = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 1);
+        cvConvert(src, dst8UC1);
+
+// end  
+
+        //preparing filename to save
+        ostringstream sout;
+        char* filename;
+        time_t init = time(0);
+        tm* tm = localtime(&init);
+        sout<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour<<tm->tm_min<<"ConvertFromMatToIpl8UC1"<<<<".xml";
+        filename = sout.str();
+        
+        //save result
+        cvSave(filename,dst8UC1);
         if(!filename)
         { 	
             soap_fault(soap);

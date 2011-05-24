@@ -174,6 +174,9 @@ int ns__MatToIpl1Ch(struct soap *soap, char *InputFilename,
             return SOAP_FAULT;
         }
         
+        ostringstream sout;
+        sout<<filename<<".jpg";
+        filename = sout.str();
         if(!cvSaveImage(filename, tmp8UC1))
         { 	
             soap_fault(soap);
