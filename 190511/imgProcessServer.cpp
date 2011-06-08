@@ -301,7 +301,7 @@ int ns__FindContours(	struct soap *soap, char *InputFilename,
 
 }
 
-
+//convert mat(xml) to ipl
 //fixing output channel, good or bad ?
 int ns__ConvertFromMatToIpl8UC1(  	struct soap *soap, char *InputFilename, 
 					char *&OutputFilename)
@@ -360,16 +360,16 @@ int ns__ConvertFromMatToIpl8UC1(  	struct soap *soap, char *InputFilename,
 }
 
 
-//convert from ipl to mat
-int ns__ConvertFromMatToIpl8UC1(  	struct soap *soap, char *InputFilename, 
+//convert from ipl(xml) to mat 32FC1
+int ns__ConvertFromIplToMat32FC1(  	struct soap *soap, char *InputFilename, 
 					char *&OutputFilename)
 {
 	init_time();
     if(InputFilename)
     { 
         // load image from directory
-        CvMat* src;
-        src = (CvMat*)cvLoad(InputFileName);
+        IplImage *src;
+        src = (IplImage*)cvLoad(InputFileName);
         if (!src)
         { 	
             soap_fault(soap);
@@ -379,8 +379,8 @@ int ns__ConvertFromMatToIpl8UC1(  	struct soap *soap, char *InputFilename,
         }
 // do anything
         
-        IplImage *dst8UC1 = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 1);
-        cvConvert(src, dst8UC1);
+        IplImage *dst32FC1 = cvCreateMat(src->height, src->width, CV_32FC1);
+        cvConvertScale(src,dst32FC1);
 
 // end  
 
@@ -389,7 +389,8 @@ int ns__ConvertFromMatToIpl8UC1(  	struct soap *soap, char *InputFilename,
         char* filename;
         time_t init = time(0);
         tm* tm = localtime(&init);
-        sout<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour<<tm->tm_min<<"ConvertFromMatToIpl8UC1"<<<<".xml";
+        sout<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour
+			<<tm->tm_min<<"ConvertFromIplToMat32FC1"<<<<".xml";
         filename = sout.str();
         
         //save result
@@ -416,3 +417,5 @@ int ns__ConvertFromMatToIpl8UC1(  	struct soap *soap, char *InputFilename,
     }
     return SOAP_OK;
 }
+
+
