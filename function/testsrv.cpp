@@ -33,7 +33,8 @@ int main (int argc, char** argv){
         perror("shmat");
         exit(1);
     }
-
+    
+    cout<<tmpImage->imageSize<<endl;
     tmpImage->imageData = addr;
     cvCopy(img,tmpImage);
     
