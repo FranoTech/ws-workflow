@@ -1,16 +1,20 @@
+
+
+	
 	//## Scanning ##//
     
     //init 
 	CvMat *input3Ch = nullptr;
 	CvMat *output1Ch = nullptr;
-    CvMat *input_morph = cvCreateMat(output1Ch->height, output1Ch->width, 
-    CV_32FC1);
+    CvMat *input_morph = cvCreateMat(output1Ch->height, output1Ch->width, CV_32FC1);
 	IplImage *tmp8UC1 = nullptr;
 	CvMemStorage *storage = cvCreateMemStorage();
 	CvSeq *first_con = nullptr;
 	CvSeq *cur = nullptr;
 	CvMat *out_single = nullptr;
 	CvMat *output_morph = nullptr;
+    
+    
     
     
 	// Convert image to 32F
@@ -38,8 +42,7 @@
         
         //morph
 		IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
-        // remove noise
-		cvMorphologyEx(input_morph, input_morph, nullptr, se1, CV_MOP_OPEN); 
+		cvMorphologyEx(input_morph, input_morph, nullptr, se1, CV_MOP_OPEN); // remove noise
         //morph
 
 
@@ -59,16 +62,12 @@
 			CvPoint *p = new CvPoint[npts];
 			cvCvtSeqToArray(cur, p);
 			if (area < 1500.0) // remove small area
-            // remove from input
-				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); 
+				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
 			else if (area < 7500.0) {
-                // move to single
-				cvFillPoly(out_single, &p, &npts, 1, cvScalar(255.0)); 
-                // remove from input
-				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); 
+				cvFillPoly(out_single, &p, &npts, 1, cvScalar(255.0)); // move to single
+				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
 			}else
-                // fill hole
-				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(255.0)); 
+				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(255.0)); // fill hole
 			delete[] p;
 			cur = cur->h_next;
 		}
@@ -174,14 +173,13 @@
 		cur = first_con;
 		ncell = 0; // total cells
 		while ((cur != nullptr) && (worker->CancellationPending == false)) {
-			if ((cur->total > 2) && (fabs(cvContourArea(cur)) > 1500.0)) { 
-                // remove small area
+			if ((cur->total > 2) && (fabs(cvContourArea(cur)) > 1500.0)) { // remove small area
 				int npts = cur->total;
 				CvPoint *p = new CvPoint[npts];
 				cvCvtSeqToArray(cur, p);
-				cvFillPoly(tmp8UC1, &p, &npts, 1, cvScalar(255));//set mask
+				cvFillPoly(tmp8UC1, &p, &npts, 1, cvScalar(255)); // set mask
 				pixel = cvAvg(output1Ch, tmp8UC1);
-				cvFillPoly(tmp8UC1, &p, &npts, 1, cvScalar(0));//clear mask
+				cvFillPoly(tmp8UC1, &p, &npts, 1, cvScalar(0)); // clear mask
 				if (pixel.val[0] > 0.5) { // Negative, green
 					if (tmpImage != nullptr)
 						cvFillPoly(tmpImage, &p, &npts, 1, CV_RGB(0,255,0));
