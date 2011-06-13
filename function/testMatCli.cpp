@@ -14,8 +14,7 @@ int main (int argc, char** argv){
     key_t key = 5678;
     char *addr;
     
-    /*  load image  */ 
-    IplImage *img = cvLoadImage(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
+    
 	CvMat *mat32FC1 = cvCreateMatHeader(img->height, img->width, CV_32FC1);
 	
 	//IplImage *tmpImage = cvCreateImageHeader(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
