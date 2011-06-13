@@ -38,11 +38,15 @@ int main()
 // @param char *InputFilename
 // @return ns__ImageData &output
 // fixed mat's depth = CV_32FC1
-// fixed key = 001
+// fixed key = 0001
 int CIAService::Ipl1ChToMat(char *InputFilename, ns__ImageData &output)
 {	
 	if(InputFilename)
 	{
+        //preparing sharedmem section
+        int shmid;
+        key_t key = 0001;
+        char *addr;
 		//load image to Ipl object
 		IplImage* src = cvLoadImage(InputFilename,CV_LOAD_IMAGE_GRAYSCALE);
         if (!src)
@@ -53,10 +57,10 @@ int CIAService::Ipl1ChToMat(char *InputFilename, ns__ImageData &output)
             return SOAP_FAULT;
         }
 		//create mat and convert image data to mat object
-        CvMat *mat32FC1 = cvCreateMat(src->height, src->width, CV_32FC1);
+        CvMat *mat32FC1 = cvCreateMatHeader(src->height, src->width, CV_32FC1);
         cvConvertScale(src, mat32FC1);
         
-        //attached data to shared memory
+
         
 		
 	}else{
