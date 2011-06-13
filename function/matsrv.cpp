@@ -14,28 +14,24 @@ int main (int argc, char** argv){
     key_t key = 5678;
     char *addr;
     
-    
-    
     /*  load image  */ 
-    IplImage *img = cvLoadImage(argv[1]);
-	IplImage *tmpImage = cvCreateImageHeader(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
-    
-    //const size_t imgSize = sizeofmat(tmpImage);
+    IplImage* src = cvLoadImage(argv[1],CV_LOAD_IMAGE_GRAYSCALE);
+    //CvMat *mat32FC1 = cvCreateMat(src->height, src->width, CV_32FC1);
+    Mat mat32FC1(src->height, src->width, CV_32FC1);
+
     /* Create the segment */
-    if ((shmid = shmget(key, tmpImage->imageSize, IPC_CREAT | 0666)) < 0) {
+    if ((shmid = shmget(key, src->imageSize, IPC_CREAT | 0666)) < 0) {
         perror("shmget");
         exit(1);
     }
-    //cout<<tmpImage->imageSize<<endl;
-    
+        
     /* Attach the segment to our data space */
     if ((addr = (char *) shmat(shmid, NULL, 0)) == (char *) -1) {
         perror("shmat");
         exit(1);
     }
     
-    cout<<tmpImage->imageSize<<endl;
-    tmpImage->imageData = addr;
+    = addr;
     cvCopy(img,tmpImage);
     
     cvReleaseImage(&img);
@@ -43,5 +39,3 @@ int main (int argc, char** argv){
     
     return 0;
 }
-
-

@@ -9,17 +9,8 @@ using namespace std;
 
 int main (int argc, char** argv){
     
-
-    IplImage* img = 0;
-    IplImage* tmpImage = 0; 
-    
-    if((img = cvLoadImage(argv[1],CV_LOAD_IMAGE_GRAYSCALE)) == 0 ) {
-        perror("cvLoadImage");
-    }
-    
-    CvMat *output1Ch = cvCreateMat(img->height, img->width, CV_32FC1);
-    cvConvertScale(img, output1Ch);
-    //output1Ch = cvGetMat(tmpImage,output1Ch,0,0);
+    CvMat* output1Ch;
+    output1Ch = (CvMat*)cvLoad("o1Ch.xml");
     
     CvMat *input_morph = cvCreateMat(output1Ch->height, output1Ch->width, CV_32FC1);
     cvThreshold(output1Ch, input_morph, 100, 255.0, CV_THRESH_BINARY);
@@ -35,8 +26,8 @@ int main (int argc, char** argv){
     cvWaitKey(10000);
     cvDestroyWindow("result");
     
-    cvReleaseImage(&img);
-    cvReleaseImage(&tmpImage);
+
+
     cvReleaseImage(&tmp8UC1);
     cvReleaseMat(&output1Ch);
     cvReleaseMat(&input_morph);
