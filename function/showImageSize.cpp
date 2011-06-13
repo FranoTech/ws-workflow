@@ -11,12 +11,12 @@ int main (int argc, char** argv)
     cout<<"img->width = "<<img->width<<endl;
     cout<<"img->height = "<<img->height<<endl;
     
-    //CvMat *mat32FC1 = cvCreateMat(img->height, img->width, CV_32FC1);
-    //cvConvertScale(img, mat32FC1);
+    CvMat *mat32FC1 = cvCreateMat(img->height, img->width, CV_32FC1);
+    cvConvertScale(img, mat32FC1);
     
-    //CvSize size = cvGetSize(mat32FC1);
-    //cout<<"mat32FC1->width"<<mat32FC1->width<<endl;
-    //cout<<"mat32FC1->height"<<mat32FC1->height<<endl;
+    CvSize size = cvGetSize(mat32FC1);
+    cout<<"mat32FC1->width"<<mat32FC1->width<<endl;
+    cout<<"mat32FC1->height"<<mat32FC1->height<<endl;
     
     //copied data
     //Mat newMat(img); 
@@ -29,15 +29,13 @@ int main (int argc, char** argv)
     
     //cvSetZero(newMat); // not work!!
     
-    cout<<"newMat->rows = "<<newMat.rows<<endl;
-    cout<<"newMat->cols = "<<newMat.cols<<endl;
-    cout<<"isempty = "<<newMat.empty()<<endl;
+    //cout<<"newMat->rows = "<<newMat.rows<<endl;
+    //cout<<"newMat->cols = "<<newMat.cols<<endl;
+    //cout<<"isempty = "<<newMat.empty()<<endl;
     //cout<<"mat data = "<<newMat.data<<endl;
-    
 
-    
-    newMat.release();
+    //newMat.release();
     cvReleaseImage(&img);
-    //cvReleaseMat(&mat32FC1);
+    cvReleaseMat(&mat32FC1);
     return 0;
 }

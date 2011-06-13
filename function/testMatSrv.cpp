@@ -16,8 +16,17 @@ int main (int argc, char** argv){
     
     /*  load image  */ 
     IplImage *img = cvLoadImage(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
+    if(!img){
+        cout<<"can not load image";
+        exit(1);
+    }
+    
 	CvMat *mat32FC1 = cvCreateMatHeader(img->height, img->width, CV_32FC1);
-	
+	if(!mat32FC1){
+        cout<<"can not create mat";
+        exit(1);
+    }
+    
 	//IplImage *tmpImage = cvCreateImageHeader(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
 	//const size_t imgSize = sizeofmat(tmpImage);
     
@@ -34,13 +43,14 @@ int main (int argc, char** argv){
         exit(1);
     }
     
-    mat32FC1->data = addr;
+    // !!!!!!!!!!!!!!!!!
+    mat32FC1->data.ptr = (unsigned char *)addr;
     cvConvertScale(img, mat32FC1);
     
     CvSize matSize = cvGetSize(mat32FC1);
     cout<<mat32FC1->height<<endl;
     cout<<mat32FC1->width<<endl;
-    
+    cout<<"[1,33] = "<<CV_MAT_ELEM(*mat32FC1, float, 1, 33)<<endl;
     
     cvReleaseImage(&img);
     cvReleaseMat(&mat32FC1);

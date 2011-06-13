@@ -13,16 +13,16 @@ int main (int argc, char** argv){
     int shmid;
     key_t key = 5678;
     char *addr;
-    
-    
-	CvMat *mat32FC1 = cvCreateMatHeader(img->height, img->width, CV_32FC1);
+    //IplImage *img = cvLoadImage(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
+	CvMat *mat32FC1 = cvCreateMatHeader(2880, 3600, CV_32FC1);
 	
+    
 	//IplImage *tmpImage = cvCreateImageHeader(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
 	//const size_t imgSize = sizeofmat(tmpImage);
     
     
     /* Create the segment */
-    if ((shmid = shmget(key, img->imageSize, IPC_CREAT | 0666)) < 0) {
+    if ((shmid = shmget(key, 10368000, IPC_CREAT | 0666)) < 0) {
         perror("shmget");
         exit(1);
     }
@@ -33,15 +33,15 @@ int main (int argc, char** argv){
         exit(1);
     }
     
-    mat32FC1->data = addr;
-    cvConvertScale(img, mat32FC1);
+    &mat32FC1->data.ptr = addr;
     
     CvSize matSize = cvGetSize(mat32FC1);
     cout<<mat32FC1->height<<endl;
     cout<<mat32FC1->width<<endl;
     
+    cout<<"[1,33] = "<<CV_MAT_ELEM(*mat32FC1, float, 1, 33)<<endl;
     
-    cvReleaseImage(&img);
+    //cvReleaseImage(&img);
     cvReleaseMat(&mat32FC1);
     
     return 0;
