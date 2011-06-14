@@ -8,11 +8,16 @@ using namespace std;
 #include <sys/shm.h>
 #include <stdio.h>
 
+int sizeofmat(CvMat *mat) {
+    return mat->rows * mat->step;
+}
+
+
 int main (int argc, char** argv){
     
     int shmid;
     key_t key = 5678;
-    char *addr;
+    uchar *addr;
     
     /*  load image  */ 
     IplImage *img = cvLoadImage(argv[1], CV_LOAD_IMAGE_GRAYSCALE);
@@ -21,33 +26,31 @@ int main (int argc, char** argv){
         exit(1);
     }
     
-	CvMat *mat32FC1 = cvCreateMatHeader(img->height, img->width, CV_32FC1);
+	CvMat *mat32FC1 = cvCreateMat(img->height, img->width, CV_32FC1);
 	if(!mat32FC1){
         cout<<"can not create mat";
         exit(1);
     }
     
+    int matSize = sizeofmat(mat32FC1);
 	//IplImage *tmpImage = cvCreateImageHeader(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
-	//const size_t imgSize = sizeofmat(tmpImage);
-    
-    
+
     /* Create the segment */
-    if ((shmid = shmget(key, img->imageSize, IPC_CREAT | 0666)) < 0) {
+    if ((shmid = shmget(key, matSize, IPC_CREAT | 0666)) < 0) {
         perror("shmget");
         exit(1);
     }
-    
     /* Attach the segment to our data space */
-    if ((addr = (char *) shmat(shmid, NULL, 0)) == (char *) -1) {
+    if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
         perror("shmat");
         exit(1);
     }
     
-    // !!!!!!!!!!!!!!!!!
-    mat32FC1->data.ptr = (unsigned char *)addr;
+    
+    mat32FC1->data.ptr = addr;
     cvConvertScale(img, mat32FC1);
     
-    CvSize matSize = cvGetSize(mat32FC1);
+    CvSize mat_Size = cvGetSize(mat32FC1);
     cout<<mat32FC1->height<<endl;
     cout<<mat32FC1->width<<endl;
     cout<<"[1,33] = "<<CV_MAT_ELEM(*mat32FC1, float, 1, 33)<<endl;
