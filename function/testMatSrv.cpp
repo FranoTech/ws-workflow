@@ -40,7 +40,7 @@ int main (int argc, char** argv){
 	//IplImage *tmpImage = cvCreateImageHeader(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
 
     /* Create the segment */
-    if ((shmid = shmget(key, img->imageSize, IPC_CREAT | 0666)) < 0) {
+    if ((shmid = shmget(key, matSize, IPC_CREAT | 0666)) < 0) {
         perror("shmget");
         exit(1);
     }
