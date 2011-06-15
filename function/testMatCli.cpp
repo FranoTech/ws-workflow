@@ -25,7 +25,7 @@ int main (int argc, char** argv){
     
     
     /* Create the segment */
-    if ((shmid = shmget(key, 10368000, IPC_CREAT | 0666)) < 0) {
+    if ((shmid = shmget(key, matSize, IPC_CREAT | 0666)) < 0) {
         perror("shmget");
         exit(1);
     }
