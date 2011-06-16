@@ -16,8 +16,8 @@
 #include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
-#include <stdlib.h>
+#include <sys/time.h> // time
+#include <stdlib.h>  //rand()
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
@@ -73,28 +73,23 @@ int get_matSize(CvMat *mat) {
 }
 
 
-int rand_lim() {
-/* return a random number between 0 and limit inclusive.
- */
+int rand_key() {
 
-    int divisor = RAND_MAX/(1000);
-    int retval;
-
-    do { 
-        retval = rand() / divisor;
-    } while (retval > limit);
-
-    return retval;
+    srand(time(NULL));  
+    return rand()%10000;
+    
 }
 
 
 
-int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int &key)
+int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int *sharedkey)
 {   
+    
     // shared memory initail
     int shmid;
-    key = rand_lim();
     uchar *addr;
+    int randkey = rand_key();
+    *sharedkey = randkey;
     
     if(InputFilename)
     { 
@@ -111,7 +106,7 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int &key)
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
 
         /* Create the segment */
-        if ((shmid = shmget(key, get_matSize(output1h), IPC_CREAT | 0666)) < 0) {
+        if ((shmid = shmget(randkey, get_matSize(output1h), IPC_CREAT | 0666)) < 0) {
             perror("shmget");
             exit(1);
         }
@@ -139,41 +134,29 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int &key)
 }
 
 
-int ns__MatToIpl1Ch(struct soap *soap, char *InputFilename, 
-                    char *filename, char *&OutputFilename)
+int ns__MatToIpl1Ch(struct soap *soap, int *sharedkey)
 { 
-    init_time();
-    cerr<<"MatToIpl1Ch started"<<endl;
-    if(InputFilename)
+    if(sharedkey)
     { 
+        int shmid;
+        uchar *addr;
+        CvMat *mat32FC1 = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
         
-        CvMat* output1Ch;
-        output1Ch = (CvMat*)cvLoad(InputFilename);
-        
-        if (!output1Ch)
-        { 	
-            soap_fault(soap);
-            cerr<<"Can not open image file"<<endl;
-            soap->fault->faultstring = "Cannot open image file";
-            return SOAP_FAULT;
+        /* Create the segment */
+        if ((shmid = shmget(*sharedkey, get_matSize(mat32FC1), IPC_CREAT | 0666)) < 0) {
+            perror("shmget");
+            exit(1);
         }
+        
+        /* Attach the segment to our data space */
+        if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
+            perror("shmat");
+            exit(1);
+        }
+        
         IplImage *tmp8UC1 = cvCreateImage(cvGetSize(output1Ch), IPL_DEPTH_8U, 1);
         cvConvert(output1Ch, tmp8UC1);
-        //cvSave(filename,tmp8UC1);
-        
-        //if(!filename)
-        //{ 	
-            //soap_fault(soap);
-            //cerr<<"Can not save to new image"<<endl;
-            //soap->fault->faultstring = "Cannot save to new image";
-            //return SOAP_FAULT;
-        //}
-        
-        //ostringstream sout;
-        //sout<<filename<<".jpg";
-        //size_t len = sout.str().length();
-        //OutputFilename = new char[len+1];
-        //memcpy(OutputFilename,sout.str().c_str(),len);
+
         
         if(!cvSaveImage(filename, tmp8UC1))
         { 	
