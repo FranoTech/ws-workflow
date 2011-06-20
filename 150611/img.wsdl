@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="img"
+ targetNamespace="http://localhost/imgSrv.wsdl"
+ xmlns:tns="http://localhost/imgSrv.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:img"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:img"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:img"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <simpleType name="ImageData">
+   <restriction base="xsd:base64Binary">
+   </restriction>
+  </simpleType>
+  <!-- operation request element -->
+  <element name="InputFilename" type="xsd:string"/>
+  <!-- operation response element -->
+  <element name="sharedkey" type="xsd:int"/>
+  <!-- operation request element -->
+  <element name="threshold" type="xsd:double"/>
+  <!-- operation request element -->
+  <element name="maxValue" type="xsd:double"/>
+  <!-- operation request element -->
+  <element name="filename" type="xsd:string"/>
+  <!-- operation response element -->
+  <element name="OutputFilename" type="xsd:string"/>
+ </schema>
+
+</types>
+
+<message name="Ipl1ChToMatRequest">
+ <part name="InputFilename" element="ns:InputFilename"/>
+</message>
+
+<message name="Ipl1ChToMatResponse">
+ <part name="sharedkey" element="ns:sharedkey"/>
+</message>
+
+<message name="BinaryThresholdRequest">
+ <part name="threshold" element="ns:threshold"/>
+ <part name="maxValue" element="ns:maxValue"/>
+</message>
+
+<message name="BinaryThresholdResponse">
+ <part name="sharedkey" element="ns:sharedkey"/>
+</message>
+
+<message name="MorphOpenRequest">
+ <part name="InputFilename" element="ns:InputFilename"/>
+ <part name="filename" element="ns:filename"/>
+</message>
+
+<message name="MorphOpenResponse">
+ <part name="OutputFilename" element="ns:OutputFilename"/>
+</message>
+
+<portType name="imgPortType">
+ <operation name="Ipl1ChToMat">
+  <documentation>Service definition of function ns__Ipl1ChToMat</documentation>
+  <input message="tns:Ipl1ChToMatRequest"/>
+  <output message="tns:Ipl1ChToMatResponse"/>
+ </operation>
+ <operation name="BinaryThreshold">
+  <documentation>Service definition of function ns__BinaryThreshold</documentation>
+  <input message="tns:BinaryThresholdRequest"/>
+  <output message="tns:BinaryThresholdResponse"/>
+ </operation>
+ <operation name="MorphOpen">
+  <documentation>Service definition of function ns__MorphOpen</documentation>
+  <input message="tns:MorphOpenRequest"/>
+  <output message="tns:MorphOpenResponse"/>
+ </operation>
+</portType>
+
+<binding name="img" type="tns:imgPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="Ipl1ChToMat">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+  </output>
+ </operation>
+ <operation name="BinaryThreshold">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+  </output>
+ </operation>
+ <operation name="MorphOpen">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+  </input>
+  <output>
+     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="img">
+ <documentation>gSOAP 2.7.17 generated service definition</documentation>
+ <port name="img" binding="tns:img">
+  <SOAP:address location="http://localhost/cgi-bin/imgSrv"/>
+ </port>
+</service>
+
+</definitions>

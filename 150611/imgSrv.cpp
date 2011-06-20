@@ -9,12 +9,14 @@
 // แก้เป็น shared memory
 
 #include "soapH.h"
-#include "imgProcess.nsmap"
+#include "img.nsmap"
 #include <iostream>
 #include "cv.h"
 #include "highgui.h"
 #include <sstream>
 #include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include <sys/stat.h>
 #include <sys/time.h> // time
 #include <stdlib.h>  //rand()
@@ -22,6 +24,10 @@
 #include <time.h>
 #include <string.h>
 #include <cstring>
+
+
+
+
 
 //init variable
 #define BASE_DIR "/home/lluu/dir/"
@@ -82,14 +88,17 @@ int rand_key() {
 
 
 
-int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int *sharedkey)
+int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int &sharedkey)
 {   
     
     // shared memory initail
     int shmid;
     uchar *addr;
     int randkey = rand_key();
-    *sharedkey = randkey;
+    
+    
+    cerr<<"got randkey = "<<randkey<<endl;
+    cerr<<"got shared key = "<<*sharedkey<<endl;
     
     if(InputFilename)
     { 
@@ -102,11 +111,11 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int *sharedkey)
             soap->fault->faultstring = "Can not open image file";
             return SOAP_FAULT;
         }
-    
+        cerr<<"loaded img"<<endl;
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
 
         /* Create the segment */
-        if ((shmid = shmget(randkey, get_matSize(output1h), IPC_CREAT | 0666)) < 0) {
+        if ((shmid = shmget(randkey, get_matSize(output1Ch), IPC_CREAT | 0666)) < 0) {
             perror("shmget");
             exit(1);
         }
@@ -115,10 +124,11 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int *sharedkey)
             perror("shmat");
             exit(1);
         }
-    
+        cerr<<"attached shared memory"<<endl;
         output1Ch->data.ptr = addr;
         cvConvertScale(src, output1Ch);
-    
+        
+        cerr<<"do convert scale"<<endl;
         cvReleaseImage(&src);
         cvReleaseMat(&output1Ch);
 
@@ -133,17 +143,72 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int *sharedkey)
     return SOAP_OK;
 }
 
+// LATER**
+//int ns__MatToIpl1Ch(struct soap *soap, int *sharedkey)
+//{ 
+    //if(sharedkey)
+    //{ 
+        //int shmid;
+        //uchar *addr;
+        //CvMat *mat32FC1 = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
+        
+        ///* Create the segment */
+        //if ((shmid = shmget(*sharedkey, get_matSize(mat32FC1), IPC_CREAT | 0666)) < 0) {
+            //perror("shmget");
+            //exit(1);
+        //}
+        
+        ///* Attach the segment to our data space */
+        //if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
+            //perror("shmat");
+            //exit(1);
+        //}
+        
+        //IplImage *tmp8UC1 = cvCreateImage(cvGetSize(output1Ch), IPL_DEPTH_8U, 1);
+        //cvConvert(output1Ch, tmp8UC1);
 
-int ns__MatToIpl1Ch(struct soap *soap, int *sharedkey)
+        
+        //if(!cvSaveImage(filename, tmp8UC1))
+        //{ 	
+            //soap_fault(soap);
+            //cerr<<"Can not save to new image"<<endl;
+            //soap->fault->faultstring = "Cannot save to new image";
+            //return SOAP_FAULT;
+        //}
+        
+        //cvReleaseImage(&tmp8UC1);
+        
+        //OutputFilename = new char[strlen(filename)];
+        ////memcpy(OutputFilename,filename,strlen(filename));
+        //strcpy(OutputFilename,filename);
+        //get_time("finished : MatToIpl1Ch \n\n");
+
+  //}
+  //else
+  //{ 
+    //cerr<<"File Name require"<<endl;
+    //soap_fault(soap);
+    //soap->fault->faultstring = "Name required";
+    //return SOAP_FAULT;
+  //}
+  //return SOAP_OK;
+//}
+
+
+int ns__BinaryThreshold(struct soap *soap, double threshold, 
+                        double maxValue,int *sharedkey)
 { 
-    if(sharedkey)
+    if(*sharedkey)
     { 
         int shmid;
         uchar *addr;
-        CvMat *mat32FC1 = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
+        int matSize;
+        
+        CvMat *mat32FC1 = cvCreateMatHeader( imgHeight, imgWidth, CV_32FC1);
+        matSize = get_matSize(mat32FC1);
         
         /* Create the segment */
-        if ((shmid = shmget(*sharedkey, get_matSize(mat32FC1), IPC_CREAT | 0666)) < 0) {
+        if ((shmid = shmget(*sharedkey, matSize, IPC_CREAT | 0666)) < 0) {
             perror("shmget");
             exit(1);
         }
@@ -154,58 +219,20 @@ int ns__MatToIpl1Ch(struct soap *soap, int *sharedkey)
             exit(1);
         }
         
-        IplImage *tmp8UC1 = cvCreateImage(cvGetSize(output1Ch), IPL_DEPTH_8U, 1);
-        cvConvert(output1Ch, tmp8UC1);
-
-        
-        if(!cvSaveImage(filename, tmp8UC1))
-        { 	
-            soap_fault(soap);
-            cerr<<"Can not save to new image"<<endl;
-            soap->fault->faultstring = "Cannot save to new image";
-            return SOAP_FAULT;
-        }
-        
-        cvReleaseImage(&tmp8UC1);
-        
-        OutputFilename = new char[strlen(filename)];
-        //memcpy(OutputFilename,filename,strlen(filename));
-        strcpy(OutputFilename,filename);
-        get_time("finished : MatToIpl1Ch \n\n");
-
-  }
-  else
-  { 
-    cerr<<"File Name require"<<endl;
-    soap_fault(soap);
-    soap->fault->faultstring = "Name required";
-    return SOAP_FAULT;
-  }
-  return SOAP_OK;
-}
-
-
-int ns__BinaryThreshold(struct soap *soap, char *InputFilename, 
-                        double threshold, double maxValue, 
-                        char *filename, char *&OutputFilename)
-{ 
-    init_time();
-    cerr<<"BinaryThreshold started"<<endl;
-    if(InputFilename)
-    { 
-        // load image from directory
-        CvMat* src1Ch;
-        src1Ch = (CvMat*)cvLoad(InputFilename);
-        if (!src1Ch)
+        if (!mat32FC1)
         { 	
             soap_fault(soap);
             cerr<<"Can not open image file"<<endl;
             soap->fault->faultstring = "Cannot open image file";
             return SOAP_FAULT;
         }
+        mat32FC1->data.ptr = addr;
     
-        CvMat *matThreshold = cvCreateMat(src1Ch->height, src1Ch->width, CV_32FC1);
-        cvThreshold(src1Ch, matThreshold, threshold, maxValue, CV_THRESH_BINARY);
+        // do threshold
+        CvMat *matThreshold = cvCreateMat(mat32FC1->height, mat32FC1->width, CV_32FC1);
+        cvThreshold(mat32FC1, matThreshold, threshold, maxValue, CV_THRESH_BINARY);
+        
+        char *filename = "/home/lluu/dir/threshold.xml";
         cvSave(filename,matThreshold);
     
         if(!filename)
@@ -215,19 +242,15 @@ int ns__BinaryThreshold(struct soap *soap, char *InputFilename,
             soap->fault->faultstring = "Cannot save to mat";
             return SOAP_FAULT;
         }
-        cvReleaseMat(&src1Ch);
+        cvReleaseMat(&mat32FC1);
         cvReleaseMat(&matThreshold);
 
-        OutputFilename = new char[strlen(filename)];
-        //memcpy(OutputFilename,filename,strlen(filename)+1);
-        strcpy(OutputFilename,filename);
-        get_time("finished : BinaryThreshold \n\n");
     }
     else
     { 
-        cerr<<"File Name require"<<endl;
+        cerr<<"shared key error"<<endl;
         soap_fault(soap);
-        soap->fault->faultstring = "Name required";
+        soap->fault->faultstring = "shared key error";
         return SOAP_FAULT;
     }
     return SOAP_OK;

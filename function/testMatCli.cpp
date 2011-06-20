@@ -38,7 +38,6 @@ int main (int argc, char** argv){
     
     mat32FC1->data.ptr = addr;
     
-    
     CvSize mat_Size = cvGetSize(mat32FC1);
     cout<<mat32FC1->height<<endl;
     cout<<mat32FC1->width<<endl;
