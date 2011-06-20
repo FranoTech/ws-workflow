@@ -30,7 +30,7 @@ int main (int argc, char** argv){
     cout<<"img->width"<<img->width<<endl;
     
     
-	CvMat *mat32FC1 = cvCreateMat(img->height, img->width, CV_32FC1);
+	CvMat *mat32FC1 = cvCreateMatHeader(img->height, img->width, CV_32FC1);
 	if(!mat32FC1){
         cout<<"can not create mat";
         exit(1);
