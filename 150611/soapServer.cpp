@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.17 2011-06-20 04:33:37 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.17 2011-06-21 03:29:10 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -96,7 +96,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__Ipl1ChToMat(struct soap *soap)
 	soap_default_int(soap, &soap_tmp_int);
 	soap_tmp_ns__Ipl1ChToMatResponse.sharedkey = &soap_tmp_int;
 	soap_default_ns__Ipl1ChToMat(soap, &soap_tmp_ns__Ipl1ChToMat);
-	soap->encodingStyle = NULL;
+	soap->encodingStyle = "";
 	if (!soap_get_ns__Ipl1ChToMat(soap, &soap_tmp_ns__Ipl1ChToMat, "ns:Ipl1ChToMat", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
@@ -140,7 +140,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__BinaryThreshold(struct soap *soap)
 	soap_default_int(soap, &soap_tmp_int);
 	soap_tmp_ns__BinaryThresholdResponse.sharedkey = &soap_tmp_int;
 	soap_default_ns__BinaryThreshold(soap, &soap_tmp_ns__BinaryThreshold);
-	soap->encodingStyle = NULL;
+	soap->encodingStyle = "";
 	if (!soap_get_ns__BinaryThreshold(soap, &soap_tmp_ns__BinaryThreshold, "ns:BinaryThreshold", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)
@@ -181,7 +181,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__MorphOpen(struct soap *soap)
 	struct ns__MorphOpenResponse soap_tmp_ns__MorphOpenResponse;
 	soap_default_ns__MorphOpenResponse(soap, &soap_tmp_ns__MorphOpenResponse);
 	soap_default_ns__MorphOpen(soap, &soap_tmp_ns__MorphOpen);
-	soap->encodingStyle = NULL;
+	soap->encodingStyle = "";
 	if (!soap_get_ns__MorphOpen(soap, &soap_tmp_ns__MorphOpen, "ns:MorphOpen", NULL))
 		return soap->error;
 	if (soap_body_end_in(soap)

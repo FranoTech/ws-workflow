@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.17 2011-06-20 04:33:37 GMT")
+SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.17 2011-06-21 03:29:10 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__Ipl1ChToMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputFilename, int *sharedkey)
@@ -19,7 +19,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__Ipl1ChToMat(struct soap *soap, const cha
 	struct ns__Ipl1ChToMatResponse *soap_tmp_ns__Ipl1ChToMatResponse;
 	if (!soap_endpoint)
 		soap_endpoint = "http://localhost/cgi-bin/imgSrv";
-	soap->encodingStyle = NULL;
+	soap->encodingStyle = "";
 	soap_tmp_ns__Ipl1ChToMat.InputFilename = InputFilename;
 	soap_begin(soap);
 	soap_serializeheader(soap);
@@ -54,7 +54,9 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__Ipl1ChToMat(struct soap *soap, const cha
 	 || soap_recv_header(soap)
 	 || soap_body_begin_in(soap))
 		return soap_closesock(soap);
-	soap_tmp_ns__Ipl1ChToMatResponse = soap_get_ns__Ipl1ChToMatResponse(soap, NULL, "ns:Ipl1ChToMatResponse", "");
+	if (soap_recv_fault(soap, 1))
+		return soap->error;
+	soap_tmp_ns__Ipl1ChToMatResponse = soap_get_ns__Ipl1ChToMatResponse(soap, NULL, "", "");
 	if (soap->error)
 		return soap_recv_fault(soap, 0);
 	if (soap_body_end_in(soap)
@@ -71,7 +73,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__BinaryThreshold(struct soap *soap, const
 	struct ns__BinaryThresholdResponse *soap_tmp_ns__BinaryThresholdResponse;
 	if (!soap_endpoint)
 		soap_endpoint = "http://localhost/cgi-bin/imgSrv";
-	soap->encodingStyle = NULL;
+	soap->encodingStyle = "";
 	soap_tmp_ns__BinaryThreshold.threshold = threshold;
 	soap_tmp_ns__BinaryThreshold.maxValue = maxValue;
 	soap_begin(soap);
@@ -107,7 +109,9 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__BinaryThreshold(struct soap *soap, const
 	 || soap_recv_header(soap)
 	 || soap_body_begin_in(soap))
 		return soap_closesock(soap);
-	soap_tmp_ns__BinaryThresholdResponse = soap_get_ns__BinaryThresholdResponse(soap, NULL, "ns:BinaryThresholdResponse", "");
+	if (soap_recv_fault(soap, 1))
+		return soap->error;
+	soap_tmp_ns__BinaryThresholdResponse = soap_get_ns__BinaryThresholdResponse(soap, NULL, "", "");
 	if (soap->error)
 		return soap_recv_fault(soap, 0);
 	if (soap_body_end_in(soap)
@@ -124,7 +128,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__MorphOpen(struct soap *soap, const char 
 	struct ns__MorphOpenResponse *soap_tmp_ns__MorphOpenResponse;
 	if (!soap_endpoint)
 		soap_endpoint = "http://localhost/cgi-bin/imgSrv";
-	soap->encodingStyle = NULL;
+	soap->encodingStyle = "";
 	soap_tmp_ns__MorphOpen.InputFilename = InputFilename;
 	soap_tmp_ns__MorphOpen.filename = filename;
 	soap_begin(soap);
@@ -158,7 +162,9 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__MorphOpen(struct soap *soap, const char 
 	 || soap_recv_header(soap)
 	 || soap_body_begin_in(soap))
 		return soap_closesock(soap);
-	soap_tmp_ns__MorphOpenResponse = soap_get_ns__MorphOpenResponse(soap, NULL, "ns:MorphOpenResponse", "");
+	if (soap_recv_fault(soap, 1))
+		return soap->error;
+	soap_tmp_ns__MorphOpenResponse = soap_get_ns__MorphOpenResponse(soap, NULL, "", "");
 	if (soap->error)
 		return soap_recv_fault(soap, 0);
 	if (soap_body_end_in(soap)

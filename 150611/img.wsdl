@@ -29,46 +29,34 @@
    <restriction base="xsd:base64Binary">
    </restriction>
   </simpleType>
-  <!-- operation request element -->
-  <element name="InputFilename" type="xsd:string"/>
-  <!-- operation response element -->
-  <element name="sharedkey" type="xsd:int"/>
-  <!-- operation request element -->
-  <element name="threshold" type="xsd:double"/>
-  <!-- operation request element -->
-  <element name="maxValue" type="xsd:double"/>
-  <!-- operation request element -->
-  <element name="filename" type="xsd:string"/>
-  <!-- operation response element -->
-  <element name="OutputFilename" type="xsd:string"/>
  </schema>
 
 </types>
 
 <message name="Ipl1ChToMatRequest">
- <part name="InputFilename" element="ns:InputFilename"/>
+ <part name="InputFilename" type="xsd:string"/>
 </message>
 
 <message name="Ipl1ChToMatResponse">
- <part name="sharedkey" element="ns:sharedkey"/>
+ <part name="sharedkey" type="xsd:int"/>
 </message>
 
 <message name="BinaryThresholdRequest">
- <part name="threshold" element="ns:threshold"/>
- <part name="maxValue" element="ns:maxValue"/>
+ <part name="threshold" type="xsd:double"/>
+ <part name="maxValue" type="xsd:double"/>
 </message>
 
 <message name="BinaryThresholdResponse">
- <part name="sharedkey" element="ns:sharedkey"/>
+ <part name="sharedkey" type="xsd:int"/>
 </message>
 
 <message name="MorphOpenRequest">
- <part name="InputFilename" element="ns:InputFilename"/>
- <part name="filename" element="ns:filename"/>
+ <part name="InputFilename" type="xsd:string"/>
+ <part name="filename" type="xsd:string"/>
 </message>
 
 <message name="MorphOpenResponse">
- <part name="OutputFilename" element="ns:OutputFilename"/>
+ <part name="OutputFilename" type="xsd:string"/>
 </message>
 
 <portType name="imgPortType">
@@ -94,28 +82,28 @@
  <operation name="Ipl1ChToMat">
   <SOAP:operation style="rpc" soapAction=""/>
   <input>
-     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </input>
   <output>
-     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </output>
  </operation>
  <operation name="BinaryThreshold">
   <SOAP:operation style="rpc" soapAction=""/>
   <input>
-     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </input>
   <output>
-     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </output>
  </operation>
  <operation name="MorphOpen">
   <SOAP:operation style="rpc" soapAction=""/>
   <input>
-     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </input>
   <output>
-     <SOAP:body parts="parameters" use="literal" namespace="urn:img"/>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </output>
  </operation>
 </binding>

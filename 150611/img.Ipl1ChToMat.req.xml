@@ -5,7 +5,7 @@
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
  xmlns:ns="urn:img">
- <SOAP-ENV:Body>
+ <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
   <ns:Ipl1ChToMat>
    <InputFilename></InputFilename>
   </ns:Ipl1ChToMat>
