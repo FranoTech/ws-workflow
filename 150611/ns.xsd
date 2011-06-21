@@ -13,17 +13,5 @@
    <restriction base="xsd:base64Binary">
    </restriction>
   </simpleType>
-  <!-- operation request element -->
-  <element name="InputFilename" type="xsd:string"/>
-  <!-- operation response element -->
-  <element name="sharedkey" type="xsd:int"/>
-  <!-- operation request element -->
-  <element name="threshold" type="xsd:double"/>
-  <!-- operation request element -->
-  <element name="maxValue" type="xsd:double"/>
-  <!-- operation request element -->
-  <element name="filename" type="xsd:string"/>
-  <!-- operation response element -->
-  <element name="OutputFilename" type="xsd:string"/>
  </schema>
 

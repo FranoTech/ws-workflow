@@ -25,16 +25,10 @@
 #include <string.h>
 #include <cstring>
 
-
-
-
-
 //init variable
 #define BASE_DIR "/home/lluu/dir/"
 #define int64 long long
-#define imgWidth 3600
-#define imgHeight 2880
-#define img1ChSize 10368000
+
 using namespace std;
 
 static timeval start_time;
@@ -88,17 +82,14 @@ int rand_key() {
 
 
 
-int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int *sharedkey)
+int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImgData &data)
 {   
     
     // shared memory initail
     int shmid;
     uchar *addr;
     int randkey = rand_key();
-    *sharedkey = randkey;
-    
-    cerr<<"got randkey = "<<randkey<<endl;
-    cerr<<"got shared key = "<<*sharedkey<<endl;
+    data.sharedKey = randkey;
     
     if(InputFilename)
     { 
@@ -111,6 +102,9 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int *sharedkey)
             soap->fault->faultstring = "Can not open image file";
             return SOAP_FAULT;
         }
+        data.imgHeigh = src->height;
+        data.imgWidth = src->width;
+        
         cerr<<"loaded img"<<endl;
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
 
@@ -143,60 +137,9 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, int *sharedkey)
     return SOAP_OK;
 }
 
-// LATER**
-//int ns__MatToIpl1Ch(struct soap *soap, int *sharedkey)
-//{ 
-    //if(sharedkey)
-    //{ 
-        //int shmid;
-        //uchar *addr;
-        //CvMat *mat32FC1 = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
-        
-        ///* Create the segment */
-        //if ((shmid = shmget(*sharedkey, get_matSize(mat32FC1), IPC_CREAT | 0666)) < 0) {
-            //perror("shmget");
-            //exit(1);
-        //}
-        
-        ///* Attach the segment to our data space */
-        //if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
-            //perror("shmat");
-            //exit(1);
-        //}
-        
-        //IplImage *tmp8UC1 = cvCreateImage(cvGetSize(output1Ch), IPL_DEPTH_8U, 1);
-        //cvConvert(output1Ch, tmp8UC1);
-
-        
-        //if(!cvSaveImage(filename, tmp8UC1))
-        //{ 	
-            //soap_fault(soap);
-            //cerr<<"Can not save to new image"<<endl;
-            //soap->fault->faultstring = "Cannot save to new image";
-            //return SOAP_FAULT;
-        //}
-        
-        //cvReleaseImage(&tmp8UC1);
-        
-        //OutputFilename = new char[strlen(filename)];
-        ////memcpy(OutputFilename,filename,strlen(filename));
-        //strcpy(OutputFilename,filename);
-        //get_time("finished : MatToIpl1Ch \n\n");
-
-  //}
-  //else
-  //{ 
-    //cerr<<"File Name require"<<endl;
-    //soap_fault(soap);
-    //soap->fault->faultstring = "Name required";
-    //return SOAP_FAULT;
-  //}
-  //return SOAP_OK;
-//}
-
 
 int ns__BinaryThreshold(struct soap *soap, double threshold, 
-                        double maxValue,int *sharedkey)
+                        double maxValue, ns__ImgData &data)
 { 
     if(*sharedkey)
     { 
