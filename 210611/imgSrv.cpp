@@ -82,14 +82,14 @@ int rand_key() {
 
 
 
-int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImgData &data)
+int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImgData &imgData)
 {   
     
     // shared memory initail
     int shmid;
     uchar *addr;
     int randkey = rand_key();
-    data.sharedKey = randkey;
+    imgData.__sharedKey = randkey;
     
     if(InputFilename)
     { 
@@ -102,8 +102,8 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImgData &data)
             soap->fault->faultstring = "Can not open image file";
             return SOAP_FAULT;
         }
-        data.imgHeigh = src->height;
-        data.imgWidth = src->width;
+        imgData.__imgHeight = src->height;
+        imgData.__imgWidth = src->width;
         
         cerr<<"loaded img"<<endl;
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
@@ -138,20 +138,20 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImgData &data)
 }
 
 
-int ns__BinaryThreshold(struct soap *soap, double threshold, 
-                        double maxValue, ns__ImgData &data)
+int ns__BinaryThreshold(struct soap *soap, ns__ImgData dataInput, double threshold, 
+                        double maxValue, ns__ImgData &imgData)
 { 
-    if(*sharedkey)
+    if(dataInput.__sharedKey)
     { 
         int shmid;
         uchar *addr;
         int matSize;
         
-        CvMat *mat32FC1 = cvCreateMatHeader( imgHeight, imgWidth, CV_32FC1);
+        CvMat *mat32FC1 = cvCreateMatHeader(dataInput.__imgHeight, dataInput.__imgWidth, CV_32FC1);
         matSize = get_matSize(mat32FC1);
         
         /* Create the segment */
-        if ((shmid = shmget(*sharedkey, matSize, IPC_CREAT | 0666)) < 0) {
+        if ((shmid = shmget(dataInput.__sharedKey, matSize, IPC_CREAT | 0666)) < 0) {
             perror("shmget");
             exit(1);
         }
@@ -170,7 +170,8 @@ int ns__BinaryThreshold(struct soap *soap, double threshold,
             return SOAP_FAULT;
         }
         mat32FC1->data.ptr = addr;
-    
+        mat32FC1->data.ptr = addr;
+        
         // do threshold
         CvMat *matThreshold = cvCreateMat(mat32FC1->height, mat32FC1->width, CV_32FC1);
         cvThreshold(mat32FC1, matThreshold, threshold, maxValue, CV_THRESH_BINARY);
@@ -185,9 +186,16 @@ int ns__BinaryThreshold(struct soap *soap, double threshold,
             soap->fault->faultstring = "Cannot save to mat";
             return SOAP_FAULT;
         }
+        
+        
+        int randkey = rand_key();
+        imgData.__sharedKey = randkey;
+        imgData.__imgHeight = dataInput.__imgHeight ;
+        imgData.__imgWidth = dataInput.__imgWidth ;
+        
         cvReleaseMat(&mat32FC1);
         cvReleaseMat(&matThreshold);
-
+        
     }
     else
     { 
