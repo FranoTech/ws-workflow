@@ -1,7 +1,14 @@
-// error ตอนเรียก wsdl จาก taverna
+//แก้จาก 230611
+
+// to do list
+// แก้ฟังก์ชันจับเวลาใหม่
+// - current_time เวลาปัจจุบัน, เวลาเริ่มต้น
+// current_time - previous_time เวลาที่ใช้ไป
+// - previous_time = current_time 
+// แก้เป็น shared memory
 
 #include "soapH.h"
-#include "img.nsmap"
+#include "imgProcess.nsmap"
 #include <iostream>
 #include "cv.h"
 #include "highgui.h"
@@ -19,10 +26,8 @@
 
 //init variable
 #define BASE_DIR "/home/lluu/dir/"
-#define int64 long long
-#define imgWidth 3600
-#define imgHeight 2880
-#define img1ChSize 10368000
+
+
 using namespace std;
 
 static timeval start_time;
@@ -76,7 +81,7 @@ int rand_key() {
 
 
 
-int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, struct ns__ImageData &out)
+int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
 {   
     
     // shared memory initail
@@ -131,20 +136,20 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, struct ns__ImageData
     return SOAP_OK;
 }
 
-int ns__BinaryThreshold(struct soap *soap, struct ns__ImageData in, double threshold, 
+int ns__BinaryThreshold(struct soap *soap, ns__ImageData *in, double threshold, 
                         double maxValue,struct ns__ImageData &out)
 { 
-    if(in.sharedKey)
+    if(in->sharedKey)
     { 
         int shmid;
         uchar *addr;
         int matSize;
         
-        CvMat *mat32FC1 = cvCreateMatHeader( in.imgHeight, in.imgWidth, CV_32FC1);
+        CvMat *mat32FC1 = cvCreateMatHeader( in->imgHeight, in->imgWidth, CV_32FC1);
         matSize = get_matSize(mat32FC1);
         
         /* Create the segment */
-        if ((shmid = shmget(in.sharedkey, matSize, IPC_CREAT | 0666)) < 0) {
+        if ((shmid = shmget(in->sharedKey, matSize, IPC_CREAT | 0666)) < 0) {
             perror("shmget");
             exit(1);
         }
@@ -198,51 +203,3 @@ int ns__BinaryThreshold(struct soap *soap, struct ns__ImageData in, double thres
 }
 
 
-
-
-int ns__MorphOpen(  struct soap *soap, char *InputFilename, 
-                char *filename, char *&OutputFilename)
-{ 
-    init_time();
-    cerr<<"MorphOpen started"<<endl;
-    if(InputFilename)
-    { 
-        // load image from directory
-        CvMat* input_morph;
-        input_morph = (CvMat*)cvLoad(InputFilename);
-        if (!input_morph)
-        { 	
-            soap_fault(soap);
-            cerr<<"Can not open image file"<<endl;
-            soap->fault->faultstring = "Cannot open image file";
-            return SOAP_FAULT;
-        }
-    
-        IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
-        cvMorphologyEx(input_morph, input_morph, NULL, se1, CV_MOP_OPEN);
-        
-        cvSave(filename,input_morph);
-        if(!filename)
-        { 	
-            soap_fault(soap);
-            cerr<<"Can not save to mat"<<endl;
-            soap->fault->faultstring = "Cannot save to mat";
-            return SOAP_FAULT;
-        }
-        
-        cvReleaseMat(&input_morph);
-
-        OutputFilename = new char[strlen(filename)];
-        //memcpy(OutputFilename,filename,strlen(filename)+1);
-        strcpy(OutputFilename,filename);
-        get_time("finished : MorphOpen \n\n");
-    }
-    else
-    { 
-        cerr<<"File Name require"<<endl;
-        soap_fault(soap);
-        soap->fault->faultstring = "Name required";
-        return SOAP_FAULT;
-    }
-    return SOAP_OK;
-}
