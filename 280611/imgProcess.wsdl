@@ -30,30 +30,19 @@
 </types>
 
 <message name="Ipl1ChToMat">
- <part name="InputFilename" type="xsd:string"/>
+ <part name="InputFilename" type="xsd:string"/><!-- ns__Ipl1ChToMat::InputFilename -->
 </message>
 
 <message name="ImageData">
- <part name="sharedKey" type="xsd:int"/>
- <part name="imgHeight" type="xsd:int"/>
- <part name="imgWidth" type="xsd:int"/>
-</message>
-
-<message name="BinaryThreshold">
- <part name="in" type="ns:ImageData"/>
- <part name="threshold" type="xsd:double"/>
- <part name="maxValue" type="xsd:double"/>
+ <part name="sharedKey" type="xsd:int"/><!-- ns__Ipl1ChToMat::sharedKey -->
+ <part name="imgHeight" type="xsd:int"/><!-- ns__Ipl1ChToMat::imgHeight -->
+ <part name="imgWidth" type="xsd:int"/><!-- ns__Ipl1ChToMat::imgWidth -->
 </message>
 
 <portType name="imgProcessPortType">
  <operation name="Ipl1ChToMat">
   <documentation>Service definition of function ns__Ipl1ChToMat</documentation>
   <input message="tns:Ipl1ChToMat"/>
-  <output message="tns:ImageData"/>
- </operation>
- <operation name="BinaryThreshold">
-  <documentation>Service definition of function ns__BinaryThreshold</documentation>
-  <input message="tns:BinaryThreshold"/>
   <output message="tns:ImageData"/>
  </operation>
 </portType>
@@ -69,19 +58,10 @@
      <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </output>
  </operation>
- <operation name="BinaryThreshold">
-  <SOAP:operation style="rpc" soapAction=""/>
-  <input>
-     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
-  </input>
-  <output>
-     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
-  </output>
- </operation>
 </binding>
 
 <service name="imgProcess">
- <documentation>gSOAP 2.7.17 generated service definition</documentation>
+ <documentation>gSOAP 2.8.2 generated service definition</documentation>
  <port name="imgProcess" binding="tns:imgProcess">
   <SOAP:address location="http://localhost/cgi-bin/imgProcessServer"/>
  </port>
