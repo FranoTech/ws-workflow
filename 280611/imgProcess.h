@@ -13,8 +13,8 @@ class ns__ImageData
 	int imgWidth;
 };
 
-int ns__Ipl1ChToMat(char *InputFilename, struct ns__ImageData &out);
-int ns__BinaryThreshold( double threshold, double maxValue,struct ns__ImageData &out);
+int ns__Ipl1ChToMat(char *InputFilename, ns__ImageData &out);
+//int ns__BinaryThreshold( double threshold, double maxValue,struct ns__ImageData &out);
 
 
 
