@@ -1,3 +1,12 @@
+//แยกมาจาก 210611
+// เปลี่ยน จากการใช้ xml เป็น sharedmem
+
+// to do list
+// แก้ฟังก์ชันจับเวลาใหม่
+// - current_time เวลาปัจจุบัน, เวลาเริ่มต้น
+// current_time - previous_time เวลาที่ใช้ไป
+// - previous_time = current_time 
+// แก้เป็น shared memory
 
 #include "soapH.h"
 #include "imgProcess.nsmap"
@@ -36,11 +45,11 @@ int main(int argc, char **argv)
 { 
     struct soap soap;
     soap_init(&soap);
-    if (argc < 2)﻿  ﻿  // no args: assume this is a CGI application
+    if (argc < 2)		// no args: assume this is a CGI application
     { 
-        soap_serve(&soap);﻿  // serve request
+        soap_serve(&soap);	// serve request
         soap_destroy(&soap);// cleanup class instances
-        soap_end(&soap);﻿  // cleanup
+        soap_end(&soap);	// cleanup
     }
     return 0;
 }
@@ -87,12 +96,15 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
         // load image from directory
         IplImage* src = cvLoadImage(InputFilename,CV_LOAD_IMAGE_GRAYSCALE);
         if (!src)
-        { ﻿  
+        { 	
             soap_fault(soap);
             cerr<<"Can not open image file"<<endl;
             soap->fault->faultstring = "Can not open image file";
             return SOAP_FAULT;
         }
+        out.imgHeight = src->height;
+        out.imgWidth = src->width;
+        
         cerr<<"loaded img"<<endl;
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
 
@@ -110,9 +122,6 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
         output1Ch->data.ptr = addr;
         cvConvertScale(src, output1Ch);
         
-        out.imgHeight = src->height;
-        out.imgWidth = src->width;
-        
         cerr<<"do convert scale"<<endl;
         cvReleaseImage(&src);
         cvReleaseMat(&output1Ch);
@@ -128,8 +137,9 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
     return SOAP_OK;
 }
 
-int ns__BinaryThreshold(struct soap *soap, struct ns__ImageData in, double threshold, 
-                        double maxValue,struct ns__ImageData &out)
+
+int ns__BinaryThreshold(struct soap *soap, ns__ImageData in, double threshold, 
+                        double maxValue, ns__ImageData &out)
 { 
     if(in.sharedKey)
     { 
@@ -137,18 +147,20 @@ int ns__BinaryThreshold(struct soap *soap, struct ns__ImageData in, double thres
         uchar *addr;
         int matSize;
         
-        CvMat *mat32FC1 = cvCreateMatHeader( in.imgHeight, in.imgWidth, CV_32FC1);
+        CvMat *mat32FC1 = cvCreateMatHeader(in.imgHeight, in.imgWidth, CV_32FC1);
         matSize = get_matSize(mat32FC1);
         
         /* Create the segment */
-        if ((shmid = shmget(in.sharedkey, matSize, IPC_CREAT | 0666)) < 0) {
+        if ((shmid = shmget(in.sharedKey, matSize, IPC_CREAT | 0666)) < 0) {
             perror("shmget");
+            cerr<<"shmget::can't create shared segment"<<endl;
             exit(1);
         }
         
         /* Attach the segment to our data space */
         if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
             perror("shmat");
+            cerr<<"shmat:: can't attach shared segment"<<endl;
             exit(1);
         }
         
@@ -160,7 +172,7 @@ int ns__BinaryThreshold(struct soap *soap, struct ns__ImageData in, double thres
             return SOAP_FAULT;
         }
         mat32FC1->data.ptr = addr;
-    
+        
         // do threshold
         CvMat *matThreshold = cvCreateMat(mat32FC1->height, mat32FC1->width, CV_32FC1);
         cvThreshold(mat32FC1, matThreshold, threshold, maxValue, CV_THRESH_BINARY);
@@ -176,13 +188,15 @@ int ns__BinaryThreshold(struct soap *soap, struct ns__ImageData in, double thres
             return SOAP_FAULT;
         }
         
-        out.sharedKey = rand_key();
-		out.imgHeight = matThreshold->height;
-		out.imgWidth = matThreshold->width;
+        
+        int randkey = rand_key();
+        out.sharedKey = randkey;
+        out.imgHeight = in.imgHeight ;
+        out.imgWidth = in.imgWidth ;
         
         cvReleaseMat(&mat32FC1);
         cvReleaseMat(&matThreshold);
-
+        
     }
     else
     { 
@@ -193,6 +207,8 @@ int ns__BinaryThreshold(struct soap *soap, struct ns__ImageData in, double thres
     }
     return SOAP_OK;
 }
+
+
 
 
 int ns__MorphOpen(  struct soap *soap, char *InputFilename, 
