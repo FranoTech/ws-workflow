@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="imgProcess"
+ targetNamespace="http://localhost/imgProcess.wsdl"
+ xmlns:tns="http://localhost/imgProcess.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:img"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:img"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:img"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="Ipl1ChToMat">
+ <part name="InputFilename" type="xsd:string"/><!-- ns__Ipl1ChToMat::InputFilename -->
+</message>
+
+<message name="ImageData">
+ <part name="sharedKey" type="xsd:int"/><!-- ns__Ipl1ChToMat::sharedKey -->
+ <part name="imgHeight" type="xsd:int"/><!-- ns__Ipl1ChToMat::imgHeight -->
+ <part name="imgWidth" type="xsd:int"/><!-- ns__Ipl1ChToMat::imgWidth -->
+</message>
+
+<portType name="imgProcessPortType">
+ <operation name="Ipl1ChToMat">
+  <documentation>Service definition of function ns__Ipl1ChToMat</documentation>
+  <input message="tns:Ipl1ChToMat"/>
+  <output message="tns:ImageData"/>
+ </operation>
+</portType>
+
+<binding name="imgProcess" type="tns:imgProcessPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="Ipl1ChToMat">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="imgProcess">
+ <documentation>gSOAP 2.8.2 generated service definition</documentation>
+ <port name="imgProcess" binding="tns:imgProcess">
+  <SOAP:address location="http://localhost/cgi-bin/imgProcessServer"/>
+ </port>
+</service>
+
+</definitions>
