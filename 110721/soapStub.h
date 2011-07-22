@@ -72,16 +72,39 @@ public:
 struct ns__BinaryThreshold
 {
 public:
-	ns__ImageData in;	/* required element of type ns:ImageData */
+	int sharedKey;	/* required element of type xsd:int */
+	int imgHeight;	/* required element of type xsd:int */
+	int imgWidth;	/* required element of type xsd:int */
 	double threshold;	/* required element of type xsd:double */
 	double maxValue;	/* required element of type xsd:double */
+};
+#endif
+
+#ifndef SOAP_TYPE_ns__MorphOpenResponse
+#define SOAP_TYPE_ns__MorphOpenResponse (16)
+/* ns:MorphOpenResponse */
+struct ns__MorphOpenResponse
+{
+public:
+	char *OutputFilename;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_ns__MorphOpen
+#define SOAP_TYPE_ns__MorphOpen (17)
+/* ns:MorphOpen */
+struct ns__MorphOpen
+{
+public:
+	char *InputFilename;	/* optional element of type xsd:string */
+	char *filename;	/* optional element of type xsd:string */
 };
 #endif
 
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (14)
+#define SOAP_TYPE_SOAP_ENV__Header (18)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -97,7 +120,7 @@ private:
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (15)
+#define SOAP_TYPE_SOAP_ENV__Code (19)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -112,7 +135,7 @@ public:
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (17)
+#define SOAP_TYPE_SOAP_ENV__Detail (21)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -128,7 +151,7 @@ public:
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (20)
+#define SOAP_TYPE_SOAP_ENV__Reason (24)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -142,7 +165,7 @@ public:
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (21)
+#define SOAP_TYPE_SOAP_ENV__Fault (25)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -194,7 +217,9 @@ typedef char *_XML;
 
 SOAP_FMAC5 int SOAP_FMAC6 ns__Ipl1ChToMat(struct soap*, char *InputFilename, ns__ImageData &out);
 
-SOAP_FMAC5 int SOAP_FMAC6 ns__BinaryThreshold(struct soap*, ns__ImageData in, double threshold, double maxValue, ns__ImageData &out);
+SOAP_FMAC5 int SOAP_FMAC6 ns__BinaryThreshold(struct soap*, int sharedKey, int imgHeight, int imgWidth, double threshold, double maxValue, ns__ImageData &out);
+
+SOAP_FMAC5 int SOAP_FMAC6 ns__MorphOpen(struct soap*, char *InputFilename, char *filename, char *&OutputFilename);
 
 /******************************************************************************\
  *                                                                            *
@@ -210,6 +235,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__Ipl1ChToMat(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__BinaryThreshold(struct soap*);
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__MorphOpen(struct soap*);
+
 /******************************************************************************\
  *                                                                            *
  * Client-Side Call Stubs                                                     *
@@ -219,7 +246,9 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__BinaryThreshold(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__Ipl1ChToMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputFilename, ns__ImageData &out);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__BinaryThreshold(struct soap *soap, const char *soap_endpoint, const char *soap_action, ns__ImageData in, double threshold, double maxValue, ns__ImageData &out);
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__BinaryThreshold(struct soap *soap, const char *soap_endpoint, const char *soap_action, int sharedKey, int imgHeight, int imgWidth, double threshold, double maxValue, ns__ImageData &out);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__MorphOpen(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputFilename, char *filename, char *&OutputFilename);
 
 #endif
 

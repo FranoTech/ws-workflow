@@ -40,9 +40,20 @@
 </message>
 
 <message name="BinaryThreshold">
- <part name="in" type="ns:ImageData"/><!-- ns__BinaryThreshold::in -->
+ <part name="sharedKey" type="xsd:int"/><!-- ns__BinaryThreshold::sharedKey -->
+ <part name="imgHeight" type="xsd:int"/><!-- ns__BinaryThreshold::imgHeight -->
+ <part name="imgWidth" type="xsd:int"/><!-- ns__BinaryThreshold::imgWidth -->
  <part name="threshold" type="xsd:double"/><!-- ns__BinaryThreshold::threshold -->
  <part name="maxValue" type="xsd:double"/><!-- ns__BinaryThreshold::maxValue -->
+</message>
+
+<message name="MorphOpenRequest">
+ <part name="InputFilename" type="xsd:string"/><!-- ns__MorphOpen::InputFilename -->
+ <part name="filename" type="xsd:string"/><!-- ns__MorphOpen::filename -->
+</message>
+
+<message name="MorphOpenResponse">
+ <part name="OutputFilename" type="xsd:string"/><!-- ns__MorphOpen::OutputFilename -->
 </message>
 
 <portType name="imgProcessPortType">
@@ -55,6 +66,11 @@
   <documentation>Service definition of function ns__BinaryThreshold</documentation>
   <input message="tns:BinaryThreshold"/>
   <output message="tns:ImageData"/>
+ </operation>
+ <operation name="MorphOpen">
+  <documentation>Service definition of function ns__MorphOpen</documentation>
+  <input message="tns:MorphOpenRequest"/>
+  <output message="tns:MorphOpenResponse"/>
  </operation>
 </portType>
 
@@ -70,6 +86,15 @@
   </output>
  </operation>
  <operation name="BinaryThreshold">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="MorphOpen">
   <SOAP:operation style="rpc" soapAction=""/>
   <input>
      <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
