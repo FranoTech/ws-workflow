@@ -7,11 +7,9 @@
  xmlns:ns="urn:img">
  <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
   <ns:BinaryThreshold>
-   <in>
-    <sharedKey>0</sharedKey>
-    <imgHeight>0</imgHeight>
-    <imgWidth>0</imgWidth>
-   </in>
+   <sharedKey>0</sharedKey>
+   <imgHeight>0</imgHeight>
+   <imgWidth>0</imgWidth>
    <threshold>0.0</threshold>
    <maxValue>0.0</maxValue>
   </ns:BinaryThreshold>
