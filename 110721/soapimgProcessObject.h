@@ -49,6 +49,4 @@ SOAP_FMAC5 int SOAP_FMAC6 ns__Ipl1ChToMat(struct soap*, char *InputFilename, ns_
 
 SOAP_FMAC5 int SOAP_FMAC6 ns__BinaryThreshold(struct soap*, ns__ImageData in, double threshold, double maxValue, ns__ImageData &out);
 
-SOAP_FMAC5 int SOAP_FMAC6 ns__MorphOpen(struct soap*, char *InputFilename, char *filename, char *&OutputFilename);
-
 #endif

@@ -15,7 +15,6 @@ class ns__ImageData
 
 int ns__Ipl1ChToMat(char *InputFilename, ns__ImageData &out);
 int ns__BinaryThreshold( ns__ImageData in, double threshold, double maxValue, ns__ImageData &out);
-int ns__MorphOpen(char *InputFilename, char *filename, char *&OutputFilename);
 
 
 
