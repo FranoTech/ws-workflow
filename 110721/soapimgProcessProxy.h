@@ -32,7 +32,5 @@ class imgProcess
 	virtual int ns__Ipl1ChToMat(char *InputFilename, ns__ImageData &out) { return soap ? soap_call_ns__Ipl1ChToMat(soap, endpoint, NULL, InputFilename, out) : SOAP_EOM; };
 	/// Invoke 'BinaryThreshold' of service 'imgProcess' and return error code (or SOAP_OK)
 	virtual int ns__BinaryThreshold(ns__ImageData in, double threshold, double maxValue, ns__ImageData &out) { return soap ? soap_call_ns__BinaryThreshold(soap, endpoint, NULL, in, threshold, maxValue, out) : SOAP_EOM; };
-	/// Invoke 'MorphOpen' of service 'imgProcess' and return error code (or SOAP_OK)
-	virtual int ns__MorphOpen(char *InputFilename, char *filename, char *&OutputFilename) { return soap ? soap_call_ns__MorphOpen(soap, endpoint, NULL, InputFilename, filename, OutputFilename) : SOAP_EOM; };
 };
 #endif

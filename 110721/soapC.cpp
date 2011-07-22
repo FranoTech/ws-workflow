@@ -12,7 +12,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.8.2 2011-07-21 15:07:53 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.8.2 2011-07-22 03:10:45 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -173,10 +173,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_double(soap, NULL, NULL, "xsd:double");
 	case SOAP_TYPE_ns__ImageData:
 		return soap_in_ns__ImageData(soap, NULL, NULL, "ns:ImageData");
-	case SOAP_TYPE_ns__MorphOpen:
-		return soap_in_ns__MorphOpen(soap, NULL, NULL, "ns:MorphOpen");
-	case SOAP_TYPE_ns__MorphOpenResponse:
-		return soap_in_ns__MorphOpenResponse(soap, NULL, NULL, "ns:MorphOpenResponse");
 	case SOAP_TYPE_ns__BinaryThreshold:
 		return soap_in_ns__BinaryThreshold(soap, NULL, NULL, "ns:BinaryThreshold");
 	case SOAP_TYPE_ns__Ipl1ChToMat:
@@ -210,14 +206,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "xsd:double"))
 		{	*type = SOAP_TYPE_double;
 			return soap_in_double(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "ns:MorphOpen"))
-		{	*type = SOAP_TYPE_ns__MorphOpen;
-			return soap_in_ns__MorphOpen(soap, NULL, NULL, NULL);
-		}
-		if (!soap_match_tag(soap, t, "ns:MorphOpenResponse"))
-		{	*type = SOAP_TYPE_ns__MorphOpenResponse;
-			return soap_in_ns__MorphOpenResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "ns:BinaryThreshold"))
 		{	*type = SOAP_TYPE_ns__BinaryThreshold;
@@ -313,10 +301,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return soap_out_double(soap, tag, id, (const double *)ptr, "xsd:double");
 	case SOAP_TYPE_ns__ImageData:
 		return ((ns__ImageData *)ptr)->soap_out(soap, tag, id, "ns:ImageData");
-	case SOAP_TYPE_ns__MorphOpen:
-		return soap_out_ns__MorphOpen(soap, tag, id, (const struct ns__MorphOpen *)ptr, "ns:MorphOpen");
-	case SOAP_TYPE_ns__MorphOpenResponse:
-		return soap_out_ns__MorphOpenResponse(soap, tag, id, (const struct ns__MorphOpenResponse *)ptr, "ns:MorphOpenResponse");
 	case SOAP_TYPE_ns__BinaryThreshold:
 		return soap_out_ns__BinaryThreshold(soap, tag, id, (const struct ns__BinaryThreshold *)ptr, "ns:BinaryThreshold");
 	case SOAP_TYPE_ns__Ipl1ChToMat:
@@ -346,12 +330,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 	{
 	case SOAP_TYPE_ns__ImageData:
 		((ns__ImageData *)ptr)->soap_serialize(soap);
-		break;
-	case SOAP_TYPE_ns__MorphOpen:
-		soap_serialize_ns__MorphOpen(soap, (const struct ns__MorphOpen *)ptr);
-		break;
-	case SOAP_TYPE_ns__MorphOpenResponse:
-		soap_serialize_ns__MorphOpenResponse(soap, (const struct ns__MorphOpenResponse *)ptr);
 		break;
 	case SOAP_TYPE_ns__BinaryThreshold:
 		soap_serialize_ns__BinaryThreshold(soap, (const struct ns__BinaryThreshold *)ptr);
@@ -383,10 +361,6 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_ns__Ipl1ChToMat(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_ns__BinaryThreshold:
 		return (void*)soap_instantiate_ns__BinaryThreshold(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_ns__MorphOpenResponse:
-		return (void*)soap_instantiate_ns__MorphOpenResponse(soap, -1, type, arrayType, n);
-	case SOAP_TYPE_ns__MorphOpen:
-		return (void*)soap_instantiate_ns__MorphOpen(soap, -1, type, arrayType, n);
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Header:
 		return (void*)soap_instantiate_SOAP_ENV__Header(soap, -1, type, arrayType, n);
@@ -431,18 +405,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			SOAP_DELETE((struct ns__BinaryThreshold*)p->ptr);
 		else
 			SOAP_DELETE_ARRAY((struct ns__BinaryThreshold*)p->ptr);
-		break;
-	case SOAP_TYPE_ns__MorphOpenResponse:
-		if (p->size < 0)
-			SOAP_DELETE((struct ns__MorphOpenResponse*)p->ptr);
-		else
-			SOAP_DELETE_ARRAY((struct ns__MorphOpenResponse*)p->ptr);
-		break;
-	case SOAP_TYPE_ns__MorphOpen:
-		if (p->size < 0)
-			SOAP_DELETE((struct ns__MorphOpen*)p->ptr);
-		else
-			SOAP_DELETE_ARRAY((struct ns__MorphOpen*)p->ptr);
 		break;
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Header:
@@ -1389,234 +1351,6 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap *soap, int st,
 }
 
 #endif
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__MorphOpen(struct soap *soap, struct ns__MorphOpen *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_string(soap, &a->InputFilename);
-	soap_default_string(soap, &a->filename);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__MorphOpen(struct soap *soap, const struct ns__MorphOpen *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_serialize_string(soap, &a->InputFilename);
-	soap_serialize_string(soap, &a->filename);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__MorphOpen(struct soap *soap, const char *tag, int id, const struct ns__MorphOpen *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns__MorphOpen), type))
-		return soap->error;
-	if (soap_out_string(soap, "InputFilename", -1, &a->InputFilename, ""))
-		return soap->error;
-	if (soap_out_string(soap, "filename", -1, &a->filename, ""))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct ns__MorphOpen * SOAP_FMAC4 soap_in_ns__MorphOpen(struct soap *soap, const char *tag, struct ns__MorphOpen *a, const char *type)
-{
-	size_t soap_flag_InputFilename = 1;
-	size_t soap_flag_filename = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct ns__MorphOpen *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns__MorphOpen, sizeof(struct ns__MorphOpen), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_ns__MorphOpen(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_InputFilename && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, "InputFilename", &a->InputFilename, "xsd:string"))
-				{	soap_flag_InputFilename--;
-					continue;
-				}
-			if (soap_flag_filename && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, "filename", &a->filename, "xsd:string"))
-				{	soap_flag_filename--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct ns__MorphOpen *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ns__MorphOpen, 0, sizeof(struct ns__MorphOpen), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__MorphOpen(struct soap *soap, const struct ns__MorphOpen *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ns__MorphOpen);
-	if (soap_out_ns__MorphOpen(soap, tag?tag:"ns:MorphOpen", id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 struct ns__MorphOpen * SOAP_FMAC4 soap_get_ns__MorphOpen(struct soap *soap, struct ns__MorphOpen *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_ns__MorphOpen(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC1 struct ns__MorphOpen * SOAP_FMAC2 soap_instantiate_ns__MorphOpen(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	(void)type; (void)arrayType; /* appease -Wall -Werror */
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns__MorphOpen(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ns__MorphOpen, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)SOAP_NEW(struct ns__MorphOpen);
-		if (size)
-			*size = sizeof(struct ns__MorphOpen);
-	}
-	else
-	{	cp->ptr = (void*)SOAP_NEW(struct ns__MorphOpen[n]);
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct ns__MorphOpen);
-	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct ns__MorphOpen*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__MorphOpen(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	(void)soap; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct ns__MorphOpen %p -> %p\n", q, p));
-	*(struct ns__MorphOpen*)p = *(struct ns__MorphOpen*)q;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__MorphOpenResponse(struct soap *soap, struct ns__MorphOpenResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_default_string(soap, &a->OutputFilename);
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__MorphOpenResponse(struct soap *soap, const struct ns__MorphOpenResponse *a)
-{
-	(void)soap; (void)a; /* appease -Wall -Werror */
-	soap_serialize_string(soap, &a->OutputFilename);
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__MorphOpenResponse(struct soap *soap, const char *tag, int id, const struct ns__MorphOpenResponse *a, const char *type)
-{
-	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns__MorphOpenResponse), type))
-		return soap->error;
-	if (a->OutputFilename)
-	{	if (soap_out_string(soap, "OutputFilename", -1, &a->OutputFilename, ""))
-			return soap->error;
-	}
-	else if (soap_element_nil(soap, "OutputFilename"))
-		return soap->error;
-	return soap_element_end_out(soap, tag);
-}
-
-SOAP_FMAC3 struct ns__MorphOpenResponse * SOAP_FMAC4 soap_in_ns__MorphOpenResponse(struct soap *soap, const char *tag, struct ns__MorphOpenResponse *a, const char *type)
-{
-	size_t soap_flag_OutputFilename = 1;
-	if (soap_element_begin_in(soap, tag, 0, type))
-		return NULL;
-	a = (struct ns__MorphOpenResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns__MorphOpenResponse, sizeof(struct ns__MorphOpenResponse), 0, NULL, NULL, NULL);
-	if (!a)
-		return NULL;
-	soap_default_ns__MorphOpenResponse(soap, a);
-	if (soap->body && !*soap->href)
-	{
-		for (;;)
-		{	soap->error = SOAP_TAG_MISMATCH;
-			if (soap_flag_OutputFilename && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
-				if (soap_in_string(soap, "OutputFilename", &a->OutputFilename, "xsd:string"))
-				{	soap_flag_OutputFilename--;
-					continue;
-				}
-			if (soap->error == SOAP_TAG_MISMATCH)
-				soap->error = soap_ignore_element(soap);
-			if (soap->error == SOAP_NO_TAG)
-				break;
-			if (soap->error)
-				return NULL;
-		}
-		if (soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	else
-	{	a = (struct ns__MorphOpenResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ns__MorphOpenResponse, 0, sizeof(struct ns__MorphOpenResponse), 0, NULL);
-		if (soap->body && soap_element_end_in(soap, tag))
-			return NULL;
-	}
-	if ((soap->mode & SOAP_XML_STRICT) && (soap_flag_OutputFilename > 0))
-	{	soap->error = SOAP_OCCURS;
-		return NULL;
-	}
-	return a;
-}
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__MorphOpenResponse(struct soap *soap, const struct ns__MorphOpenResponse *a, const char *tag, const char *type)
-{
-	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ns__MorphOpenResponse);
-	if (soap_out_ns__MorphOpenResponse(soap, tag?tag:"ns:MorphOpenResponse", id, a, type))
-		return soap->error;
-	return soap_putindependent(soap);
-}
-
-SOAP_FMAC3 struct ns__MorphOpenResponse * SOAP_FMAC4 soap_get_ns__MorphOpenResponse(struct soap *soap, struct ns__MorphOpenResponse *p, const char *tag, const char *type)
-{
-	if ((p = soap_in_ns__MorphOpenResponse(soap, tag, p, type)))
-		if (soap_getindependent(soap))
-			return NULL;
-	return p;
-}
-
-SOAP_FMAC1 struct ns__MorphOpenResponse * SOAP_FMAC2 soap_instantiate_ns__MorphOpenResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
-{
-	(void)type; (void)arrayType; /* appease -Wall -Werror */
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns__MorphOpenResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
-	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ns__MorphOpenResponse, n, soap_fdelete);
-	if (!cp)
-		return NULL;
-	if (n < 0)
-	{	cp->ptr = (void*)SOAP_NEW(struct ns__MorphOpenResponse);
-		if (size)
-			*size = sizeof(struct ns__MorphOpenResponse);
-	}
-	else
-	{	cp->ptr = (void*)SOAP_NEW(struct ns__MorphOpenResponse[n]);
-		if (!cp->ptr)
-		{	soap->error = SOAP_EOM;
-			return NULL;
-		}
-		if (size)
-			*size = n * sizeof(struct ns__MorphOpenResponse);
-	}
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
-	return (struct ns__MorphOpenResponse*)cp->ptr;
-}
-
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__MorphOpenResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
-{
-	(void)soap; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
-	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct ns__MorphOpenResponse %p -> %p\n", q, p));
-	*(struct ns__MorphOpenResponse*)p = *(struct ns__MorphOpenResponse*)q;
-}
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__BinaryThreshold(struct soap *soap, struct ns__BinaryThreshold *a)
 {
