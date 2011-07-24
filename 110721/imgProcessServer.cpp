@@ -130,7 +130,7 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
 }
 
 
-
+// ยังไม่เสร็จ
 
  //	------------      ----------  
  //	|  mat32FC1|   => | output |
@@ -171,14 +171,27 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
         }
         mat32FC1->data.ptr = addr;
         
+        // prepare sharedmem segment to do thresholding
+        CvMat *output = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
+        outputSize = get_matSize(output);
+        
+        /* Create the segment */
+        if ((shmid = shmget(sharedKey, outputSize, IPC_CREAT | 0666)) < 0) {
+            perror("shmget");
+            cerr<<"shmget::can't create shared segment"<<endl;
+            exit(1);
+        }
+        
+        /* Attach the segment to our data space */
+        if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
+            perror("shmat");
+            cerr<<"shmat:: can't attach shared segment"<<endl;
+            exit(1);
+        }
+        output->data.ptr = addr;
+        
         // do threshold
-        CvMat *matThreshold = cvCreateMat(mat32FC1->height, mat32FC1->width, CV_32FC1);
-        
-        
-        
-        
-        
-        cvThreshold(mat32FC1, matThreshold, threshold, maxValue, CV_THRESH_BINARY);
+        cvThreshold(mat32FC1, output, threshold, maxValue, CV_THRESH_BINARY);
         
         //char *filename = "/home/lluu/dir/threshold.xml";
         //cvSave(filename,matThreshold);
@@ -196,35 +209,7 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
         out.sharedKey = randkey;
         out.imgHeight = imgHeight ;
         out.imgWidth = imgWidth ;
-        
-        CvMat *output = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
-        outputSize = get_matSize(output);
-        
-        /* Create the segment */
-        if ((shmid = shmget(sharedKey, outputSize, IPC_CREAT | 0666)) < 0) {
-            perror("shmget");
-            cerr<<"shmget::can't create shared segment"<<endl;
-            exit(1);
-        }
-        
-        /* Attach the segment to our data space */
-        if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
-            perror("shmat");
-            cerr<<"shmat:: can't attach shared segment"<<endl;
-            exit(1);
-        }
-        
-        if (!output)
-        { 	
-            soap_fault(soap);
-            cerr<<"Can not open image file"<<endl;
-            soap->fault->faultstring = "Cannot open image file";
-            return SOAP_FAULT;
-        }
-        output->data.ptr = addr;
-        
-        
-        
+
         cvReleaseMat(&mat32FC1);
         cvReleaseMat(&output);
         
@@ -239,7 +224,7 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
     return SOAP_OK;
 }
 
-
+// ยังไม่เสร็จ
 
 
 int ns__MorphOpen(  struct soap *soap, int sharedKey, int imgHeight, int imgWidth, 
@@ -277,21 +262,67 @@ int ns__MorphOpen(  struct soap *soap, int sharedKey, int imgHeight, int imgWidt
             return SOAP_FAULT;
         }
         mat32FC1->data.ptr = addr;
-        // load image from directory
-        //CvMat* input_morph;
-        //input_morph = (CvMat*)cvLoad(InputFilename);
-        //if (!input_morph)
-        //{ 	
-            //soap_fault(soap);
-            //cerr<<"Can not open image file"<<endl;
-            //soap->fault->faultstring = "Cannot open image file";
-            //return SOAP_FAULT;
-        //}
     
+		// do morphology
         IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
         cvMorphologyEx(mat32FC1, mat32FC1, NULL, se1, CV_MOP_OPEN);
+                
+        cvReleaseMat(&mat32FC1);
+        cvReleaseMat(&input_morph);
+    }
+    else
+    { 
+        cerr<<"File Name require"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "Name required";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
+
+//	------------	------- 
+//	| mat32FC1 | => | JPG |
+//	------------	-------
+int ns__MatToJPG(struct soap *soap, int sharedKey, int imgHeight, int imgWidth, char *&OutputFilename)
+{   
+    if(sharedKey)
+    { 
+        int shmid;
+        uchar *addr;
+        int matSize;
         
-        cvSave(filename,input_morph);
+        CvMat *mat32FC1 = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
+        matSize = get_matSize(mat32FC1);
+        
+        /* Create the segment */
+        if ((shmid = shmget(sharedKey, matSize, IPC_CREAT | 0666)) < 0) {
+            perror("shmget");
+            cerr<<"shmget::can't create shared segment"<<endl;
+            exit(1);
+        }
+        
+        /* Attach the segment to our data space */
+        if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
+            perror("shmat");
+            cerr<<"shmat:: can't attach shared segment"<<endl;
+            exit(1);
+        }
+        mat32FC1->data.ptr = addr;
+
+		//do convert image scale
+        IplImage *tmp8UC1 = cvCreateImage(cvGetSize(mat32FC1), IPL_DEPTH_8U, 1);
+        cvConvert(mat32FC1, tmp8UC1);
+        
+		//preparing filename to save
+        ostringstream sout;
+        char* filename;
+        time_t init = time(0);
+        tm* tm = localtime(&init);
+        sout<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour<<tm->tm_min<<":MatToJPG.xml";
+        filename = sout.str();
+        
+        //save result to .jpg
+        cvSave(filename,tmp8UC1);
         if(!filename)
         { 	
             soap_fault(soap);
@@ -299,13 +330,14 @@ int ns__MorphOpen(  struct soap *soap, int sharedKey, int imgHeight, int imgWidt
             soap->fault->faultstring = "Cannot save to mat";
             return SOAP_FAULT;
         }
-        
-        cvReleaseMat(&input_morph);
 
-        OutputFilename = new char[strlen(filename)];
-        //memcpy(OutputFilename,filename,strlen(filename)+1);
-        strcpy(OutputFilename,filename);
-        get_time("finished : MorphOpen \n\n");
+        OutputFilename = new char[strlen(filename)+1];
+        memcpy(OutputFilename,filename,strlen(filename)+1);
+        
+        cerr<<"do convert scale"<<endl;
+        cvReleaseImage(&tmp8UC1);
+        cvReleaseMat(&mat32FC1);
+
     }
     else
     { 
