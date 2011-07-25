@@ -161,22 +161,15 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
             cerr<<"shmat:: can't attach shared segment"<<endl;
             exit(1);
         }
-        
-        if (!mat32FC1)
-        { 	
-            soap_fault(soap);
-            cerr<<"Can not open image file"<<endl;
-            soap->fault->faultstring = "Cannot open image file";
-            return SOAP_FAULT;
-        }
         mat32FC1->data.ptr = addr;
         
-        // prepare sharedmem segment to do thresholding
+        // prepare shared memory segment to do thresholding
         CvMat *output = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
         outputSize = get_matSize(output);
+        int randkey = rand_key();
         
         /* Create the segment */
-        if ((shmid = shmget(sharedKey, outputSize, IPC_CREAT | 0666)) < 0) {
+        if ((shmid = shmget(randKey, outputSize, IPC_CREAT | 0666)) < 0) {
             perror("shmget");
             cerr<<"shmget::can't create shared segment"<<endl;
             exit(1);
@@ -192,20 +185,7 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
         
         // do threshold
         cvThreshold(mat32FC1, output, threshold, maxValue, CV_THRESH_BINARY);
-        
-        //char *filename = "/home/lluu/dir/threshold.xml";
-        //cvSave(filename,matThreshold);
-    
-        //if(!filename)
-        //{ 	
-            //soap_fault(soap);
-            //cerr<<"Can not save to mat"<<endl;
-            //soap->fault->faultstring = "Cannot save to mat";
-            //return SOAP_FAULT;
-        //}
-        
-        
-        int randkey = rand_key();
+     
         out.sharedKey = randkey;
         out.imgHeight = imgHeight ;
         out.imgWidth = imgWidth ;
