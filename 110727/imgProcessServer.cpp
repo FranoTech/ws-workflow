@@ -130,6 +130,78 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
 }
 
 
+
+int ns__MatToIpl1Ch(struct soap *soap, int sharedKey, int imgHeight, int imgWidth, double threshold, 
+                        double maxValue, ns__ImageData &out)
+{ 
+    if(sharedKey)
+    { 
+        int shmid;
+        uchar *addr;
+        int matSize;
+        
+        CvMat *mat32FC1 = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
+        matSize = get_matSize(mat32FC1);
+        
+        /* Create the segment */
+        if ((shmid = shmget(sharedKey, matSize, IPC_CREAT | 0666)) < 0) {
+            perror("shmget");
+            cerr<<"shmget::can't create shared segment"<<endl;
+            exit(1);
+        }
+        
+        /* Attach the segment to our data space */
+        if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
+            perror("shmat");
+            cerr<<"shmat:: can't attach shared segment"<<endl;
+            exit(1);
+        }
+        mat32FC1->data.ptr = addr;
+        
+        // prepare shared memory segment to do thresholding
+        int randkey = rand_key();
+        int outputSize;
+        CvMat *output = cvCreateMatHeader(imgHeight, imgWidth, CV_32FC1);
+        outputSize = get_matSize(output);
+        
+        /* Create the segment */
+        if ((shmid = shmget(randkey, outputSize, IPC_CREAT | 0666)) < 0) {
+            perror("shmget");
+            cerr<<"shmget::can't create shared segment"<<endl;
+            exit(1);
+        }
+        
+        /* Attach the segment to our data space */
+        if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
+            perror("shmat");
+            cerr<<"shmat:: can't attach shared segment"<<endl;
+            exit(1);
+        }
+        output->data.ptr = addr;
+        
+        // do threshold
+        cvThreshold(mat32FC1, output, threshold, maxValue, CV_THRESH_BINARY);
+     
+        out.sharedKey = randkey;
+        out.imgHeight = imgHeight ;
+        out.imgWidth = imgWidth ;
+
+        cvReleaseMat(&mat32FC1);
+        cvReleaseMat(&output);
+        
+    }
+    else
+    { 
+        cerr<<"shared key error"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "shared key error";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
+
+
+
 // สร้าง segment ของ output ก่อนแล้วทำ threshold
 
  //	------------      				----------  

@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.8.2 2011-07-26 04:50:40 GMT")
+SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.8.2 2011-07-27 09:55:22 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__Ipl1ChToMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputFilename, ns__ImageData &out)
