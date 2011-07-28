@@ -30,37 +30,37 @@
 </types>
 
 <message name="Ipl1ChToMat">
- <part name="InputFilename" type="xsd:string"/><!-- ns__Ipl1ChToMat::InputFilename -->
+ <part name="InputFilename" type="xsd:string"/>
 </message>
 
 <message name="ImageData">
- <part name="sharedKey" type="xsd:int"/><!-- ns__Ipl1ChToMat::sharedKey -->
- <part name="imgHeight" type="xsd:int"/><!-- ns__Ipl1ChToMat::imgHeight -->
- <part name="imgWidth" type="xsd:int"/><!-- ns__Ipl1ChToMat::imgWidth -->
+ <part name="sharedKey" type="xsd:int"/>
+ <part name="imgHeight" type="xsd:int"/>
+ <part name="imgWidth" type="xsd:int"/>
 </message>
 
 <message name="BinaryThreshold">
- <part name="sharedKey" type="xsd:int"/><!-- ns__BinaryThreshold::sharedKey -->
- <part name="imgHeight" type="xsd:int"/><!-- ns__BinaryThreshold::imgHeight -->
- <part name="imgWidth" type="xsd:int"/><!-- ns__BinaryThreshold::imgWidth -->
- <part name="threshold" type="xsd:double"/><!-- ns__BinaryThreshold::threshold -->
- <part name="maxValue" type="xsd:double"/><!-- ns__BinaryThreshold::maxValue -->
+ <part name="sharedKey" type="xsd:int"/>
+ <part name="imgHeight" type="xsd:int"/>
+ <part name="imgWidth" type="xsd:int"/>
+ <part name="threshold" type="xsd:double"/>
+ <part name="maxValue" type="xsd:double"/>
 </message>
 
 <message name="MorphOpen">
- <part name="sharedKey" type="xsd:int"/><!-- ns__MorphOpen::sharedKey -->
- <part name="imgHeight" type="xsd:int"/><!-- ns__MorphOpen::imgHeight -->
- <part name="imgWidth" type="xsd:int"/><!-- ns__MorphOpen::imgWidth -->
+ <part name="sharedKey" type="xsd:int"/>
+ <part name="imgHeight" type="xsd:int"/>
+ <part name="imgWidth" type="xsd:int"/>
 </message>
 
 <message name="MatToJPGRequest">
- <part name="sharedKey" type="xsd:int"/><!-- ns__MatToJPG::sharedKey -->
- <part name="imgHeight" type="xsd:int"/><!-- ns__MatToJPG::imgHeight -->
- <part name="imgWidth" type="xsd:int"/><!-- ns__MatToJPG::imgWidth -->
+ <part name="sharedKey" type="xsd:int"/>
+ <part name="imgHeight" type="xsd:int"/>
+ <part name="imgWidth" type="xsd:int"/>
 </message>
 
 <message name="MatToJPGResponse">
- <part name="OutputFilename" type="xsd:string"/><!-- ns__MatToJPG::OutputFilename -->
+ <part name="OutputFilename" type="xsd:string"/>
 </message>
 
 <portType name="imgProcessPortType">
@@ -127,7 +127,7 @@
 </binding>
 
 <service name="imgProcess">
- <documentation>gSOAP 2.8.2 generated service definition</documentation>
+ <documentation>gSOAP 2.7.17 generated service definition</documentation>
  <port name="imgProcess" binding="tns:imgProcess">
   <SOAP:address location="http://localhost/cgi-bin/imgProcessServer"/>
  </port>
