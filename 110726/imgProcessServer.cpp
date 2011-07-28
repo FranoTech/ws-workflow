@@ -94,36 +94,36 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
             soap->fault->faultstring = "Can not open image file";
             return SOAP_FAULT;
         }
-        cerr<<"loaded img"<<endl;
+        cerr<<"Ipl1ChToMat::loaded img"<<endl;
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
 
         /* Create the segment */
         if ((shmid = shmget(randkey, get_matSize(output1Ch), IPC_CREAT | 0666)) < 0) {
-            perror("shmget");
+            perror("Ipl1ChToMat::shmget");
             exit(1);
         }
         /* Attach the segment to our data space */
         if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
-            perror("shmat");
+            perror("Ipl1ChToMat::shmat");
             exit(1);
         }
-        cerr<<"attached shared memory"<<endl;
+        cerr<<"Ipl1ChToMat::attached shared memory"<<endl;
         output1Ch->data.ptr = addr;
         cvConvertScale(src, output1Ch);
         
         out.imgHeight = src->height;
         out.imgWidth = src->width;
         
-        cerr<<"do convert scale"<<endl;
+        cerr<<"Ipl1ChToMat::do convert scale"<<endl;
         cvReleaseImage(&src);
         cvReleaseMat(&output1Ch);
 
     }
     else
     { 
-        cerr<<"File Name require"<<endl;
+        cerr<<"Ipl1ChToMat::File Name require"<<endl;
         soap_fault(soap);
-        soap->fault->faultstring = "Name required";
+        soap->fault->faultstring = "Ipl1ChToMat::Name required";
         return SOAP_FAULT;
     }
     return SOAP_OK;
@@ -150,15 +150,15 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
         
         /* Create the segment */
         if ((shmid = shmget(sharedKey, matSize, IPC_CREAT | 0666)) < 0) {
-            perror("shmget");
-            cerr<<"shmget::can't create shared segment"<<endl;
+            perror("BinaryThreshold::shmget");
+            cerr<<"BinaryThreshold::shmget::can't create shared segment"<<endl;
             exit(1);
         }
         
         /* Attach the segment to our data space */
         if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
-            perror("shmat");
-            cerr<<"shmat:: can't attach shared segment"<<endl;
+            perror("BinaryThreshold::shmat");
+            cerr<<"BinaryThreshold::shmat:: can't attach shared segment"<<endl;
             exit(1);
         }
         mat32FC1->data.ptr = addr;
@@ -171,20 +171,21 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
         
         /* Create the segment */
         if ((shmid = shmget(randkey, outputSize, IPC_CREAT | 0666)) < 0) {
-            perror("shmget");
-            cerr<<"shmget::can't create shared segment"<<endl;
+            perror("BinaryThreshold::shmget");
+            cerr<<"BinaryThreshold::shmget::can't create shared segment"<<endl;
             exit(1);
         }
         
         /* Attach the segment to our data space */
         if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
-            perror("shmat");
-            cerr<<"shmat:: can't attach shared segment"<<endl;
+            perror("BinaryThreshold::shmat");
+            cerr<<"BinaryThreshold::shmat:: can't attach shared segment"<<endl;
             exit(1);
         }
         output->data.ptr = addr;
         
         // do threshold
+        cerr<<"BinaryThreshold:: do threshold"<<endl;
         cvThreshold(mat32FC1, output, threshold, maxValue, CV_THRESH_BINARY);
      
         out.sharedKey = randkey;
@@ -197,9 +198,9 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
     }
     else
     { 
-        cerr<<"shared key error"<<endl;
+        cerr<<"BinaryThreshold::shared key error"<<endl;
         soap_fault(soap);
-        soap->fault->faultstring = "shared key error";
+        soap->fault->faultstring = "BinaryThreshold::shared key error";
         return SOAP_FAULT;
     }
     return SOAP_OK;
@@ -225,30 +226,34 @@ int ns__MorphOpen(  struct soap *soap, int sharedKey, int imgHeight, int imgWidt
         
         /* Create the segment */
         if ((shmid = shmget(sharedKey, matSize, IPC_CREAT | 0666)) < 0) {
-            perror("shmget");
-            cerr<<"shmget::can't create shared segment"<<endl;
+            perror("MorphOpen::shmget");
+            cerr<<"MorphOpen::shmget::can't create shared segment"<<endl;
             exit(1);
         }
         
         /* Attach the segment to our data space */
         if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
-            perror("shmat");
-            cerr<<"shmat:: can't attach shared segment"<<endl;
+            perror("MorphOpen::shmat");
+            cerr<<"MorphOpen::shmat:: can't attach shared segment"<<endl;
             exit(1);
         }
         mat32FC1->data.ptr = addr;
     
 		// do morphology
+        cerr<<"MorphOpen:: do morph"<<endl;
         IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
         cvMorphologyEx(mat32FC1, mat32FC1, NULL, se1, CV_MOP_OPEN);
-                
+                             
+        out.sharedKey = sharedKey;
+        out.imgHeight = imgHeight;
+        out.imgWidth = imgWidth;                
         cvReleaseMat(&mat32FC1);
     }
     else
     { 
-        cerr<<"File Name require"<<endl;
+        cerr<<"MorphOpen::key error"<<endl;
         soap_fault(soap);
-        soap->fault->faultstring = "Name required";
+        soap->fault->faultstring = "MorphOpen::key error";
         return SOAP_FAULT;
     }
     return SOAP_OK;
@@ -272,15 +277,15 @@ int ns__MatToJPG(struct soap *soap, int sharedKey, int imgHeight, int imgWidth, 
         
         /* Create the segment */
         if ((shmid = shmget(sharedKey, matSize, IPC_CREAT | 0666)) < 0) {
-            perror("shmget");
-            cerr<<"shmget::can't create shared segment"<<endl;
+            perror("MatToJPG::shmget");
+            cerr<<"MatToJPG::shmget::can't create shared segment"<<endl;
             exit(1);
         }
         
         /* Attach the segment to our data space */
         if ((addr = (uchar *) shmat(shmid, NULL, 0)) == (uchar *) -1) {
-            perror("shmat");
-            cerr<<"shmat:: can't attach shared segment"<<endl;
+            perror("MatToJPG::shmat");
+            cerr<<"MatToJPG::shmat:: can't attach shared segment"<<endl;
             exit(1);
         }
         mat32FC1->data.ptr = addr;
@@ -289,25 +294,26 @@ int ns__MatToJPG(struct soap *soap, int sharedKey, int imgHeight, int imgWidth, 
         IplImage *tmp8UC1 = cvCreateImage(cvGetSize(mat32FC1), IPL_DEPTH_8U, 1);
         
         cvConvert(mat32FC1, tmp8UC1);
-		cerr<<"done convert"<<endl;
+		//cerr<<"MatToJPG::done convert"<<endl;
 		
 		//preparing filename to save
 		ostringstream sout;
         time_t init = time(0);
         tm* tm = localtime(&init);
-        sout<<BASE_DIR<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour<<tm->tm_min<<":MatToJPG.xml";
+        sout<<BASE_DIR<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour<<tm->tm_min<<":MatToJPG.jpg";
         size_t len = sout.str().length();
 		OutputFilename = new char[len+1];
         memcpy(OutputFilename,sout.str().c_str(),len);
-        cout<<"got filename"<<endl;
+        cerr<<"MatToJPG::done convert"<<endl;
+        cout<<"MatToJPG::got filename"<<endl;
         
         //save result to .jpg
         //cvSave(filename,tmp8UC1);
         if(!cvSaveImage(OutputFilename, tmp8UC1))
         { 	
             soap_fault(soap);
-            cerr<<"Can not save an output image"<<endl;
-            soap->fault->faultstring = "Can not save an output image";
+            cerr<<"MatToJPG::Can not save an output image"<<endl;
+            soap->fault->faultstring = "MatToJPG::Can not save an output image";
             return SOAP_FAULT;
         }
         
@@ -317,9 +323,9 @@ int ns__MatToJPG(struct soap *soap, int sharedKey, int imgHeight, int imgWidth, 
     }
     else
     { 
-        cerr<<"File Name require"<<endl;
+        cerr<<"MatToJPG::key error"<<endl;
         soap_fault(soap);
-        soap->fault->faultstring = "Name required";
+        soap->fault->faultstring = "MatToJPG::key error";
         return SOAP_FAULT;
     }
     return SOAP_OK;
