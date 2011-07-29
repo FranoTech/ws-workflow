@@ -10,8 +10,16 @@
 
 using namespace std;
 
+clock_t startm, stopm;
+#define START if ( (startm = clock()) == -1) {cerr<<"Error calling clock"<<endl; exit(1);}
+#define STOP if ( (stopm = clock()) == -1) {cerr<<"Error calling clock"<<endl; exit(1);}
+#define PRINTTIME cerr<<((double)stopm-startm)/CLOCKS_PER_SEC<<" seconds used by the processor."<<endl;
+
+
+
 int main(int argc, char **argv)
-{ 
+{ 		
+		START;
 		ostringstream sout;
         char* filename;
         time_t init = time(0);
@@ -21,7 +29,8 @@ int main(int argc, char **argv)
 		filename = new char[len+1];
         memcpy(filename,sout.str().c_str(),len);
         cout<<filename<<endl;
-		
+		STOP;
+		PRINTTIME;
 		//ostringstream sout;
         //sout<<filename<<".jpg";
         //size_t len = sout.str().length();
