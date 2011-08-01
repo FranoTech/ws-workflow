@@ -94,7 +94,7 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
             soap->fault->faultstring = "Can not open image file";
             return SOAP_FAULT;
         }
-        //cerr<<"Ipl1ChToMat::loaded img"<<endl;
+        
         CvMat *output1Ch = cvCreateMat(src->height, src->width, CV_32FC1);
 
         /* Create the segment */
@@ -107,18 +107,18 @@ int ns__Ipl1ChToMat(struct soap *soap, char *InputFilename, ns__ImageData &out)
             perror("Ipl1ChToMat::shmat");
             exit(1);
         }
-        //cerr<<"Ipl1ChToMat::attached shared memory"<<endl;
+        
         output1Ch->data.ptr = addr;
         cvConvertScale(src, output1Ch);
         
         out.imgHeight = src->height;
         out.imgWidth = src->width;
         
-        //cerr<<"Ipl1ChToMat::do convert scale"<<endl;
         cvReleaseImage(&src);
         cvReleaseMat(&output1Ch);
+        
         gettimeofday(&t, NULL);
-		cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs :: Ipl1ChToMat"<<endl;
+		cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
 
     }
     else
@@ -188,7 +188,6 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
         output->data.ptr = addr;
         
         // do threshold
-        cerr<<"BinaryThreshold:: do threshold"<<endl;
         cvThreshold(mat32FC1, output, threshold, maxValue, CV_THRESH_BINARY);
      
         out.sharedKey = randkey;
@@ -198,7 +197,7 @@ int ns__BinaryThreshold(struct soap *soap, int sharedKey, int imgHeight, int img
         cvReleaseMat(&mat32FC1);
         cvReleaseMat(&output);
         gettimeofday(&t, NULL);
-		cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs :: BinaryThreshold"<<endl;
+		cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::BinaryThreshold"<<endl;
         
     }
     else
@@ -246,7 +245,6 @@ int ns__MorphOpen(  struct soap *soap, int sharedKey, int imgHeight, int imgWidt
         mat32FC1->data.ptr = addr;
     
 		// do morphology
-        cerr<<"MorphOpen:: do morph"<<endl;
         IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
         cvMorphologyEx(mat32FC1, mat32FC1, NULL, se1, CV_MOP_OPEN);
                              
@@ -254,6 +252,7 @@ int ns__MorphOpen(  struct soap *soap, int sharedKey, int imgHeight, int imgWidt
         out.imgHeight = imgHeight;
         out.imgWidth = imgWidth;                
         cvReleaseMat(&mat32FC1);
+        
         gettimeofday(&t, NULL);
 		cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs :: MorphOpen"<<endl;
    
@@ -302,9 +301,7 @@ int ns__MatToJPG(struct soap *soap, int sharedKey, int imgHeight, int imgWidth, 
 
 		//do convert image scale
         IplImage *tmp8UC1 = cvCreateImage(cvGetSize(mat32FC1), IPL_DEPTH_8U, 1);
-        
         cvConvert(mat32FC1, tmp8UC1);
-		//cerr<<"MatToJPG::done convert"<<endl;
 		
 		//preparing filename to save
 		ostringstream sout;
@@ -314,9 +311,7 @@ int ns__MatToJPG(struct soap *soap, int sharedKey, int imgHeight, int imgWidth, 
         size_t len = sout.str().length();
 		OutputFilename = new char[len+1];
         memcpy(OutputFilename,sout.str().c_str(),len);
-        cerr<<"MatToJPG::done convert"<<endl;
-        cout<<"MatToJPG::got filename"<<endl;
-        
+                
         //save result to .jpg
         //cvSave(filename,tmp8UC1);
         if(!cvSaveImage(OutputFilename, tmp8UC1))
