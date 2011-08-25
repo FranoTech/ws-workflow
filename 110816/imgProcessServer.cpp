@@ -232,13 +232,9 @@ int ns__BinaryThreshold(struct soap *soap, char *InputFilename,
         CvMat *matThreshold = cvCreateMat(src1Ch->height, src1Ch->width, CV_32FC1);
         cvThreshold(src1Ch, matThreshold, threshold, maxValue, CV_THRESH_BINARY);
         
-        ostringstream sout;
-        time_t init = time(0);
-        tm* tm = localtime(&init);
-        sout<<BASE_DIR<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour<<tm->tm_min<<":BinaryThreshold.jpg";
-        size_t len = sout.str().length();
-		OutputFilename = new char[len+1];
-        memcpy(OutputFilename,sout.str().c_str(),len);
+        *&OutputFilename = (char*)soap_malloc(soap, 60);
+        time_t now = time(0);
+        strftime(OutputFilename, sizeof(OutputFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_bi_threshold.jpg", localtime(&now));
 		
 		cvSetZero(src);
 		cvConvert(matThreshold, src);
@@ -275,13 +271,8 @@ int ns__BinaryThreshold(struct soap *soap, char *InputFilename,
 
 int ns__MorphOpen(  struct soap *soap, char *InputFilename, char *&OutputFilename)
 { 
-    gettimeofday(&start_time, NULL);
     if(InputFilename)
     { 
-        // load image from directory
-        //CvMat* input_morph;
-        //input_morph = (CvMat*)cvLoad(InputFilename);
-        
         IplImage* src = cvLoadImage(InputFilename,CV_LOAD_IMAGE_GRAYSCALE);
         if (!src)
         { 	
@@ -296,17 +287,9 @@ int ns__MorphOpen(  struct soap *soap, char *InputFilename, char *&OutputFilenam
         IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
         cvMorphologyEx(input_morph, input_morph, NULL, se1, CV_MOP_OPEN);
         
-        //ostringstream sout;
-        //time_t init = time(0);
-        //tm* tm = localtime(&init);
-        //sout<<BASE_DIR<<1900+tm->tm_year<<1+tm->tm_mon<<tm->tm_mday<<tm->tm_hour<<tm->tm_min<<"MorphologyOpen.jpg";
-        //size_t len = sout.str().length();
-		//OutputFilename = new char[len+1];
-        //memcpy(OutputFilename,sout.str().c_str(),len);
-        
-        OutputFilename = new char[45];
+        *&OutputFilename = (char*)soap_malloc(soap, 60);
         time_t now = time(0);
-        strftime(OutputFilename, sizeof(OutputFilename), "/home/lluu/dir/%Y%m%d_%H%M%S_morpOpen.jpg", localtime(&now));
+        strftime(OutputFilename, sizeof(OutputFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_morp_open.jpg", localtime(&now));
         
 		cvSetZero(src);
 		cvConvert(input_morph, src);
@@ -338,4 +321,83 @@ int ns__MorphOpen(  struct soap *soap, char *InputFilename, char *&OutputFilenam
     return SOAP_OK;
 }
 
-int ns__MorphOpen(  struct soap *soap, char *InputFilename, char *&OutputFilename)
+
+
+//hadn't finished yet
+
+int ns__RemoveSmallCell(  struct soap *soap, char *InputFilename, int discard_area, int area, int fillhole_area, char *&OutputFilename)
+{ 
+    if(InputFilename)
+    { 
+        // load image from directory
+        //CvMat* input_morph;
+        //input_morph = (CvMat*)cvLoad(InputFilename);
+        
+        IplImage* src8UC1 = cvLoadImage(InputFilename,CV_LOAD_IMAGE_GRAYSCALE);
+        if (!src8UC1)
+        { 	
+            soap_fault(soap);
+            cerr<<"RemoveSmallCell::Can not open image file"<<endl;
+            soap->fault->faultstring = "RemoveSmallCell::Cannot open image file";
+            return SOAP_FAULT;
+        }
+		
+        CvMat *tmp = cvCreateMat(src8UC1->height, src8UC1->width, CV_32FC1);
+        
+        cvFindContours(src8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
+        CvSeq *cur = nullptr;
+		cur = first_con;
+		while (cur != nullptr) {
+			double area = fabs(cvContourArea(cur));
+			int npts = cur->total;
+			CvPoint *p = new CvPoint[npts];
+			cvCvtSeqToArray(cur, p);
+			if (area < 1500.0) // remove small area
+				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
+			else if (area < 7500.0) {
+				cvFillPoly(out_single, &p, &npts, 1, cvScalar(255.0)); // move to single
+				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
+			}else
+				cvFillPoly(input_morph, &p, &npts, 1, cvScalar(255.0)); // fill hole
+			delete[] p;
+			cur = cur->h_next;
+		}
+        
+        
+        
+        *&OutputFilename = (char*)soap_malloc(soap, 60);
+        time_t now = time(0);
+        strftime(OutputFilename, sizeof(OutputFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_morp_open.jpg", localtime(&now));
+        
+		cvSetZero(src);
+		cvConvert(input_morph, src);
+        
+        
+		cvSaveImage(OutputFilename, src);
+        if(!OutputFilename)
+        { 	
+            soap_fault(soap);
+            cerr<<"MatToIpl1Ch::Can not save to new image"<<endl;
+            soap->fault->faultstring = "MatToIpl1Ch::Can not save to new image";
+            return SOAP_FAULT;
+        }
+        
+        cvReleaseMat(&input_morph);
+        cvReleaseImage(&src);
+        //cvReleaseMat(&src1Ch);
+        
+        gettimeofday(&t, NULL);
+		cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::MorphOpen"<<endl;
+
+    }
+    else
+    { 
+        cerr<<"File Name require"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "Name required";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
+
+
