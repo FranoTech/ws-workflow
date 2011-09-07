@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 //#include <cv.hpp>
 #include <cv.h>
 #include <highgui.h>
@@ -13,11 +14,20 @@ int main (int argc, char** argv){
     Mat im_rgb  = imread(argv[1],1);
     Mat im_gray;
     cvtColor( im_rgb, im_gray, CV_RGB2GRAY );
+   
+    //namedWindow("result", CV_WINDOW_AUTOSIZE);
+    //imshow("result" , im_gray);
+    //waitKey(0);
     
-    namedWindow("result", CV_WINDOW_AUTOSIZE);
-    imshow("result", im_gray);
-    waitKey(0);
-    //destroyWindow("result");
+    uchar** data;
+	int step;
+	CvSize size;
+
+	cvGetRawData(array, (uchar**)&data, &step, &size);
+	//step /= sizeof(data[0]);
+    
+	ofstream out("output", ofstream::binary);
+	out.write(data, );
     
     im_gray.release();
     im_rgb.release();

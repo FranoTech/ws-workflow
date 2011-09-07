@@ -29,8 +29,8 @@ using namespace cv;
 static timeval start_time, now;
 
 //global function
-int saveMat( const string& filename, const Mat& M);
-int readMat( const string& filename, Mat& M);
+int saveMat( const char *filename, const Mat& M);
+int readMat( const char *filename, Mat& M);
 
 int main(int argc, char **argv)
 { 
@@ -45,33 +45,53 @@ int main(int argc, char **argv)
     return 0;
 }
 
+/* Load image data to Mat, save to bin */
 int ns__LoadMat (struct soap *soap,
-                string InputImageFilename,
+                const char *InputImageFilename,
                 int loadparam,
-                string& OutputMatFilename)
+                char *&OutputMatFilename)
 {
-    switch (loadparam){
-    case 0:
-        Mat src  = imread(InputImageFilename.c_str(),CV_LOAD_IMAGE_GRAYSCALE);
-        break;
-    case (loadparam > 0):
-        Mat src  = imread(InputImageFilename.c_str(),CV_LOAD_IMAGE_COLOR);
-        break;
-    case loadparam < 0:
-        Mat src  = imread(InputImageFilename.c_str(),CV_LOAD_IMAGE_UNCHANGED);
-        break;
-    default
-        Mat src  = imread(InputImageFilename.c_str(),CV_LOAD_IMAGE_COLOR);
-        break;
-    }
-    
+	/* Determine type of the matrix */
+	if(loadparam){
+	    switch (loadparam){
+			case 0:
+				Mat src  = imread(InputImageFilename,CV_LOAD_IMAGE_GRAYSCALE);
+				break;
+			case (loadparam > 0):
+				Mat src  = imread(InputImageFilename,CV_LOAD_IMAGE_COLOR);
+				break;
+			case (loadparam < 0):
+				Mat src  = imread(InputImageFilename,CV_LOAD_IMAGE_UNCHANGED);
+				break;
+			default
+				Mat src  = imread(InputImageFilename,CV_LOAD_IMAGE_COLOR);
+	    }
+	    
+	    if( !src ) {
+			soap_fault(soap);
+			cerr << "error :: can not load image" << endl;
+			soap->fault->faultstring = "error :: can not load image";
+			return SOAP_FAULT;
+		}
+		
+    } else {
+		soap_fault(soap);
+		cerr << "loadparam error" << endl;
+		soap->fault->faultstring = "loadparam error";
+		return SOAP_FAULT;
+	}
+	
+	/* generate output file name */
+	*&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_load_mat", localtime(&now));
+	
+	/* save to bin */
     if(!saveMat(OutputMatFilename, src))
     {
         soap_fault(soap);
-        Exception& e
-        const char* err_msg = e.what();
-        cerr << "exception caught: " << err_msg << endl;
-        soap->fault->faultstring = e.what();
+        cerr << "error:: save mat to binary file" << endl;
+		soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
     
@@ -79,24 +99,37 @@ int ns__LoadMat (struct soap *soap,
 }
 
 int ns__BinaryThreshold(struct soap *soap, 
-                        string InputImageFilename, 
+                        const char *InputMatFilename, 
                         double threshold, 
-                        double maxValue, 
+                        double maxValue,
                         char *&OutputMatFilename)
 { 
+	/* read from bin */
+	Mat src;
+	if(!readMat(InputMatFilename, src))
+	    {
+	        soap_fault(soap);
+	        cerr << "error :: can not read bin file" << endl;
+			soap->fault->faultstring = "error :: can not read bin file";
+	        return SOAP_FAULT;
+	    }
+	
+    Mat dst(src.rows, src.cols, src.depth());
+    threshold(src, dst, threshold, maxValue, CV_THRESH_BINARY);
     
-    
+    writeToBin (OutputFilename, dst);
+
+
 }
 
 
 
-
-// Save matrix to binary file
-int saveMat( const string& filename, const Mat& M){
+/* Save matrix to binary file */
+int saveMat( const char *filename, const Mat& M){
     if (M.empty()){
        return 0;
     }
-    ofstream out(filename.c_str(), ios::out|ios::binary);
+    ofstream out(filename, ios::out|ios::binary);
     if (!out)
        return 0;
 
@@ -105,13 +138,13 @@ int saveMat( const string& filename, const Mat& M){
     int chan = M.channels();
     int eSiz = (M.dataend-M.datastart)/(cols*rows*chan);
 
-    // Write header
+    /* Write header */
     out.write((char*)&cols,sizeof(cols));
     out.write((char*)&rows,sizeof(rows));
     out.write((char*)&chan,sizeof(chan));
     out.write((char*)&eSiz,sizeof(eSiz));
 
-    // Write data.
+    /* Write data. */
     if (M.isContinuous()){
        out.write((char *)M.data,cols*rows*chan*eSiz);
     }
@@ -124,10 +157,10 @@ int saveMat( const string& filename, const Mat& M){
 
 
 
-// Read matrix from binary file
-int readMat( const string& filename, Mat& M)
+/* Read matrix from binary file */
+int readMat( const char *filename, Mat& M)
 {    
-    ifstream in(filename.c_str(), ios::in|ios::binary);
+    ifstream in(filename, ios::in|ios::binary);
     if (!in){
        M.data = NULL;
        return 0;
@@ -137,13 +170,13 @@ int readMat( const string& filename, Mat& M)
     int chan;
     int eSiz;
 
-    // Read header
+    /* Read header */
     in.read((char*)&cols,sizeof(cols));
     in.read((char*)&rows,sizeof(rows));
     in.read((char*)&chan,sizeof(chan));
     in.read((char*)&eSiz,sizeof(eSiz));
 
-    // Determine type of the matrix 
+    /* Determine type of the matrix */
     int type = 0;
     switch (eSiz){
     case sizeof(char):
@@ -157,10 +190,10 @@ int readMat( const string& filename, Mat& M)
          break;
     }
 
-    // Alocate Matrix.
+    /* Alocate Matrix. */
     M = Mat(rows,cols,type,Scalar(1));  
 
-    // Read data.
+    /* Read data. */
     if (M.isContinuous()){
        in.read((char *)M.data,cols*rows*chan*eSiz);
     }
@@ -170,3 +203,19 @@ int readMat( const string& filename, Mat& M)
     in.close();
     return 1;
 } 
+
+void writeToBin (char *&OutputFilename, Mat& M)
+{
+	*&OutputFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_bi_threshold", localtime(&now));
+
+		/* save to bin */
+    if(!saveMat(OutputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+		soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+}
