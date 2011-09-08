@@ -29,8 +29,6 @@ class imgProcess
 	/// Destructor frees deserialized data and soap engine context
 	virtual ~imgProcess() { if (soap) { soap_destroy(soap); soap_end(soap); soap_free(soap); } };
 	/// Invoke 'LoadMat' of service 'imgProcess' and return error code (or SOAP_OK)
-	virtual int ns__LoadMat(const char *InputImageFilename, int loadparam, char *&OutputMatFilename) { return soap ? soap_call_ns__LoadMat(soap, endpoint, NULL, InputImageFilename, loadparam, OutputMatFilename) : SOAP_EOM; };
-	/// Invoke 'BinaryThreshold' of service 'imgProcess' and return error code (or SOAP_OK)
-	virtual int ns__BinaryThreshold(const char *InputMatFilename, double threshold, double maxValue, char *&OutputMatFilename) { return soap ? soap_call_ns__BinaryThreshold(soap, endpoint, NULL, InputMatFilename, threshold, maxValue, OutputMatFilename) : SOAP_EOM; };
+	virtual int ns__LoadMat(char *InputImageFilename, int loadparam, char *&OutputMatFilename) { return soap ? soap_call_ns__LoadMat(soap, endpoint, NULL, InputImageFilename, loadparam, OutputMatFilename) : SOAP_EOM; };
 };
 #endif

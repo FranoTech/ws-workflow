@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string.h>
 #include <cstring>
+#include <fstream>
 //system
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,8 +30,9 @@ using namespace cv;
 static timeval start_time, now;
 
 //global function
-int saveMat( char *filename, const Mat& M);
-int readMat( char *filename, Mat& M);
+//void writeToBin (char *&OutputFilename, Mat& M);
+int saveMat( const char *filename, const Mat& M);
+int readMat( const char *filename, Mat& M);
 
 int main(int argc, char **argv)
 { 
@@ -51,23 +53,26 @@ int ns__LoadMat (struct soap *soap,
                 int loadparam,
                 char *&OutputMatFilename)
 {
+    Mat src;
+    
 	/* Determine type of the matrix */
-	if(loadparam){
-	    switch (loadparam){
+	if(InputImageFilename){
+        
+        switch (loadparam){
 			case 0:
-				Mat src  = imread(InputImageFilename,CV_LOAD_IMAGE_GRAYSCALE);
+                src  = imread(InputImageFilename,CV_LOAD_IMAGE_GRAYSCALE);
 				break;
 			case 1:
-				Mat src  = imread(InputImageFilename,CV_LOAD_IMAGE_COLOR);
+                src  = imread(InputImageFilename,CV_LOAD_IMAGE_COLOR);
 				break;
 			case -1:
-				Mat src  = imread(InputImageFilename,CV_LOAD_IMAGE_UNCHANGED);
+				src  = imread(InputImageFilename,CV_LOAD_IMAGE_UNCHANGED);
 				break;
-			default
-				Mat src  = imread(InputImageFilename,CV_LOAD_IMAGE_COLOR);
+			default :
+				src  = imread(InputImageFilename,CV_LOAD_IMAGE_COLOR);
 	    }
 	    
-	    if( !src ) {
+	    if(src.empty()) {
 			soap_fault(soap);
 			cerr << "error :: can not load image" << endl;
 			soap->fault->faultstring = "error :: can not load image";
@@ -117,7 +122,7 @@ int ns__BinaryThreshold(struct soap *soap,
     Mat dst(src.rows, src.cols, src.depth());
     threshold(src, dst, threshold, maxValue, CV_THRESH_BINARY);
     
-    writeToBin (OutputFilename, dst);
+    writeToBin (OutputMatFilename, dst);
     return SOAP_OK;
 }
 
@@ -203,18 +208,18 @@ int readMat( const char *filename, Mat& M)
     return 1;
 } 
 
-void writeToBin (char *&OutputFilename, Mat& M)
-{
-	*&OutputFilename = (char*)soap_malloc(soap, 60);
-    time_t now = time(0);
-    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_bi_threshold", localtime(&now));
+//void writeToBin (char *&OutputMatFilename, Mat& M)
+//{
+	//OutputMatFilename = (char*)soap_malloc(soap,60);
+    //time_t now = time(0);
+    //strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_bi_threshold", localtime(&now));
 
-		/* save to bin */
-    if(!saveMat(OutputMatFilename, src))
-    {
-        soap_fault(soap);
-        cerr << "error:: save mat to binary file" << endl;
-		soap->fault->faultstring = "error:: save mat to binary file";
-        return SOAP_FAULT;
-    }
-}
+		///* save to bin */
+    //if(!saveMat(OutputMatFilename, M))
+    //{
+        //soap_fault(soap);
+        //cerr << "error:: save mat to binary file" << endl;
+		//soap->fault->faultstring = "error:: save mat to binary file";
+        //return SOAP_FAULT;
+    //}
+//}

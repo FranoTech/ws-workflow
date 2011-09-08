@@ -11,10 +11,10 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.17 2011-09-08 03:28:25 GMT")
+SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.17 2011-09-08 07:13:11 GMT")
 
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__LoadMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, const char *InputImageFilename, int loadparam, char *&OutputMatFilename)
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__LoadMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputImageFilename, int loadparam, char *&OutputMatFilename)
 {	struct ns__LoadMat soap_tmp_ns__LoadMat;
 	struct ns__LoadMatResponse *soap_tmp_ns__LoadMatResponse;
 	if (!soap_endpoint)
@@ -63,59 +63,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__LoadMat(struct soap *soap, const char *s
 	 || soap_end_recv(soap))
 		return soap_closesock(soap);
 	OutputMatFilename = soap_tmp_ns__LoadMatResponse->OutputMatFilename;
-	return soap_closesock(soap);
-}
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__BinaryThreshold(struct soap *soap, const char *soap_endpoint, const char *soap_action, const char *InputMatFilename, double threshold, double maxValue, char *&OutputMatFilename)
-{	struct ns__BinaryThreshold soap_tmp_ns__BinaryThreshold;
-	struct ns__BinaryThresholdResponse *soap_tmp_ns__BinaryThresholdResponse;
-	if (!soap_endpoint)
-		soap_endpoint = "http://localhost/cgi-bin/imgProcessServer";
-	soap->encodingStyle = "";
-	soap_tmp_ns__BinaryThreshold.InputMatFilename = InputMatFilename;
-	soap_tmp_ns__BinaryThreshold.threshold = threshold;
-	soap_tmp_ns__BinaryThreshold.maxValue = maxValue;
-	soap_begin(soap);
-	soap_serializeheader(soap);
-	soap_serialize_ns__BinaryThreshold(soap, &soap_tmp_ns__BinaryThreshold);
-	if (soap_begin_count(soap))
-		return soap->error;
-	if (soap->mode & SOAP_IO_LENGTH)
-	{	if (soap_envelope_begin_out(soap)
-		 || soap_putheader(soap)
-		 || soap_body_begin_out(soap)
-		 || soap_put_ns__BinaryThreshold(soap, &soap_tmp_ns__BinaryThreshold, "ns:BinaryThreshold", NULL)
-		 || soap_body_end_out(soap)
-		 || soap_envelope_end_out(soap))
-			 return soap->error;
-	}
-	if (soap_end_count(soap))
-		return soap->error;
-	if (soap_connect(soap, soap_endpoint, soap_action)
-	 || soap_envelope_begin_out(soap)
-	 || soap_putheader(soap)
-	 || soap_body_begin_out(soap)
-	 || soap_put_ns__BinaryThreshold(soap, &soap_tmp_ns__BinaryThreshold, "ns:BinaryThreshold", NULL)
-	 || soap_body_end_out(soap)
-	 || soap_envelope_end_out(soap)
-	 || soap_end_send(soap))
-		return soap_closesock(soap);
-	OutputMatFilename = NULL;
-	if (soap_begin_recv(soap)
-	 || soap_envelope_begin_in(soap)
-	 || soap_recv_header(soap)
-	 || soap_body_begin_in(soap))
-		return soap_closesock(soap);
-	if (soap_recv_fault(soap, 1))
-		return soap->error;
-	soap_tmp_ns__BinaryThresholdResponse = soap_get_ns__BinaryThresholdResponse(soap, NULL, "", "");
-	if (soap->error)
-		return soap_recv_fault(soap, 0);
-	if (soap_body_end_in(soap)
-	 || soap_envelope_end_in(soap)
-	 || soap_end_recv(soap))
-		return soap_closesock(soap);
-	OutputMatFilename = soap_tmp_ns__BinaryThresholdResponse->OutputMatFilename;
 	return soap_closesock(soap);
 }
 

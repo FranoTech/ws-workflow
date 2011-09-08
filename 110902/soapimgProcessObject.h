@@ -45,8 +45,6 @@ class imgProcessService : public soap
 \******************************************************************************/
 
 
-SOAP_FMAC5 int SOAP_FMAC6 ns__LoadMat(struct soap*, const char *InputImageFilename, int loadparam, char *&OutputMatFilename);
-
-SOAP_FMAC5 int SOAP_FMAC6 ns__BinaryThreshold(struct soap*, const char *InputMatFilename, double threshold, double maxValue, char *&OutputMatFilename);
+SOAP_FMAC5 int SOAP_FMAC6 ns__LoadMat(struct soap*, char *InputImageFilename, int loadparam, char *&OutputMatFilename);
 
 #endif

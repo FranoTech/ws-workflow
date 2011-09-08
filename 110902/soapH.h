@@ -61,22 +61,6 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_int(struct soap*, const int *, const char*, c
 
 SOAP_FMAC3 int * SOAP_FMAC4 soap_get_int(struct soap*, int *, const char*, const char*);
 
-#ifndef SOAP_TYPE_double
-#define SOAP_TYPE_double (15)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_double(struct soap*, double *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_double(struct soap*, const char*, int, const double *, const char*);
-SOAP_FMAC3 double * SOAP_FMAC4 soap_in_double(struct soap*, const char*, double *, const char*);
-
-#define soap_write_double(soap, data) ( soap_begin_send(soap) || soap_put_double(soap, data, NULL, NULL) || soap_end_send(soap) )
-
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_double(struct soap*, const double *, const char*, const char*);
-
-#define soap_read_double(soap, data) ( soap_begin_recv(soap) || !soap_get_double(soap, data, NULL, NULL) || soap_end_recv(soap) )
-
-SOAP_FMAC3 double * SOAP_FMAC4 soap_get_double(struct soap*, double *, const char*, const char*);
-
 #ifndef SOAP_TYPE_unsignedByte
 #define SOAP_TYPE_unsignedByte (9)
 #endif
@@ -133,7 +117,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__ImageData(struct soap*, int, int, void*
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (26)
+#define SOAP_TYPE_SOAP_ENV__Fault (22)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Fault(struct soap*, struct SOAP_ENV__Fault *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Fault(struct soap*, const struct SOAP_ENV__Fault *);
@@ -162,7 +146,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Fault(struct soap*, int, int, voi
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (25)
+#define SOAP_TYPE_SOAP_ENV__Reason (21)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Reason(struct soap*, const struct SOAP_ENV__Reason *);
@@ -191,7 +175,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Reason(struct soap*, int, int, vo
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (22)
+#define SOAP_TYPE_SOAP_ENV__Detail (18)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Detail(struct soap*, const struct SOAP_ENV__Detail *);
@@ -220,7 +204,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Detail(struct soap*, int, int, vo
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (20)
+#define SOAP_TYPE_SOAP_ENV__Code (16)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Code(struct soap*, const struct SOAP_ENV__Code *);
@@ -249,7 +233,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Code(struct soap*, int, int, void
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (19)
+#define SOAP_TYPE_SOAP_ENV__Header (15)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Header(struct soap*, struct SOAP_ENV__Header *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Header(struct soap*, const struct SOAP_ENV__Header *);
@@ -274,56 +258,6 @@ SOAP_FMAC1 struct SOAP_ENV__Header * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Heade
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #endif
-
-#ifndef SOAP_TYPE_ns__BinaryThreshold
-#define SOAP_TYPE_ns__BinaryThreshold (18)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__BinaryThreshold(struct soap*, struct ns__BinaryThreshold *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__BinaryThreshold(struct soap*, const struct ns__BinaryThreshold *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__BinaryThreshold(struct soap*, const char*, int, const struct ns__BinaryThreshold *, const char*);
-SOAP_FMAC3 struct ns__BinaryThreshold * SOAP_FMAC4 soap_in_ns__BinaryThreshold(struct soap*, const char*, struct ns__BinaryThreshold *, const char*);
-
-#define soap_write_ns__BinaryThreshold(soap, data) ( soap_begin_send(soap) || (soap_serialize_ns__BinaryThreshold(soap, data), 0) || soap_put_ns__BinaryThreshold(soap, data, NULL, NULL) || soap_end_send(soap) )
-
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__BinaryThreshold(struct soap*, const struct ns__BinaryThreshold *, const char*, const char*);
-
-#define soap_read_ns__BinaryThreshold(soap, data) ( soap_begin_recv(soap) || !soap_get_ns__BinaryThreshold(soap, data, NULL, NULL) || soap_end_recv(soap) )
-
-SOAP_FMAC3 struct ns__BinaryThreshold * SOAP_FMAC4 soap_get_ns__BinaryThreshold(struct soap*, struct ns__BinaryThreshold *, const char*, const char*);
-
-#define soap_new_ns__BinaryThreshold(soap, n) soap_instantiate_ns__BinaryThreshold(soap, n, NULL, NULL, NULL)
-
-
-#define soap_delete_ns__BinaryThreshold(soap, p) soap_delete(soap, p)
-
-SOAP_FMAC1 struct ns__BinaryThreshold * SOAP_FMAC2 soap_instantiate_ns__BinaryThreshold(struct soap*, int, const char*, const char*, size_t*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__BinaryThreshold(struct soap*, int, int, void*, size_t, const void*, size_t);
-
-#ifndef SOAP_TYPE_ns__BinaryThresholdResponse
-#define SOAP_TYPE_ns__BinaryThresholdResponse (17)
-#endif
-SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__BinaryThresholdResponse(struct soap*, struct ns__BinaryThresholdResponse *);
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__BinaryThresholdResponse(struct soap*, const struct ns__BinaryThresholdResponse *);
-SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__BinaryThresholdResponse(struct soap*, const char*, int, const struct ns__BinaryThresholdResponse *, const char*);
-SOAP_FMAC3 struct ns__BinaryThresholdResponse * SOAP_FMAC4 soap_in_ns__BinaryThresholdResponse(struct soap*, const char*, struct ns__BinaryThresholdResponse *, const char*);
-
-#define soap_write_ns__BinaryThresholdResponse(soap, data) ( soap_begin_send(soap) || (soap_serialize_ns__BinaryThresholdResponse(soap, data), 0) || soap_put_ns__BinaryThresholdResponse(soap, data, NULL, NULL) || soap_end_send(soap) )
-
-
-SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__BinaryThresholdResponse(struct soap*, const struct ns__BinaryThresholdResponse *, const char*, const char*);
-
-#define soap_read_ns__BinaryThresholdResponse(soap, data) ( soap_begin_recv(soap) || !soap_get_ns__BinaryThresholdResponse(soap, data, NULL, NULL) || soap_end_recv(soap) )
-
-SOAP_FMAC3 struct ns__BinaryThresholdResponse * SOAP_FMAC4 soap_get_ns__BinaryThresholdResponse(struct soap*, struct ns__BinaryThresholdResponse *, const char*, const char*);
-
-#define soap_new_ns__BinaryThresholdResponse(soap, n) soap_instantiate_ns__BinaryThresholdResponse(soap, n, NULL, NULL, NULL)
-
-
-#define soap_delete_ns__BinaryThresholdResponse(soap, p) soap_delete(soap, p)
-
-SOAP_FMAC1 struct ns__BinaryThresholdResponse * SOAP_FMAC2 soap_instantiate_ns__BinaryThresholdResponse(struct soap*, int, const char*, const char*, size_t*);
-SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__BinaryThresholdResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ns__LoadMat
 #define SOAP_TYPE_ns__LoadMat (14)
@@ -378,7 +312,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__LoadMatResponse(struct soap*, int, int,
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Reason
-#define SOAP_TYPE_PointerToSOAP_ENV__Reason (28)
+#define SOAP_TYPE_PointerToSOAP_ENV__Reason (24)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Reason(struct soap*, const char *, int, struct SOAP_ENV__Reason *const*, const char *);
@@ -397,7 +331,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason ** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Rea
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Detail
-#define SOAP_TYPE_PointerToSOAP_ENV__Detail (27)
+#define SOAP_TYPE_PointerToSOAP_ENV__Detail (23)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Detail(struct soap*, const char *, int, struct SOAP_ENV__Detail *const*, const char *);
@@ -416,7 +350,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail ** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Det
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Code
-#define SOAP_TYPE_PointerToSOAP_ENV__Code (21)
+#define SOAP_TYPE_PointerToSOAP_ENV__Code (17)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Code(struct soap*, const char *, int, struct SOAP_ENV__Code *const*, const char *);
