@@ -13,11 +13,15 @@ int readMat( const string& filename, Mat& M);
 
 int main (int argc, char** argv){
     
-    Mat im_rgb  = imread(argv[1],1);
+    Mat im_rgb  = imread(argv[1],0);
     Mat im_gray;
-    cvtColor( im_rgb, im_gray, CV_RGB2GRAY );
+    //cvtColor( im_rgb, im_gray, CV_RGB2GRAY );
     
-    if(!saveMat(string("test"),im_gray))
+    threshold(im_rgb, im_gray, 127.0, 255.0, CV_THRESH_BINARY);
+    
+    string filename = "test";
+    
+    if(!saveMat(filename,im_gray))
     {
         cout<<"save error"<<endl;
     }
