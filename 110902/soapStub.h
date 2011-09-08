@@ -71,35 +71,13 @@ public:
 struct ns__LoadMat
 {
 public:
-	const char *InputImageFilename;	/* optional element of type xsd:string */
+	char *InputImageFilename;	/* optional element of type xsd:string */
 	int loadparam;	/* required element of type xsd:int */
 };
 #endif
 
-#ifndef SOAP_TYPE_ns__BinaryThresholdResponse
-#define SOAP_TYPE_ns__BinaryThresholdResponse (17)
-/* ns:BinaryThresholdResponse */
-struct ns__BinaryThresholdResponse
-{
-public:
-	char *OutputMatFilename;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* required element of type xsd:string */
-};
-#endif
-
-#ifndef SOAP_TYPE_ns__BinaryThreshold
-#define SOAP_TYPE_ns__BinaryThreshold (18)
-/* ns:BinaryThreshold */
-struct ns__BinaryThreshold
-{
-public:
-	const char *InputMatFilename;	/* optional element of type xsd:string */
-	double threshold;	/* required element of type xsd:double */
-	double maxValue;	/* required element of type xsd:double */
-};
-#endif
-
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (19)
+#define SOAP_TYPE_SOAP_ENV__Header (15)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -111,7 +89,7 @@ private:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (20)
+#define SOAP_TYPE_SOAP_ENV__Code (16)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -122,7 +100,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (22)
+#define SOAP_TYPE_SOAP_ENV__Detail (18)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -134,7 +112,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (25)
+#define SOAP_TYPE_SOAP_ENV__Reason (21)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -144,7 +122,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (26)
+#define SOAP_TYPE_SOAP_ENV__Fault (22)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -192,9 +170,7 @@ typedef char *_XML;
 \******************************************************************************/
 
 
-SOAP_FMAC5 int SOAP_FMAC6 ns__LoadMat(struct soap*, const char *InputImageFilename, int loadparam, char *&OutputMatFilename);
-
-SOAP_FMAC5 int SOAP_FMAC6 ns__BinaryThreshold(struct soap*, const char *InputMatFilename, double threshold, double maxValue, char *&OutputMatFilename);
+SOAP_FMAC5 int SOAP_FMAC6 ns__LoadMat(struct soap*, char *InputImageFilename, int loadparam, char *&OutputMatFilename);
 
 /******************************************************************************\
  *                                                                            *
@@ -208,8 +184,6 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__LoadMat(struct soap*);
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__BinaryThreshold(struct soap*);
-
 /******************************************************************************\
  *                                                                            *
  * Client-Side Call Stubs                                                     *
@@ -217,9 +191,7 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__BinaryThreshold(struct soap*);
 \******************************************************************************/
 
 
-SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__LoadMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, const char *InputImageFilename, int loadparam, char *&OutputMatFilename);
-
-SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__BinaryThreshold(struct soap *soap, const char *soap_endpoint, const char *soap_action, const char *InputMatFilename, double threshold, double maxValue, char *&OutputMatFilename);
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__LoadMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputImageFilename, int loadparam, char *&OutputMatFilename);
 
 #endif
 

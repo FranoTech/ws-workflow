@@ -13,5 +13,5 @@ class ns__ImageData
   //char *__filename;
 };
 
-int ns__LoadMat (const char *InputImageFilename, int loadparam, char *&OutputMatFilename);
-int ns__BinaryThreshold(const char *InputMatFilename, double threshold, double maxValue, char *&OutputMatFilename);
+int ns__LoadMat (char *InputImageFilename, int loadparam, char *&OutputMatFilename);
+
