@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.17 2011-09-08 07:13:11 GMT")
+SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.17 2011-09-09 08:18:33 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__LoadMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputImageFilename, int loadparam, char *&OutputMatFilename)
@@ -63,6 +63,161 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__LoadMat(struct soap *soap, const char *s
 	 || soap_end_recv(soap))
 		return soap_closesock(soap);
 	OutputMatFilename = soap_tmp_ns__LoadMatResponse->OutputMatFilename;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__BinaryThreshold(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputMatFilename, double thresholdValue, double maxValue, char *&OutputMatFilename)
+{	struct ns__BinaryThreshold soap_tmp_ns__BinaryThreshold;
+	struct ns__BinaryThresholdResponse *soap_tmp_ns__BinaryThresholdResponse;
+	if (!soap_endpoint)
+		soap_endpoint = "http://localhost/cgi-bin/imgProcessServer";
+	soap->encodingStyle = "";
+	soap_tmp_ns__BinaryThreshold.InputMatFilename = InputMatFilename;
+	soap_tmp_ns__BinaryThreshold.thresholdValue = thresholdValue;
+	soap_tmp_ns__BinaryThreshold.maxValue = maxValue;
+	soap_begin(soap);
+	soap_serializeheader(soap);
+	soap_serialize_ns__BinaryThreshold(soap, &soap_tmp_ns__BinaryThreshold);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_ns__BinaryThreshold(soap, &soap_tmp_ns__BinaryThreshold, "ns:BinaryThreshold", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_ns__BinaryThreshold(soap, &soap_tmp_ns__BinaryThreshold, "ns:BinaryThreshold", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	OutputMatFilename = NULL;
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	if (soap_recv_fault(soap, 1))
+		return soap->error;
+	soap_tmp_ns__BinaryThresholdResponse = soap_get_ns__BinaryThresholdResponse(soap, NULL, "", "");
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	OutputMatFilename = soap_tmp_ns__BinaryThresholdResponse->OutputMatFilename;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__MorphOpen(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InpuMattFilename, char *&OutputMatFilename)
+{	struct ns__MorphOpen soap_tmp_ns__MorphOpen;
+	struct ns__MorphOpenResponse *soap_tmp_ns__MorphOpenResponse;
+	if (!soap_endpoint)
+		soap_endpoint = "http://localhost/cgi-bin/imgProcessServer";
+	soap->encodingStyle = "";
+	soap_tmp_ns__MorphOpen.InpuMattFilename = InpuMattFilename;
+	soap_begin(soap);
+	soap_serializeheader(soap);
+	soap_serialize_ns__MorphOpen(soap, &soap_tmp_ns__MorphOpen);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_ns__MorphOpen(soap, &soap_tmp_ns__MorphOpen, "ns:MorphOpen", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_ns__MorphOpen(soap, &soap_tmp_ns__MorphOpen, "ns:MorphOpen", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	OutputMatFilename = NULL;
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	if (soap_recv_fault(soap, 1))
+		return soap->error;
+	soap_tmp_ns__MorphOpenResponse = soap_get_ns__MorphOpenResponse(soap, NULL, "", "");
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	OutputMatFilename = soap_tmp_ns__MorphOpenResponse->OutputMatFilename;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__MatToJPG(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputMatFilename, char *&OutputMatFilename)
+{	struct ns__MatToJPG soap_tmp_ns__MatToJPG;
+	struct ns__MatToJPGResponse *soap_tmp_ns__MatToJPGResponse;
+	if (!soap_endpoint)
+		soap_endpoint = "http://localhost/cgi-bin/imgProcessServer";
+	soap->encodingStyle = "";
+	soap_tmp_ns__MatToJPG.InputMatFilename = InputMatFilename;
+	soap_begin(soap);
+	soap_serializeheader(soap);
+	soap_serialize_ns__MatToJPG(soap, &soap_tmp_ns__MatToJPG);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_ns__MatToJPG(soap, &soap_tmp_ns__MatToJPG, "ns:MatToJPG", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_ns__MatToJPG(soap, &soap_tmp_ns__MatToJPG, "ns:MatToJPG", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	OutputMatFilename = NULL;
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	if (soap_recv_fault(soap, 1))
+		return soap->error;
+	soap_tmp_ns__MatToJPGResponse = soap_get_ns__MatToJPGResponse(soap, NULL, "", "");
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	OutputMatFilename = soap_tmp_ns__MatToJPGResponse->OutputMatFilename;
 	return soap_closesock(soap);
 }
 

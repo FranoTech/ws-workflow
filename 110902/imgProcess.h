@@ -14,4 +14,6 @@ class ns__ImageData
 };
 
 int ns__LoadMat (char *InputImageFilename, int loadparam, char *&OutputMatFilename);
-
+int ns__BinaryThreshold(char *InputMatFilename, double thresholdValue, double maxValue, char *&OutputMatFilename);
+int ns__MorphOpen(char *InpuMattFilename, char *&OutputMatFilename);
+int ns__MatToJPG (char *InputMatFilename, char *&OutputMatFilename);

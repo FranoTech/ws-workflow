@@ -81,15 +81,15 @@ int ns__LoadMat (struct soap *soap,
 		
     } else {
 		soap_fault(soap);
-		cerr << "loadparam error" << endl;
-		soap->fault->faultstring = "loadparam error";
+		cerr << "param error" << endl;
+		soap->fault->faultstring = " param error";
 		return SOAP_FAULT;
 	}
 	
 	/* generate output file name */
 	*&OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_load_mat", localtime(&now));
+    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_LoadMat", localtime(&now));
 	
 	/* save to bin */
     if(!saveMat(OutputMatFilename, src))
@@ -104,8 +104,8 @@ int ns__LoadMat (struct soap *soap,
 }
 
 int ns__BinaryThreshold(struct soap *soap, 
-                        const char *InputMatFilename, 
-                        double threshold, 
+                        char *InputMatFilename, 
+                        double thresholdValue, 
                         double maxValue,
                         char *&OutputMatFilename)
 { 
@@ -120,12 +120,114 @@ int ns__BinaryThreshold(struct soap *soap,
 	    }
 	
     Mat dst(src.rows, src.cols, src.depth());
-    threshold(src, dst, threshold, maxValue, CV_THRESH_BINARY);
+    threshold(src, dst, thresholdValue, maxValue, CV_THRESH_BINARY);
     
-    writeToBin (OutputMatFilename, dst);
+    /* generate output file name */
+	*&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
+	
+	/* save to bin */
+    if(!saveMat(OutputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+		soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
     return SOAP_OK;
 }
 
+int ns__MorphOpen(  struct soap *soap, char *InputMatFilename, char *&OutputMatFilename)
+{ 
+   
+    /* read from bin */
+    Mat src;
+    if(!readMat(InputMatFilename, src))
+        {
+            soap_fault(soap);
+            cerr << "error :: can not read bin file" << endl;
+            soap->fault->faultstring = "error :: can not read bin file";
+            return SOAP_FAULT;
+        }
+    
+    Mat dst(src.rows, src.cols, src.depth());
+    Mat se; 
+    Size seSize(3, 3); 
+    Point seAnc(1, 1);
+    
+    se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
+    morphologyEx(src, dst, MORPH_OPEN, se, seAnc);
+    
+    if(src.empty()) {
+			soap_fault(soap);
+			cerr << "error :: morphologyEx" << endl;
+			soap->fault->faultstring = "error :: morphologyEx";
+			return SOAP_FAULT;
+    }
+    
+    /* generate output file name */
+    *&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_MorphOpen", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(OutputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+    
+}
+
+int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char *&OutputMatFilename)
+{
+    Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    /* generate output file name */
+    *&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S.jpg", localtime(&now));
+    
+    if(!imwrite(OutputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not save to jpg" << endl;
+        soap->fault->faultstring = "error :: can not save to jpg";
+        return SOAP_FAULT;
+    }
+    
+    return SOAP_OK;
+}
+
+int ns__removeSmallCell (struct soap *soap, char *InputMatFilename, char *&OutputMatFilename)
+{
+    Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat outSingle ;
+    outsingle = Mat::zeros(src.rows, src.cols, CV_32F);
+    
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    //findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+}
 
 
 /* Save matrix to binary file */
@@ -208,18 +310,4 @@ int readMat( const char *filename, Mat& M)
     return 1;
 } 
 
-//void writeToBin (char *&OutputMatFilename, Mat& M)
-//{
-	//OutputMatFilename = (char*)soap_malloc(soap,60);
-    //time_t now = time(0);
-    //strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_bi_threshold", localtime(&now));
 
-		///* save to bin */
-    //if(!saveMat(OutputMatFilename, M))
-    //{
-        //soap_fault(soap);
-        //cerr << "error:: save mat to binary file" << endl;
-		//soap->fault->faultstring = "error:: save mat to binary file";
-        //return SOAP_FAULT;
-    //}
-//}

@@ -30,5 +30,11 @@ class imgProcess
 	virtual ~imgProcess() { if (soap) { soap_destroy(soap); soap_end(soap); soap_free(soap); } };
 	/// Invoke 'LoadMat' of service 'imgProcess' and return error code (or SOAP_OK)
 	virtual int ns__LoadMat(char *InputImageFilename, int loadparam, char *&OutputMatFilename) { return soap ? soap_call_ns__LoadMat(soap, endpoint, NULL, InputImageFilename, loadparam, OutputMatFilename) : SOAP_EOM; };
+	/// Invoke 'BinaryThreshold' of service 'imgProcess' and return error code (or SOAP_OK)
+	virtual int ns__BinaryThreshold(char *InputMatFilename, double thresholdValue, double maxValue, char *&OutputMatFilename) { return soap ? soap_call_ns__BinaryThreshold(soap, endpoint, NULL, InputMatFilename, thresholdValue, maxValue, OutputMatFilename) : SOAP_EOM; };
+	/// Invoke 'MorphOpen' of service 'imgProcess' and return error code (or SOAP_OK)
+	virtual int ns__MorphOpen(char *InpuMattFilename, char *&OutputMatFilename) { return soap ? soap_call_ns__MorphOpen(soap, endpoint, NULL, InpuMattFilename, OutputMatFilename) : SOAP_EOM; };
+	/// Invoke 'MatToJPG' of service 'imgProcess' and return error code (or SOAP_OK)
+	virtual int ns__MatToJPG(char *InputMatFilename, char *&OutputMatFilename) { return soap ? soap_call_ns__MatToJPG(soap, endpoint, NULL, InputMatFilename, OutputMatFilename) : SOAP_EOM; };
 };
 #endif

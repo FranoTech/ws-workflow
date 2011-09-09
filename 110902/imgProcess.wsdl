@@ -42,17 +42,85 @@
  <part name="OutputMatFilename" type="xsd:string"/>
 </message>
 
+<message name="BinaryThresholdRequest">
+ <part name="InputMatFilename" type="xsd:string"/>
+ <part name="thresholdValue" type="xsd:double"/>
+ <part name="maxValue" type="xsd:double"/>
+</message>
+
+<message name="BinaryThresholdResponse">
+ <part name="OutputMatFilename" type="xsd:string"/>
+</message>
+
+<message name="MorphOpenRequest">
+ <part name="InpuMattFilename" type="xsd:string"/>
+</message>
+
+<message name="MorphOpenResponse">
+ <part name="OutputMatFilename" type="xsd:string"/>
+</message>
+
+<message name="MatToJPGRequest">
+ <part name="InputMatFilename" type="xsd:string"/>
+</message>
+
+<message name="MatToJPGResponse">
+ <part name="OutputMatFilename" type="xsd:string"/>
+</message>
+
 <portType name="imgProcessPortType">
  <operation name="LoadMat">
   <documentation>Service definition of function ns__LoadMat</documentation>
   <input message="tns:LoadMatRequest"/>
   <output message="tns:LoadMatResponse"/>
  </operation>
+ <operation name="BinaryThreshold">
+  <documentation>Service definition of function ns__BinaryThreshold</documentation>
+  <input message="tns:BinaryThresholdRequest"/>
+  <output message="tns:BinaryThresholdResponse"/>
+ </operation>
+ <operation name="MorphOpen">
+  <documentation>Service definition of function ns__MorphOpen</documentation>
+  <input message="tns:MorphOpenRequest"/>
+  <output message="tns:MorphOpenResponse"/>
+ </operation>
+ <operation name="MatToJPG">
+  <documentation>Service definition of function ns__MatToJPG</documentation>
+  <input message="tns:MatToJPGRequest"/>
+  <output message="tns:MatToJPGResponse"/>
+ </operation>
 </portType>
 
 <binding name="imgProcess" type="tns:imgProcessPortType">
  <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
  <operation name="LoadMat">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="BinaryThreshold">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="MorphOpen">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="MatToJPG">
   <SOAP:operation style="rpc" soapAction=""/>
   <input>
      <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
