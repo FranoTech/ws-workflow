@@ -61,6 +61,22 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_put_int(struct soap*, const int *, const char*, c
 
 SOAP_FMAC3 int * SOAP_FMAC4 soap_get_int(struct soap*, int *, const char*, const char*);
 
+#ifndef SOAP_TYPE_double
+#define SOAP_TYPE_double (15)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_double(struct soap*, double *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_double(struct soap*, const char*, int, const double *, const char*);
+SOAP_FMAC3 double * SOAP_FMAC4 soap_in_double(struct soap*, const char*, double *, const char*);
+
+#define soap_write_double(soap, data) ( soap_begin_send(soap) || soap_put_double(soap, data, NULL, NULL) || soap_end_send(soap) )
+
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_double(struct soap*, const double *, const char*, const char*);
+
+#define soap_read_double(soap, data) ( soap_begin_recv(soap) || !soap_get_double(soap, data, NULL, NULL) || soap_end_recv(soap) )
+
+SOAP_FMAC3 double * SOAP_FMAC4 soap_get_double(struct soap*, double *, const char*, const char*);
+
 #ifndef SOAP_TYPE_unsignedByte
 #define SOAP_TYPE_unsignedByte (9)
 #endif
@@ -117,7 +133,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__ImageData(struct soap*, int, int, void*
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (22)
+#define SOAP_TYPE_SOAP_ENV__Fault (32)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Fault(struct soap*, struct SOAP_ENV__Fault *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Fault(struct soap*, const struct SOAP_ENV__Fault *);
@@ -146,7 +162,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Fault(struct soap*, int, int, voi
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (21)
+#define SOAP_TYPE_SOAP_ENV__Reason (31)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Reason(struct soap*, const struct SOAP_ENV__Reason *);
@@ -175,7 +191,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Reason(struct soap*, int, int, vo
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (18)
+#define SOAP_TYPE_SOAP_ENV__Detail (28)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Detail(struct soap*, const struct SOAP_ENV__Detail *);
@@ -204,7 +220,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Detail(struct soap*, int, int, vo
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (16)
+#define SOAP_TYPE_SOAP_ENV__Code (26)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Code(struct soap*, const struct SOAP_ENV__Code *);
@@ -233,7 +249,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Code(struct soap*, int, int, void
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (15)
+#define SOAP_TYPE_SOAP_ENV__Header (25)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_SOAP_ENV__Header(struct soap*, struct SOAP_ENV__Header *);
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_SOAP_ENV__Header(struct soap*, const struct SOAP_ENV__Header *);
@@ -258,6 +274,156 @@ SOAP_FMAC1 struct SOAP_ENV__Header * SOAP_FMAC2 soap_instantiate_SOAP_ENV__Heade
 SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #endif
+
+#ifndef SOAP_TYPE_ns__MatToJPG
+#define SOAP_TYPE_ns__MatToJPG (24)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__MatToJPG(struct soap*, struct ns__MatToJPG *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__MatToJPG(struct soap*, const struct ns__MatToJPG *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__MatToJPG(struct soap*, const char*, int, const struct ns__MatToJPG *, const char*);
+SOAP_FMAC3 struct ns__MatToJPG * SOAP_FMAC4 soap_in_ns__MatToJPG(struct soap*, const char*, struct ns__MatToJPG *, const char*);
+
+#define soap_write_ns__MatToJPG(soap, data) ( soap_begin_send(soap) || (soap_serialize_ns__MatToJPG(soap, data), 0) || soap_put_ns__MatToJPG(soap, data, NULL, NULL) || soap_end_send(soap) )
+
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__MatToJPG(struct soap*, const struct ns__MatToJPG *, const char*, const char*);
+
+#define soap_read_ns__MatToJPG(soap, data) ( soap_begin_recv(soap) || !soap_get_ns__MatToJPG(soap, data, NULL, NULL) || soap_end_recv(soap) )
+
+SOAP_FMAC3 struct ns__MatToJPG * SOAP_FMAC4 soap_get_ns__MatToJPG(struct soap*, struct ns__MatToJPG *, const char*, const char*);
+
+#define soap_new_ns__MatToJPG(soap, n) soap_instantiate_ns__MatToJPG(soap, n, NULL, NULL, NULL)
+
+
+#define soap_delete_ns__MatToJPG(soap, p) soap_delete(soap, p)
+
+SOAP_FMAC1 struct ns__MatToJPG * SOAP_FMAC2 soap_instantiate_ns__MatToJPG(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__MatToJPG(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ns__MatToJPGResponse
+#define SOAP_TYPE_ns__MatToJPGResponse (23)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__MatToJPGResponse(struct soap*, struct ns__MatToJPGResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__MatToJPGResponse(struct soap*, const struct ns__MatToJPGResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__MatToJPGResponse(struct soap*, const char*, int, const struct ns__MatToJPGResponse *, const char*);
+SOAP_FMAC3 struct ns__MatToJPGResponse * SOAP_FMAC4 soap_in_ns__MatToJPGResponse(struct soap*, const char*, struct ns__MatToJPGResponse *, const char*);
+
+#define soap_write_ns__MatToJPGResponse(soap, data) ( soap_begin_send(soap) || (soap_serialize_ns__MatToJPGResponse(soap, data), 0) || soap_put_ns__MatToJPGResponse(soap, data, NULL, NULL) || soap_end_send(soap) )
+
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__MatToJPGResponse(struct soap*, const struct ns__MatToJPGResponse *, const char*, const char*);
+
+#define soap_read_ns__MatToJPGResponse(soap, data) ( soap_begin_recv(soap) || !soap_get_ns__MatToJPGResponse(soap, data, NULL, NULL) || soap_end_recv(soap) )
+
+SOAP_FMAC3 struct ns__MatToJPGResponse * SOAP_FMAC4 soap_get_ns__MatToJPGResponse(struct soap*, struct ns__MatToJPGResponse *, const char*, const char*);
+
+#define soap_new_ns__MatToJPGResponse(soap, n) soap_instantiate_ns__MatToJPGResponse(soap, n, NULL, NULL, NULL)
+
+
+#define soap_delete_ns__MatToJPGResponse(soap, p) soap_delete(soap, p)
+
+SOAP_FMAC1 struct ns__MatToJPGResponse * SOAP_FMAC2 soap_instantiate_ns__MatToJPGResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__MatToJPGResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ns__MorphOpen
+#define SOAP_TYPE_ns__MorphOpen (21)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__MorphOpen(struct soap*, struct ns__MorphOpen *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__MorphOpen(struct soap*, const struct ns__MorphOpen *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__MorphOpen(struct soap*, const char*, int, const struct ns__MorphOpen *, const char*);
+SOAP_FMAC3 struct ns__MorphOpen * SOAP_FMAC4 soap_in_ns__MorphOpen(struct soap*, const char*, struct ns__MorphOpen *, const char*);
+
+#define soap_write_ns__MorphOpen(soap, data) ( soap_begin_send(soap) || (soap_serialize_ns__MorphOpen(soap, data), 0) || soap_put_ns__MorphOpen(soap, data, NULL, NULL) || soap_end_send(soap) )
+
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__MorphOpen(struct soap*, const struct ns__MorphOpen *, const char*, const char*);
+
+#define soap_read_ns__MorphOpen(soap, data) ( soap_begin_recv(soap) || !soap_get_ns__MorphOpen(soap, data, NULL, NULL) || soap_end_recv(soap) )
+
+SOAP_FMAC3 struct ns__MorphOpen * SOAP_FMAC4 soap_get_ns__MorphOpen(struct soap*, struct ns__MorphOpen *, const char*, const char*);
+
+#define soap_new_ns__MorphOpen(soap, n) soap_instantiate_ns__MorphOpen(soap, n, NULL, NULL, NULL)
+
+
+#define soap_delete_ns__MorphOpen(soap, p) soap_delete(soap, p)
+
+SOAP_FMAC1 struct ns__MorphOpen * SOAP_FMAC2 soap_instantiate_ns__MorphOpen(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__MorphOpen(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ns__MorphOpenResponse
+#define SOAP_TYPE_ns__MorphOpenResponse (20)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__MorphOpenResponse(struct soap*, struct ns__MorphOpenResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__MorphOpenResponse(struct soap*, const struct ns__MorphOpenResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__MorphOpenResponse(struct soap*, const char*, int, const struct ns__MorphOpenResponse *, const char*);
+SOAP_FMAC3 struct ns__MorphOpenResponse * SOAP_FMAC4 soap_in_ns__MorphOpenResponse(struct soap*, const char*, struct ns__MorphOpenResponse *, const char*);
+
+#define soap_write_ns__MorphOpenResponse(soap, data) ( soap_begin_send(soap) || (soap_serialize_ns__MorphOpenResponse(soap, data), 0) || soap_put_ns__MorphOpenResponse(soap, data, NULL, NULL) || soap_end_send(soap) )
+
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__MorphOpenResponse(struct soap*, const struct ns__MorphOpenResponse *, const char*, const char*);
+
+#define soap_read_ns__MorphOpenResponse(soap, data) ( soap_begin_recv(soap) || !soap_get_ns__MorphOpenResponse(soap, data, NULL, NULL) || soap_end_recv(soap) )
+
+SOAP_FMAC3 struct ns__MorphOpenResponse * SOAP_FMAC4 soap_get_ns__MorphOpenResponse(struct soap*, struct ns__MorphOpenResponse *, const char*, const char*);
+
+#define soap_new_ns__MorphOpenResponse(soap, n) soap_instantiate_ns__MorphOpenResponse(soap, n, NULL, NULL, NULL)
+
+
+#define soap_delete_ns__MorphOpenResponse(soap, p) soap_delete(soap, p)
+
+SOAP_FMAC1 struct ns__MorphOpenResponse * SOAP_FMAC2 soap_instantiate_ns__MorphOpenResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__MorphOpenResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ns__BinaryThreshold
+#define SOAP_TYPE_ns__BinaryThreshold (18)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__BinaryThreshold(struct soap*, struct ns__BinaryThreshold *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__BinaryThreshold(struct soap*, const struct ns__BinaryThreshold *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__BinaryThreshold(struct soap*, const char*, int, const struct ns__BinaryThreshold *, const char*);
+SOAP_FMAC3 struct ns__BinaryThreshold * SOAP_FMAC4 soap_in_ns__BinaryThreshold(struct soap*, const char*, struct ns__BinaryThreshold *, const char*);
+
+#define soap_write_ns__BinaryThreshold(soap, data) ( soap_begin_send(soap) || (soap_serialize_ns__BinaryThreshold(soap, data), 0) || soap_put_ns__BinaryThreshold(soap, data, NULL, NULL) || soap_end_send(soap) )
+
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__BinaryThreshold(struct soap*, const struct ns__BinaryThreshold *, const char*, const char*);
+
+#define soap_read_ns__BinaryThreshold(soap, data) ( soap_begin_recv(soap) || !soap_get_ns__BinaryThreshold(soap, data, NULL, NULL) || soap_end_recv(soap) )
+
+SOAP_FMAC3 struct ns__BinaryThreshold * SOAP_FMAC4 soap_get_ns__BinaryThreshold(struct soap*, struct ns__BinaryThreshold *, const char*, const char*);
+
+#define soap_new_ns__BinaryThreshold(soap, n) soap_instantiate_ns__BinaryThreshold(soap, n, NULL, NULL, NULL)
+
+
+#define soap_delete_ns__BinaryThreshold(soap, p) soap_delete(soap, p)
+
+SOAP_FMAC1 struct ns__BinaryThreshold * SOAP_FMAC2 soap_instantiate_ns__BinaryThreshold(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__BinaryThreshold(struct soap*, int, int, void*, size_t, const void*, size_t);
+
+#ifndef SOAP_TYPE_ns__BinaryThresholdResponse
+#define SOAP_TYPE_ns__BinaryThresholdResponse (17)
+#endif
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__BinaryThresholdResponse(struct soap*, struct ns__BinaryThresholdResponse *);
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__BinaryThresholdResponse(struct soap*, const struct ns__BinaryThresholdResponse *);
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__BinaryThresholdResponse(struct soap*, const char*, int, const struct ns__BinaryThresholdResponse *, const char*);
+SOAP_FMAC3 struct ns__BinaryThresholdResponse * SOAP_FMAC4 soap_in_ns__BinaryThresholdResponse(struct soap*, const char*, struct ns__BinaryThresholdResponse *, const char*);
+
+#define soap_write_ns__BinaryThresholdResponse(soap, data) ( soap_begin_send(soap) || (soap_serialize_ns__BinaryThresholdResponse(soap, data), 0) || soap_put_ns__BinaryThresholdResponse(soap, data, NULL, NULL) || soap_end_send(soap) )
+
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__BinaryThresholdResponse(struct soap*, const struct ns__BinaryThresholdResponse *, const char*, const char*);
+
+#define soap_read_ns__BinaryThresholdResponse(soap, data) ( soap_begin_recv(soap) || !soap_get_ns__BinaryThresholdResponse(soap, data, NULL, NULL) || soap_end_recv(soap) )
+
+SOAP_FMAC3 struct ns__BinaryThresholdResponse * SOAP_FMAC4 soap_get_ns__BinaryThresholdResponse(struct soap*, struct ns__BinaryThresholdResponse *, const char*, const char*);
+
+#define soap_new_ns__BinaryThresholdResponse(soap, n) soap_instantiate_ns__BinaryThresholdResponse(soap, n, NULL, NULL, NULL)
+
+
+#define soap_delete_ns__BinaryThresholdResponse(soap, p) soap_delete(soap, p)
+
+SOAP_FMAC1 struct ns__BinaryThresholdResponse * SOAP_FMAC2 soap_instantiate_ns__BinaryThresholdResponse(struct soap*, int, const char*, const char*, size_t*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__BinaryThresholdResponse(struct soap*, int, int, void*, size_t, const void*, size_t);
 
 #ifndef SOAP_TYPE_ns__LoadMat
 #define SOAP_TYPE_ns__LoadMat (14)
@@ -312,7 +478,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__LoadMatResponse(struct soap*, int, int,
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Reason
-#define SOAP_TYPE_PointerToSOAP_ENV__Reason (24)
+#define SOAP_TYPE_PointerToSOAP_ENV__Reason (34)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Reason(struct soap*, struct SOAP_ENV__Reason *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Reason(struct soap*, const char *, int, struct SOAP_ENV__Reason *const*, const char *);
@@ -331,7 +497,7 @@ SOAP_FMAC3 struct SOAP_ENV__Reason ** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Rea
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Detail
-#define SOAP_TYPE_PointerToSOAP_ENV__Detail (23)
+#define SOAP_TYPE_PointerToSOAP_ENV__Detail (33)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Detail(struct soap*, struct SOAP_ENV__Detail *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Detail(struct soap*, const char *, int, struct SOAP_ENV__Detail *const*, const char *);
@@ -350,7 +516,7 @@ SOAP_FMAC3 struct SOAP_ENV__Detail ** SOAP_FMAC4 soap_get_PointerToSOAP_ENV__Det
 #ifndef WITH_NOGLOBAL
 
 #ifndef SOAP_TYPE_PointerToSOAP_ENV__Code
-#define SOAP_TYPE_PointerToSOAP_ENV__Code (17)
+#define SOAP_TYPE_PointerToSOAP_ENV__Code (27)
 #endif
 SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_PointerToSOAP_ENV__Code(struct soap*, struct SOAP_ENV__Code *const*);
 SOAP_FMAC3 int SOAP_FMAC4 soap_out_PointerToSOAP_ENV__Code(struct soap*, const char *, int, struct SOAP_ENV__Code *const*, const char *);
