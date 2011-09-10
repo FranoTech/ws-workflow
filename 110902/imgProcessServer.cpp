@@ -225,8 +225,12 @@ int ns__removeSmallCell (struct soap *soap, char *InputMatFilename, char *&Outpu
     outsingle = Mat::zeros(src.rows, src.cols, CV_32F);
     
     vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
-    //findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    findContours(src, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    for(int i = 0; i< contours.size(); i++)
+    {
+		double area = fabs(contourArea(contours));
+		
+	}
 }
 
 
