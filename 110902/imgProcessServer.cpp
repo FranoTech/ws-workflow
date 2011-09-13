@@ -221,18 +221,112 @@ int ns__removeSmallCell (struct soap *soap, char *InputMatFilename, char *&Outpu
         return SOAP_FAULT;
     }
     
+    //Mat outSingle ;
+    //outSingle = Mat::zeros(src.rows, src.cols, CV_32F);
+	
+	CvMat *out_single = nullptr;
+   	IplImage tmp8UC1 = src;
+   	CvMat *out_single = nullptr;
+	CvMemStorage *storage = cvCreateMemStorage();
+	CvSeq *first_con = nullptr;
+	CvSeq *cur = nullptr;
+	
+	out_single = cvCreateMat(tmp8UC1->height, tmp8UC1->width, CV_32FC1);
+	cvSetZero(out_single);
+	
+	cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
+	cur = first_con;
+	while (cur != nullptr) {
+		double area = fabs(cvContourArea(cur));
+		int npts = cur->total;
+		CvPoint *p = new CvPoint[npts];
+		cvCvtSeqToArray(cur, p);
+		if (area < 1500.0) // remove small area
+			cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
+		else if (area < 7500.0) {
+			cvFillPoly(out_single, &p, &npts, 1, cvScalar(255.0)); // move to single
+			cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
+		}else
+			cvFillPoly(input_morph, &p, &npts, 1, cvScalar(255.0)); // fill hole
+		delete[] p;
+		cur = cur->h_next;
+	}
+    
+    //vector<vector<Point> > contours;
+    //findContours(src, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    //for(int i = 0; i< contours.size(); i++)
+    //{
+		//double area = contourArea(contours);
+		
+		//cerr << area << endl;
+		//if(area < lowerBound)
+		//{
+			//fillPoly(src)
+		//}
+		
+	//}
+}
+
+
+
+int ns__removeSmallCell (struct soap *soap, char *InputMatFilename, char *&OutputMatFilename)
+{
+    Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
     Mat outSingle ;
-    outsingle = Mat::zeros(src.rows, src.cols, CV_32F);
+    outSingle = Mat::zeros(src.rows, src.cols, CV_32F);
+	
+	//CvMat *out_single = nullptr;
+   	//IplImage tmp8UC1 = src;
+   	//CvMat *out_single = nullptr;
+	//CvMemStorage *storage = cvCreateMemStorage();
+	//CvSeq *first_con = nullptr;
+	//CvSeq *cur = nullptr;
+	
+	//out_single = cvCreateMat(tmp8UC1->height, tmp8UC1->width, CV_32FC1);
+	//cvSetZero(out_single);
+	
+	//cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
+	//cur = first_con;
+	//while (cur != nullptr) {
+		//double area = fabs(cvContourArea(cur));
+		//int npts = cur->total;
+		//CvPoint *p = new CvPoint[npts];
+		//cvCvtSeqToArray(cur, p);
+		//if (area < 1500.0) // remove small area
+			//cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
+		//else if (area < 7500.0) {
+			//cvFillPoly(out_single, &p, &npts, 1, cvScalar(255.0)); // move to single
+			//cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
+		//}else
+			//cvFillPoly(input_morph, &p, &npts, 1, cvScalar(255.0)); // fill hole
+		//delete[] p;
+		//cur = cur->h_next;
+	//}
     
     vector<vector<Point> > contours;
     findContours(src, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-    for(int i = 0; i< contours.size(); i++)
+    for(size_t i = 0; i< contours.size(); i++)
     {
-		double area = fabs(contourArea(contours));
+		double area = contourArea(Mat(contours[i]);
+		int npts = contours.size();
+		vector<Point> p;
+		
+		cerr << area << endl;
+		if(area < lowerBound)
+		{
+			fillPoly(src)
+		}
 		
 	}
 }
-
 
 /* Save matrix to binary file */
 int saveMat( const char *filename, const Mat& M){
