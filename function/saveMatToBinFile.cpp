@@ -17,7 +17,7 @@ int main (int argc, char** argv){
     Mat im_gray;
     //cvtColor( im_rgb, im_gray, CV_RGB2GRAY );
     
-    threshold(im_rgb, im_gray, 127.0, 255.0, CV_THRESH_BINARY);
+    threshold(im_rgb, im_gray, 65.0, 255.0, CV_THRESH_BINARY);
     
     string filename = "test";
     
