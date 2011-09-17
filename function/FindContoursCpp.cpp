@@ -12,27 +12,27 @@ int main (int argc, char** argv){
     
     Mat src  = imread(argv[1],0);
     Mat gray;
-    Mat result();
+    
+    Mat result = Mat::zeros(src.rows,src.cols, CV_32FC1);
     threshold(src, gray, 127.0, 255.0, CV_THRESH_BINARY);
     
     vector<vector<Point> > contours;
-    findContours(gray, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    findContours(	gray, contours, CV_RETR_EXTERNAL, 
+					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
     for(size_t i = 0; i< contours.size(); i++)
     {
-		//const Point* ppt[1] = {Point(contours[0])}; // fail
 		const Point* p = &contours[i][0];
         int n = (int)contours[i].size();
 		double area = contourArea(Mat(contours[i]));
 		
-		if(area < 100.0)
+		if(area < 1500.0) //lower bound
 		{
-			fillPoly( result, &p, &n, 1, Scalar(255,255,255));
-			cout<<"***************passed************"<<endl;
-		 //} else if (area < 1500.0) {
-            //fillPoly(gray, contours, contours.size(), 1, Scalar(0,0,255)); // move to single
-             //// remove from input
-        //}else{
-			//fillPoly(gray, contours, contours.size(), 1, Scalar(255,0,0));
+			fillPoly( gray, &p, &n, 1, Scalar(0));
+		} else if (area < 7500.0) {
+            fillPoly(result, contours, contours.size(), 1, Scalar(255)); // move to result
+            fillPoly(gray, contours, contours.size(), 1, Scalar(0)); // remove from input
+        }else{
+			fillPoly(gray, contours, contours.size(), 1, Scalar(255));
 		}
 	}
 	
