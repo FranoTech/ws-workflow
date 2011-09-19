@@ -30,19 +30,28 @@
 </types>
 
 <message name="genNameRequest">
- <part name="InputFilename" type="xsd:string"/>
+ <part name="InputFilename" type="xsd:string"/><!-- ns__genName::InputFilename -->
 </message>
 
 <message name="genNameResponse">
- <part name="OutputFilename" type="xsd:string"/>
+ <part name="OutputFilename" type="xsd:string"/><!-- ns__genName::OutputFilename -->
 </message>
 
 <message name="genName2Request">
- <part name="InputFilename" type="xsd:string"/>
+ <part name="InputFilename" type="xsd:string"/><!-- ns__genName2::InputFilename -->
 </message>
 
 <message name="genName2Response">
- <part name="OutputFilename" type="xsd:string"/>
+ <part name="OutputFilename" type="xsd:string"/><!-- ns__genName2::OutputFilename -->
+</message>
+
+<message name="genName3">
+ <part name="InputFilename" type="xsd:string"/><!-- ns__genName3::InputFilename -->
+</message>
+
+<message name="Output">
+ <part name="outputFilename" type="xsd:string"/><!-- ns__genName3::outputFilename -->
+ <part name="anotherOutputFilename" type="xsd:string"/><!-- ns__genName3::anotherOutputFilename -->
 </message>
 
 <portType name="namePortType">
@@ -55,6 +64,11 @@
   <documentation>Service definition of function ns__genName2</documentation>
   <input message="tns:genName2Request"/>
   <output message="tns:genName2Response"/>
+ </operation>
+ <operation name="genName3">
+  <documentation>Service definition of function ns__genName3</documentation>
+  <input message="tns:genName3"/>
+  <output message="tns:Output"/>
  </operation>
 </portType>
 
@@ -78,10 +92,19 @@
      <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </output>
  </operation>
+ <operation name="genName3">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
 </binding>
 
 <service name="name">
- <documentation>gSOAP 2.7.17 generated service definition</documentation>
+ <documentation>gSOAP 2.8.2 generated service definition</documentation>
  <port name="name" binding="tns:name">
   <SOAP:address location="http://localhost/cgi-bin/name"/>
  </port>

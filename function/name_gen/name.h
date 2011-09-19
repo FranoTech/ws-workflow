@@ -6,7 +6,13 @@
 
 //gsoap ns schema namespace: urn:n
 
+class ns__Output
+{ 
+	char *outputFilename;
+	char *anotherOutputFilename;
+};
 
 int ns__genName(char *InputFilename, char *&OutputFilename);
 int ns__genName2(char *InputFilename, char **OutputFilename);
+int ns__genName3(char *InputFilename, ns__Output &out);
 

@@ -25,14 +25,14 @@ int main (int argc, char** argv){
         int n = (int)contours[i].size();
 		double area = contourArea(Mat(contours[i]));
 		
-		if(area < 1500.0) //lower bound
+		if(area < 300.0) //lower bound
 		{
-			fillPoly( gray, &p, &n, 1, Scalar(0));
-		} else if (area < 7500.0) {
-            fillPoly(result, contours, contours.size(), 1, Scalar(255)); // move to result
-            fillPoly(gray, contours, contours.size(), 1, Scalar(0)); // remove from input
+			fillPoly( gray, &p, &n, 1, Scalar(255,255,255));
+		} else if (area < 1500.0) {
+            fillPoly( result, &p, &n, 1, Scalar(255,255,255)); // move to result
+            fillPoly( gray, &p, &n, 1, Scalar(255,255,255)); // remove from input
         }else{
-			fillPoly(gray, contours, contours.size(), 1, Scalar(255));
+			fillPoly( gray, &p, &n, 1, Scalar(255,255,255));
 		}
 	}
 	
@@ -45,6 +45,7 @@ int main (int argc, char** argv){
     imshow("result", result);
     waitKey(0);
     
+    contours.clear();
     src.release();
     gray.release();
     
