@@ -58,3 +58,27 @@ int ns__genName2(struct soap *soap, char *InputFilename, char **OutputFilename)
     }
     return SOAP_OK;
 }
+
+//worked
+
+int ns__genName3(struct soap *soap, char *InputFilename, ns__Output &out)
+{ 
+	out.outputFilename = (char*)soap_malloc(soap, 60);
+	out.anotherOutputFilename = (char*)soap_malloc(soap, 60); 
+    if(InputFilename){
+        cerr<<"1"<<endl;
+        time_t now = time(0);
+        strftime(out.outputFilename, sizeof(out.outputFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biThreshold.jpg", localtime(&now));
+        cerr<<out.outputFilename<<endl;
+        
+        now = time(0);
+        strftime(out.anotherOutputFilename, sizeof(out.anotherOutputFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biThreshold.jpg", localtime(&now));
+        cerr<<out.anotherOutputFilename<<endl;
+    }else{ 
+        cerr<<"File Name require"<<endl;
+        soap_fault(soap);
+        soap->fault->faultstring = "Name required";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
