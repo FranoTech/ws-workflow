@@ -7,14 +7,14 @@
 //gsoap ns schema namespace: urn:img
 
 
-class ns__Output
+class ns__FindContours
 { 
-	char *&outputFilename;
-	char *&anotherOutputFilename;
+	char *smallerArea;
+	char *biggerArea;
 };
 
 int ns__loadMat (char *InputImageFilename, int loadparam, char *&OutputMatFilename);
 int ns__binaryThreshold(char *InputMatFilename, double thresholdValue, double maxValue, char *&OutputMatFilename);
 int ns__morphOpen(char *InpuMattFilename, char *&OutputMatFilename);
 int ns__MatToJPG (char *InputMatFilename, char *&OutputMatFilename);
-int ns__findContoursAndFillPoly (char *InputMatFilename, int lowerBound,int UpperBound, Output &OutputMat);
+int ns__findContoursAndFillpoly (char *InputMatFilename, int lowerBound,int UpperBound, FindContours &out);

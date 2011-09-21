@@ -220,14 +220,16 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char *&OutputMatFil
 //			-UpperBound พื้นที่ที่ต้องการ fillPoly ถ้ามากกว่า UpperBound นำไปคัดอีกที
 //			-InputMatFilename
 // @return	
-// 			-OutputMatFilename
+// 			-ns_FindContours out.smallerArea
+//			-ns_FindContours out.biggerArea
 
 
-int ns__findContoursAndFillPoly (struct soap *soap, 
+
+int ns__findContoursAndFillpoly (struct soap *soap, 
 						char *InputMatFilename,
 						int lowerBound,
 						int UpperBound,
-						char *&OutputMatFilename)
+						ns_FindContours &out )
 {
     Mat src;
     if(!readMat(InputMatFilename, src))
@@ -248,33 +250,34 @@ int ns__findContoursAndFillPoly (struct soap *soap,
         int n = (int)contours[i].size();
 		double area = contourArea(Mat(contours[i]));
 		
-		//if(area < lowerBound) //lower bound
-		//{
-			//fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
-		//} else if (area < UpperBound) { //upper bound
-            //fillPoly(outSingle, contours, contours.size(), 1, Scalar(255, 255, 255)); // move to result
-            //fillPoly(src, contours, contours.size(), 1, Scalar(0, 0, 0)); // remove from input
-        //}else{
-			//fillPoly(src, contours, contours.size(), 1, Scalar(255, 255, 255));
-		//}
-		
-		if(area > lowerBound)
+		if(area < lowerBound) //lower bound
 		{
-			fillPoly(outSingle, contours, contours.size(), 1, Scalar(255, 255, 255));
+			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put white area instead the old one)
+			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with black color
 		}
 		
 	}
 
 	contours.clear();
-	
 
     /* generate output file name */
-    *&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    out.smallerArea = (char*)soap_malloc(soap, 60);
+    out.biggerArea = (char*)soap_malloc(soap, 60);
+
     time_t now = time(0);
-    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_MorphOpen", localtime(&now));
+    strftime(out.smallerArea, sizeof(out.smallerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_smallerArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
     
     /* save to bin */
-    if(!saveMat(OutputMatFilename, outSingle))
+    if(!saveMat(out.smallerArea, outSingle))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    if(!saveMat(out.biggerArea, src))
     {
         soap_fault(soap);
         cerr << "error:: save mat to binary file" << endl;
@@ -283,14 +286,120 @@ int ns__findContoursAndFillPoly (struct soap *soap,
     }
     
     
-    
     return SOAP_OK;
 }
 
+// 
+// name: ns__erode
+// @param
+//		- src Source image.
+//		- element Structuring element used for erosion.
+//		- iteration  Number of times erosion is applied.
+// @return
+// 		- OutputMatFilename
 
-int ns__erode(  struct soap *soap, char *InputMatFilename, char *&OutputMatFilename)
+
+int ns__erode(  struct soap *soap, char *src,
+				char *element,
+				int iteration=1,
+				char *&OutputMatFilename)
 { 
-	
+	Mat src;
+    if(!readMat(Input1, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat element;
+    if(!readMat(Input2, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat dst;
+    erode(src1, dst, element, iteration);
+    
+    /* generate output file name */
+    *&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_erode", localtime(&now));
+    
+    if(!imwrite(OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not save to jpg" << endl;
+        soap->fault->faultstring = "error :: can not save to jpg";
+        return SOAP_FAULT;
+    }
+    
+    return SOAP_OK;
+}
+    
+
+}
+
+
+
+// 
+// name: ns__dilate
+// @param
+//		- src Source image.
+//		- element Structuring element used for dilation.
+//		- iteration  Number of times erosion is applied.
+// @return
+// 		- OutputMatFilename
+
+
+int ns__dilate(  struct soap *soap, char *src,
+				char *element,
+				int iteration=1,
+				char *&OutputMatFilename)
+{ 
+	Mat src;
+    if(!readMat(Input1, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat element;
+    if(!readMat(Input2, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat dst;
+    dilate(src1, dst, element, iteration);
+    
+    /* generate output file name */
+    *&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_dilate", localtime(&now));
+    
+    if(!imwrite(OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not save to jpg" << endl;
+        soap->fault->faultstring = "error :: can not save to jpg";
+        return SOAP_FAULT;
+    }
+    
+    return SOAP_OK;
+}
+    
+
+}
 
 
 /* helper function */
