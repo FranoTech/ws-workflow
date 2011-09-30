@@ -33,6 +33,7 @@ static timeval start_time, now;
 //void writeToBin (char *&OutputFilename, Mat& M);
 int saveMat( const char *filename, const Mat& M);
 int readMat( const char *filename, Mat& M);
+int getMatType (const Mat& M);
 
 int main(int argc, char **argv)
 { 
@@ -228,7 +229,6 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char *&OutputMatFil
 int ns__findContoursAndFillpoly (struct soap *soap, 
 						char *InputMatFilename,
 						int lowerBound,
-						int UpperBound,
 						ns_FindContours &out )
 {
     Mat src;
@@ -482,4 +482,23 @@ int readMat( const char *filename, Mat& M)
     return 1;
 } 
 
-
+int getMatType ( const Mat& M)
+{
+	int type = 0;
+    int chan = M.channels();
+    int eSiz = (M.dataend-M.datastart)/(cols*rows*chan);
+    
+    switch (eSiz){
+    case sizeof(char):
+         type = CV_8UC(chan);
+         break;
+    case sizeof(float):
+         type = CV_32FC(chan);
+         break;
+    case sizeof(double):
+         type = CV_64FC(chan);
+         break;
+    }
+    
+    return type;
+}

@@ -9,7 +9,7 @@ using namespace cv;
 int main (int argc, char** argv){
 	
 	Mat src  = imread(argv[1],0);
-	Mat src2 = Mat::zeros(src.rows, src.cols, CV_8UC1);
+	//Mat src2 = Mat::zeros(src.rows, src.cols, CV_8UC1);
 	Mat dst = Mat(src.rows, src.cols, CV_8UC1);
 	//Mat elem = cv::noArray();
 	
@@ -19,7 +19,8 @@ int main (int argc, char** argv){
 		//i++;
 	//}
 	
-	erode(src, dst, src2);
+	//erode(src, dst, src2);
+	erode(src, dst, src);
 	
 	namedWindow("src", CV_WINDOW_AUTOSIZE);
     imshow("src", src);

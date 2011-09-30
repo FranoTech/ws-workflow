@@ -1,0 +1,12 @@
+#!/bin/bash
+#if [$1 = ]; then
+#	echo "no files given"
+#	exit 0
+#fi
+
+rm -rf *.xml
+rm -rf *.nsmap
+rm -rf *.wsdl
+rm -rf soap*
+rm -rf *.xsd
+	
