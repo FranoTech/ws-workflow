@@ -62,7 +62,7 @@
 <service name="calc">
  <documentation>Simple calculator service</documentation>
  <port name="calc" binding="tns:calc">
-  <SOAP:address location="http://localhost/calcserver.cgi"/>
+  <SOAP:address location="http://localhost/cgi-bin/calcserver"/>
  </port>
 </service>
 

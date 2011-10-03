@@ -2,7 +2,7 @@
 //gsoap ns service style:	rpc
 //gsoap ns service encoding:	encoded
 //gsoap ns service namespace:	http://localhost/calc.wsdl
-//gsoap ns service location:	http://localhost/calcserver.cgi
+//gsoap ns service location:	http://localhost/cgi-bin/calcserver
 
 //gsoap ns schema namespace:	urn:calc
 
