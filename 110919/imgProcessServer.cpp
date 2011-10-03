@@ -323,7 +323,7 @@ int ns__erode(  struct soap *soap, char *src,
     }
     
     Mat dst;
-    erode(src1, dst, element, iteration);
+    erode(src, dst, element, iteration);
     
     /* generate output file name */
     *&OutputMatFilename = (char*)soap_malloc(soap, 60);
@@ -340,7 +340,8 @@ int ns__erode(  struct soap *soap, char *src,
     
     return SOAP_OK;
 }
-    
+
+
 
 }
 
