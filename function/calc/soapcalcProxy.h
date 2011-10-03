@@ -16,7 +16,7 @@ class calc
 	const char *endpoint;
 	/// Constructor allocates soap engine context, sets default endpoint URL, and sets namespace mapping table
 	calc()
-	{ soap = soap_new(); endpoint = "http://localhost/calcserver.cgi"; if (soap && !soap->namespaces) { static const struct Namespace namespaces[] = 
+	{ soap = soap_new(); endpoint = "http://localhost/cgi-bin/calcserver"; if (soap && !soap->namespaces) { static const struct Namespace namespaces[] = 
 {
 	{"SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/", "http://www.w3.org/*/soap-envelope", NULL},
 	{"SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/", "http://www.w3.org/*/soap-encoding", NULL},
