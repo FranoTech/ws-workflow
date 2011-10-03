@@ -24,6 +24,7 @@
 #define BASE_DIR "/home/lluu/dir/"
 #define LOGNAME_SIZE 60
 #define int64 long long
+#define none "none"
 
 using namespace std;
 using namespace cv;
@@ -232,7 +233,7 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char *&OutputMatFil
 int ns__findContoursAndFillpoly (struct soap *soap, 
 						char *InputMatFilename,
 						int lowerBound,
-						ns_FindContours &out )
+						ns__FindContours &out )
 {
     Mat src;
     if(!readMat(InputMatFilename, src))
@@ -305,10 +306,10 @@ int ns__findContoursAndFillpoly (struct soap *soap,
 int ns__erode(  struct soap *soap, char *src,
 				char *element,
 				int iteration=1,
-				char *&OutputMatFilename)
+				char **OutputMatFilename=NULL)
 { 
-	Mat src;
-    if(!readMat(Input1, src))
+	Mat matSrc;
+    if(!readMat(src, matSrc))
     {
         soap_fault(soap);
         cerr << "error :: can not read bin file" << endl;
@@ -317,21 +318,22 @@ int ns__erode(  struct soap *soap, char *src,
     }
     
     Mat dst;
-    Mat element;
+    Mat matElement;
     
-    if(!readMat(Input2, src))
+    if(!readMat(element, matElement))
     {
-        erode(src, dst, Mat(), iteration);
+        matElement.release();
+        erode(matSrc, dst, Mat(), Point(-1, -1), iteration);
     } else {
-        erode(src, dst, element, iteration);
+        erode(matSrc, dst, matElement, Point(-1, -1), iteration);
     }
     
     /* generate output file name */
-    *&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_erode", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_erode", localtime(&now));
     
-    if(!imwrite(OutputMatFilename, dst))
+    if(!imwrite(*OutputMatFilename, dst))
     {
         soap_fault(soap);
         cerr << "error :: can not save to jpg" << endl;
@@ -355,44 +357,45 @@ int ns__erode(  struct soap *soap, char *src,
 // 		- OutputMatFilename
 
 
-int ns__dilate(  struct soap *soap, char *src,
-				char *element,
-				int iteration=1,
-				char *&OutputMatFilename)
-{ 
-	Mat src;
-    if(!readMat(Input1, src))
-    {
-        soap_fault(soap);
-        cerr << "error :: can not read bin file" << endl;
-        soap->fault->faultstring = "error :: can not read bin file";
-        return SOAP_FAULT;
-    }
+//int ns__dilate(  struct soap *soap, char *src,
+				//char *element,
+				//int iteration=1,
+				//char *&OutputMatFilename=none)
+//{ 
+	//Mat matSrc;
+    //if(!readMat(src, matSrc))
+    //{
+        //soap_fault(soap);
+        //cerr << "error :: can not read bin file" << endl;
+        //soap->fault->faultstring = "error :: can not read bin file";
+        //return SOAP_FAULT;
+    //}
     
-    Mat element;
-    if(!readMat(Input2, src))
-    {
-        element.release();
-        dilate(src, dst, Mat(), iteration);
-    } else {
-        dilate(src, dst, element, iteration);
-    }
+    //Mat dst;
+    //Mat matElement;
+    //if(!readMat(element, matElement))
+    //{
+        //matElement.release();
+        //dilate(matSrc, dst, Mat(), Point(-1,-1), iteration);
+    //} else {
+        //dilate(matSrc, dst, matElement, iteration);
+    //}
     
-    /* generate output file name */
-    *&OutputMatFilename = (char*)soap_malloc(soap, 60);
-    time_t now = time(0);
-    strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_dilate", localtime(&now));
+    ///* generate output file name */
+    //*&OutputMatFilename = (char*)soap_malloc(soap, 60);
+    //time_t now = time(0);
+    //strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_dilate", localtime(&now));
     
-    if(!imwrite(OutputMatFilename, dst))
-    {
-        soap_fault(soap);
-        cerr << "error :: can not save to jpg" << endl;
-        soap->fault->faultstring = "error :: can not save to jpg";
-        return SOAP_FAULT;
-    }
+    //if(!imwrite(OutputMatFilename, dst))
+    //{
+        //soap_fault(soap);
+        //cerr << "error :: can not save to jpg" << endl;
+        //soap->fault->faultstring = "error :: can not save to jpg";
+        //return SOAP_FAULT;
+    //}
     
-    return SOAP_OK;
-}
+    //return SOAP_OK;
+//}
 
 
 /* helper function */
@@ -479,7 +482,7 @@ int getMatType ( const Mat& M)
 {
 	int type = 0;
     int chan = M.channels();
-    int eSiz = (M.dataend-M.datastart)/(cols*rows*chan);
+    int eSiz = (M.dataend-M.datastart)/(M.cols*M.rows*chan);
     
     switch (eSiz){
     case sizeof(char):

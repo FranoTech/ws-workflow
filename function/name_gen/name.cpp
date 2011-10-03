@@ -82,3 +82,24 @@ int ns__genName3(struct soap *soap, char *InputFilename, ns__Output &out)
     }
     return SOAP_OK;
 }
+
+// not worked
+//int ns__genName4(struct soap *soap, char *InputFilename, char *OutputFilename)
+//{ 
+    ////OutputFilename = new char[50];
+    ////*a = (char*)soap_malloc(soap, 11); 
+    //OutputFilename = (char*)soap_malloc(soap, 60); 
+    //if(InputFilename){
+        //cerr<<"1"<<endl;
+        //time_t now = time(0);
+        //strftime(OutputFilename, sizeof(OutputFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biThreshold.jpg", localtime(&now));
+        //cerr<<*OutputFilename<<endl;
+    //}else{ 
+        //cerr<<"File Name require"<<endl;
+        //soap_fault(soap);
+        //soap->fault->faultstring = "Name required";
+        //return SOAP_FAULT;
+    //}
+    //return SOAP_OK;
+//}
+
