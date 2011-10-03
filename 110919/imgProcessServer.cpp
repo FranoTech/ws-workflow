@@ -184,6 +184,10 @@ int ns__morphOpen(  struct soap *soap, char *InputMatFilename, char *&OutputMatF
     
 }
 
+// save mat data to jpg file
+// name: MatToJPG 
+// @param char *InputMatFilename
+// @return char *&OutputMatFilename
 
 
 int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char *&OutputMatFilename)
@@ -218,7 +222,6 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char *&OutputMatFil
 // name: findContoursAndFillPoly
 // @param	
 //			-lowerbound พื้นที่น้อยสุดที่ใช้ fillPoly น้อยกว่านี้จะถูก remove
-//			-UpperBound พื้นที่ที่ต้องการ fillPoly ถ้ามากกว่า UpperBound นำไปคัดอีกที
 //			-InputMatFilename
 // @return	
 // 			-ns_FindContours out.smallerArea
@@ -313,17 +316,15 @@ int ns__erode(  struct soap *soap, char *src,
         return SOAP_FAULT;
     }
     
+    Mat dst;
     Mat element;
+    
     if(!readMat(Input2, src))
     {
-        soap_fault(soap);
-        cerr << "error :: can not read bin file" << endl;
-        soap->fault->faultstring = "error :: can not read bin file";
-        return SOAP_FAULT;
+        erode(src, dst, Mat(), iteration);
+    } else {
+        erode(src, dst, element, iteration);
     }
-    
-    Mat dst;
-    erode(src, dst, element, iteration);
     
     /* generate output file name */
     *&OutputMatFilename = (char*)soap_malloc(soap, 60);
@@ -341,9 +342,6 @@ int ns__erode(  struct soap *soap, char *src,
     return SOAP_OK;
 }
 
-
-
-}
 
 
 
@@ -374,14 +372,11 @@ int ns__dilate(  struct soap *soap, char *src,
     Mat element;
     if(!readMat(Input2, src))
     {
-        soap_fault(soap);
-        cerr << "error :: can not read bin file" << endl;
-        soap->fault->faultstring = "error :: can not read bin file";
-        return SOAP_FAULT;
+        element.release();
+        dilate(src, dst, Mat(), iteration);
+    } else {
+        dilate(src, dst, element, iteration);
     }
-    
-    Mat dst;
-    dilate(src1, dst, element, iteration);
     
     /* generate output file name */
     *&OutputMatFilename = (char*)soap_malloc(soap, 60);
@@ -397,9 +392,6 @@ int ns__dilate(  struct soap *soap, char *src,
     }
     
     return SOAP_OK;
-}
-    
-
 }
 
 

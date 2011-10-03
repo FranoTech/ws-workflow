@@ -1,0 +1,2 @@
+#!/bin/bash
+g++ -I/usr/include/opencv -lcxcore -lhighgui -lm -o $1 $1.cpp
