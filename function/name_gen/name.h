@@ -15,4 +15,4 @@ class ns__Output
 int ns__genName(char *InputFilename, char *&OutputFilename);
 int ns__genName2(char *InputFilename, char **OutputFilename);
 int ns__genName3(char *InputFilename, ns__Output &out);
-
+//int ns__genName4(struct soap *soap, char *InputFilename, char *OutputFilename)
