@@ -20,7 +20,7 @@ int main (int argc, char** argv){
 	//}
 	
 	//erode(src, dst, src2);
-	erode(src, dst, src);
+	erode(src, dst, Mat());
 	
 	namedWindow("src", CV_WINDOW_AUTOSIZE);
     imshow("src", src);

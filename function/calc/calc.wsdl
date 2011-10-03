@@ -30,12 +30,12 @@
 </types>
 
 <message name="addRequest">
- <part name="a" type="xsd:double"/><!-- ns__add::a -->
- <part name="b" type="xsd:double"/><!-- ns__add::b -->
+ <part name="a" type="xsd:double"/>
+ <part name="b" type="xsd:double"/>
 </message>
 
 <message name="addResponse">
- <part name="result" type="xsd:double"/><!-- ns__add::result -->
+ <part name="result" type="xsd:double"/>
 </message>
 
 <portType name="calcPortType">
