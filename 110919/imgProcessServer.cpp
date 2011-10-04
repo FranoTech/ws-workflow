@@ -228,8 +228,6 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char *&OutputMatFil
 // 			-ns_FindContours out.smallerArea
 //			-ns_FindContours out.biggerArea
 
-
-
 int ns__findContoursAndFillpoly (struct soap *soap, 
 						char *InputMatFilename,
 						int lowerBound,
@@ -322,9 +320,11 @@ int ns__erode(  struct soap *soap, char *src,
     
     if(!readMat(element, matElement))
     {
+		cerr<<"erode: use default element"<<endl;
         matElement.release();
         erode(matSrc, dst, Mat(), Point(-1, -1), iteration);
     } else {
+		cerr<<"erode: use defined element"<<endl;
         erode(matSrc, dst, matElement, Point(-1, -1), iteration);
     }
     
@@ -333,17 +333,36 @@ int ns__erode(  struct soap *soap, char *src,
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_erode", localtime(&now));
     
-    if(!imwrite(*OutputMatFilename, dst))
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, matSrc))
     {
         soap_fault(soap);
-        cerr << "error :: can not save to jpg" << endl;
-        soap->fault->faultstring = "error :: can not save to jpg";
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
     
     return SOAP_OK;
 }
 
+
+int ns__viewResult( struct soap *soap, char *src, struct ns__signalResponse *out )
+{ 
+	Mat matSrc;
+    if(!readMat(src, matSrc))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    namedWindow("result", CV_WINDOW_AUTOSIZE);
+    imshow("result", matSrc);
+    waitKey(0);
+    
+    return SOAP_OK;
+}
 
 
 

@@ -18,5 +18,5 @@ int ns__binaryThreshold(char *InputMatFilename, double thresholdValue, double ma
 int ns__morphOpen(char *InpuMattFilename, char *&OutputMatFilename);
 int ns__MatToJPG (char *InputMatFilename, char *&OutputMatFilename);
 int ns__findContoursAndFillpoly (char *InputMatFilename, int lowerBound, ns__FindContours &out);
-int ns__erode(char *src, char *element, int iteration=1, char **OutputMatFilename);
-
+int ns__erode(char *src, char *element, int iteration=1, char **OutputMatFilename=NULL);
+int ns__viewResult( char *src, struct ns__signalResponse { } *out );

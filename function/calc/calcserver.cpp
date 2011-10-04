@@ -33,3 +33,16 @@ int ns__add(struct soap *soap, double a=10, double b=12, double *result=0)
 	*result = a + b;
 	return SOAP_OK;
 } 
+
+int ns__test(struct soap *soap, char* s=NULL, int i=10, char** t=NULL){
+	if( *s != NULL )
+		cerr<<"s ="<<*s<<endl;
+	else
+		cerr<<"s = NULL"<<endl;
+	
+	cerr<<"i = "<<i<<endl;
+	*t = (char*)soap_malloc(soap, 20);
+	*t = "Hello";
+	return SOAP_OK;
+}
+	

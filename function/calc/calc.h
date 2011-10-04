@@ -8,4 +8,5 @@
 
 //gsoap ns service method-documentation: add Sums two values
 int ns__add(double a=10, double b=12, double *result=0);
+int ns__test(char* s, int i, char** t);
 
