@@ -346,26 +346,6 @@ int ns__erode(  struct soap *soap, char *src,
 }
 
 
-int ns__viewResult( struct soap *soap, char *src, struct ns__signalResponse *out )
-{ 
-	Mat matSrc;
-    if(!readMat(src, matSrc))
-    {
-        soap_fault(soap);
-        cerr << "error :: can not read bin file" << endl;
-        soap->fault->faultstring = "error :: can not read bin file";
-        return SOAP_FAULT;
-    }
-    
-    namedWindow("result", CV_WINDOW_AUTOSIZE);
-    imshow("result", matSrc);
-    waitKey(0);
-    
-    return SOAP_OK;
-}
-
-
-
 // 
 // name: ns__dilate
 // @param
@@ -376,45 +356,228 @@ int ns__viewResult( struct soap *soap, char *src, struct ns__signalResponse *out
 // 		- OutputMatFilename
 
 
-//int ns__dilate(  struct soap *soap, char *src,
-				//char *element,
-				//int iteration=1,
-				//char *&OutputMatFilename=none)
-//{ 
-	//Mat matSrc;
-    //if(!readMat(src, matSrc))
-    //{
-        //soap_fault(soap);
-        //cerr << "error :: can not read bin file" << endl;
-        //soap->fault->faultstring = "error :: can not read bin file";
-        //return SOAP_FAULT;
-    //}
+int ns__dilate(  struct soap *soap, char *src,
+				char *element,
+				int iteration=1,
+				char **OutputMatFilename=NULL)
+{ 
+	Mat matSrc;
+    if(!readMat(src, matSrc))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
     
-    //Mat dst;
-    //Mat matElement;
-    //if(!readMat(element, matElement))
-    //{
-        //matElement.release();
-        //dilate(matSrc, dst, Mat(), Point(-1,-1), iteration);
-    //} else {
-        //dilate(matSrc, dst, matElement, iteration);
-    //}
+    Mat dst;
+    Mat matElement;
     
-    ///* generate output file name */
-    //*&OutputMatFilename = (char*)soap_malloc(soap, 60);
-    //time_t now = time(0);
-    //strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_dilate", localtime(&now));
+    if(!readMat(element, matElement))
+    {
+		cerr<<"erode: use default element"<<endl;
+        matElement.release();
+        dilate(matSrc, dst, Mat(), Point(-1, -1), iteration);
+    } else {
+		cerr<<"erode: use defined element"<<endl;
+        dilate(matSrc, dst, matElement, Point(-1, -1), iteration);
+    }
     
-    //if(!imwrite(OutputMatFilename, dst))
-    //{
-        //soap_fault(soap);
-        //cerr << "error :: can not save to jpg" << endl;
-        //soap->fault->faultstring = "error :: can not save to jpg";
-        //return SOAP_FAULT;
-    //}
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_dilate", localtime(&now));
     
-    //return SOAP_OK;
-//}
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, matSrc))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    return SOAP_OK;
+}
+
+
+
+int ns__Or(  struct soap *soap, char *src1,
+				char *src2,
+				char **OutputMatFilename)
+{ 
+	Mat matSrc1;
+    if(!readMat(src1, matSrc1))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat dst;
+    Mat matSrc2;
+    
+    if(!readMat(src2, matSrc2))
+    {
+		soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+    }
+    
+    bitwise_or(matSrc1, matSrc2, dst);
+    
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_or", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    return SOAP_OK;
+}
+
+
+int ns__removeSmallCell(struct soap *soap, 
+						char *inputMatFilename,
+						ns__RemoveSmallCell &out)
+{ 
+	Mat src;
+    if(!readMat(inputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
+	vector<vector<Point> > contours;
+    findContours(	src, contours, CV_RETR_EXTERNAL, 
+					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    for(size_t i = 0; i< contours.size(); i++)
+    {
+		const Point* p = &contours[i][0];
+        int n = (int)contours[i].size();
+		double area = contourArea(Mat(contours[i]));
+		
+		if(area < 1500.0) //lower bound
+		{
+			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put white area instead the old one)
+			
+		} else if (area < 7500.0) {
+			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with black color
+			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
+			
+		} else {
+			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
+			
+		}
+	}
+
+	contours.clear();
+	
+	/* generate output file name */
+    out.keepArea = (char*)soap_malloc(soap, 60);
+    out.biggerArea = (char*)soap_malloc(soap, 60);
+
+    time_t now = time(0);
+    strftime(out.keepedArea, sizeof(out.keepedArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(out.keepedArea, outSingle))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    if(!saveMat(out.biggerArea, src))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
+
+
+
+int ns__scanningCell(struct soap *soap, 
+						char *inputMatFilename,
+						ns__RemoveSmallCell &out)
+{ 
+	Mat src;
+    if(!readMat(inputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "error :: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    //Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
+	vector<vector<Point> > contours;
+    findContours(	src, contours, CV_RETR_EXTERNAL, 
+					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    for(size_t i = 0; i< contours.size(); i++)
+    {
+		const Point* p = &contours[i][0];
+        int n = (int)contours[i].size();
+		double area = contourArea(Mat(contours[i]));
+		
+		if(area < 1500.0) //lower bound
+		{
+			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put white area instead the old one)
+			
+		} else if (area < 7500.0) {
+			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with black color
+			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
+			
+		} else {
+			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
+			
+		}
+	}
+
+	contours.clear();
+	
+	/* generate output file name */
+    out.keepArea = (char*)soap_malloc(soap, 60);
+    out.biggerArea = (char*)soap_malloc(soap, 60);
+
+    time_t now = time(0);
+    strftime(out.keepedArea, sizeof(out.keepedArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(out.keepedArea, outSingle))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    if(!saveMat(out.biggerArea, src))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    return SOAP_OK;
+}
 
 
 /* helper function */
@@ -517,3 +680,23 @@ int getMatType ( const Mat& M)
     
     return type;
 }
+
+
+// not worked!!
+//int ns__viewResult( struct soap *soap, char *src, struct ns__signalResponse *out )
+//{ 
+	//Mat matSrc;
+    //if(!readMat(src, matSrc))
+    //{
+        //soap_fault(soap);
+        //cerr << "error :: can not read bin file" << endl;
+        //soap->fault->faultstring = "error :: can not read bin file";
+        //return SOAP_FAULT;
+    //}
+    
+    //namedWindow("result", CV_WINDOW_AUTOSIZE);
+    //imshow("result", matSrc);
+    //waitKey(0);
+    
+    //return SOAP_OK;
+//}
