@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="imgProcess"
+ targetNamespace="http://localhost/imgProcess.wsdl"
+ xmlns:tns="http://localhost/imgProcess.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:img"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:img"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:img"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="loadMatRequest">
+ <part name="InputImageFilename" type="xsd:string"/><!-- ns__loadMat::InputImageFilename -->
+ <part name="loadparam" type="xsd:int"/><!-- ns__loadMat::loadparam -->
+</message>
+
+<message name="loadMatResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__loadMat::OutputMatFilename -->
+</message>
+
+<message name="binaryThresholdRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__binaryThreshold::InputMatFilename -->
+ <part name="thresholdValue" type="xsd:double"/><!-- ns__binaryThreshold::thresholdValue -->
+ <part name="maxValue" type="xsd:double"/><!-- ns__binaryThreshold::maxValue -->
+</message>
+
+<message name="binaryThresholdResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__binaryThreshold::OutputMatFilename -->
+</message>
+
+<message name="morphOpenRequest">
+ <part name="InpuMattFilename" type="xsd:string"/><!-- ns__morphOpen::InpuMattFilename -->
+</message>
+
+<message name="morphOpenResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__morphOpen::OutputMatFilename -->
+</message>
+
+<message name="MatToJPGRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__MatToJPG::InputMatFilename -->
+</message>
+
+<message name="MatToJPGResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__MatToJPG::OutputMatFilename -->
+</message>
+
+<message name="findContoursAndFillpoly">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__findContoursAndFillpoly::InputMatFilename -->
+ <part name="lowerBound" type="xsd:int"/><!-- ns__findContoursAndFillpoly::lowerBound -->
+</message>
+
+<message name="FindContours">
+ <part name="smallerArea" type="xsd:string"/><!-- ns__findContoursAndFillpoly::smallerArea -->
+ <part name="biggerArea" type="xsd:string"/><!-- ns__findContoursAndFillpoly::biggerArea -->
+</message>
+
+<message name="erodeRequest">
+ <part name="src" type="xsd:string"/><!-- ns__erode::src -->
+ <part name="element" type="xsd:string"/><!-- ns__erode::element -->
+ <part name="iteration" type="xsd:int"/><!-- ns__erode::iteration -->
+</message>
+
+<message name="erodeResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__erode::OutputMatFilename -->
+</message>
+
+<message name="viewResult">
+ <part name="src" type="xsd:string"/><!-- ns__viewResult::src -->
+</message>
+
+<message name="signalResponse">
+</message>
+
+<portType name="imgProcessPortType">
+ <operation name="loadMat">
+  <documentation>Service definition of function ns__loadMat</documentation>
+  <input message="tns:loadMatRequest"/>
+  <output message="tns:loadMatResponse"/>
+ </operation>
+ <operation name="binaryThreshold">
+  <documentation>Service definition of function ns__binaryThreshold</documentation>
+  <input message="tns:binaryThresholdRequest"/>
+  <output message="tns:binaryThresholdResponse"/>
+ </operation>
+ <operation name="morphOpen">
+  <documentation>Service definition of function ns__morphOpen</documentation>
+  <input message="tns:morphOpenRequest"/>
+  <output message="tns:morphOpenResponse"/>
+ </operation>
+ <operation name="MatToJPG">
+  <documentation>Service definition of function ns__MatToJPG</documentation>
+  <input message="tns:MatToJPGRequest"/>
+  <output message="tns:MatToJPGResponse"/>
+ </operation>
+ <operation name="findContoursAndFillpoly">
+  <documentation>Service definition of function ns__findContoursAndFillpoly</documentation>
+  <input message="tns:findContoursAndFillpoly"/>
+  <output message="tns:FindContours"/>
+ </operation>
+ <operation name="erode">
+  <documentation>Service definition of function ns__erode</documentation>
+  <input message="tns:erodeRequest"/>
+  <output message="tns:erodeResponse"/>
+ </operation>
+ <operation name="viewResult">
+  <documentation>Service definition of function ns__viewResult</documentation>
+  <input message="tns:viewResult"/>
+  <output message="tns:signalResponse"/>
+ </operation>
+</portType>
+
+<binding name="imgProcess" type="tns:imgProcessPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="loadMat">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="binaryThreshold">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="morphOpen">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="MatToJPG">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="findContoursAndFillpoly">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="erode">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="viewResult">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="imgProcess">
+ <documentation>gSOAP 2.8.2 generated service definition</documentation>
+ <port name="imgProcess" binding="tns:imgProcess">
+  <SOAP:address location="http://localhost/cgi-bin/imgProcessServer"/>
+ </port>
+</service>
+
+</definitions>
