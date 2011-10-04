@@ -13,6 +13,12 @@ class ns__FindContours
 	char *biggerArea;
 };
 
+class ns__RemoveSmallCell
+{ 
+	char *keepedArea;
+	char *biggerArea;
+};
+
 int ns__loadMat (char *InputImageFilename, int loadparam, char *&OutputMatFilename);
 int ns__binaryThreshold(char *InputMatFilename, double thresholdValue, double maxValue, char *&OutputMatFilename);
 int ns__morphOpen(char *InpuMattFilename, char *&OutputMatFilename);
