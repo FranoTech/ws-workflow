@@ -58,12 +58,12 @@ int main (int argc, char** argv){
         int npts = cur->total;
         CvPoint *p = new CvPoint[npts];
         cvCvtSeqToArray(cur, p);
-        if (area < 200.0) { // remove small area
+        if (area < 1500.0) { // remove small area
             cvFillPoly(&input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
             cvFillPoly(out_single, &p, &npts, 1, cvScalar(255.0)); // move to single
-        //else if (area < 1500.0) {
-            //cvFillPoly(out_single, &p, &npts, 1, cvScalar(255.0)); // move to single
-            //cvFillPoly(&input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
+        } else if (area < 7500.0) {
+            cvFillPoly(out_single, &p, &npts, 1, cvScalar(255.0)); // move to single
+            cvFillPoly(&input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
         }else
             cvFillPoly(&input_morph, &p, &npts, 1, cvScalar(255.0)); // fill hole
         delete[] p;
