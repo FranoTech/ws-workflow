@@ -16,34 +16,39 @@ int main (int argc, char** argv){
     Mat result = Mat::zeros(src.rows,src.cols, CV_32FC1);
     threshold(src, gray, 127.0, 255.0, CV_THRESH_BINARY);
     
+    namedWindow("result", CV_WINDOW_AUTOSIZE);
+    imshow("result", gray);
+    waitKey(0);
+    
     vector<vector<Point> > contours;
     findContours(	gray, contours, CV_RETR_EXTERNAL, 
-					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+					CV_CHAIN_APPROX_SIMPLE);
     for(size_t i = 0; i< contours.size(); i++)
     {
 		const Point* p = &contours[i][0];
         int n = (int)contours[i].size();
 		double area = contourArea(Mat(contours[i]));
+        cout<<area<<" ";
 		
-		if(area < 300.0) //lower bound
-		{
-			fillPoly( gray, &p, &n, 1, Scalar(255,255,255));
-		} else if (area < 1500.0) {
-            fillPoly( result, &p, &n, 1, Scalar(255,255,255)); // move to result
-            fillPoly( gray, &p, &n, 1, Scalar(255,255,255)); // remove from input
-        }else{
-			fillPoly( gray, &p, &n, 1, Scalar(255,255,255));
-		}
+		//if(area < 300.0) //lower bound
+		//{
+			//fillPoly( gray, &p, &n, 1, Scalar(255,255,255));
+		//} else if (area < 1500.0) {
+            //fillPoly( result, &p, &n, 1, Scalar(255,255,255)); // move to result
+            //fillPoly( gray, &p, &n, 1, Scalar(255,255,255)); // remove from input
+        //}else{
+			//fillPoly( gray, &p, &n, 1, Scalar(255,255,255));
+		//}
 	}
 	
-    
+    cout<<endl;
     namedWindow("result", CV_WINDOW_AUTOSIZE);
-    imshow("result", src);
+    imshow("result", gray);
     waitKey(0);
     
-    namedWindow("result", CV_WINDOW_AUTOSIZE);
-    imshow("result", result);
-    waitKey(0);
+    //namedWindow("result", CV_WINDOW_AUTOSIZE);
+    //imshow("result", result);
+    //waitKey(0);
     
     contours.clear();
     src.release();
