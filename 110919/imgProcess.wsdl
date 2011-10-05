@@ -30,65 +30,86 @@
 </types>
 
 <message name="loadMatRequest">
- <part name="InputImageFilename" type="xsd:string"/><!-- ns__loadMat::InputImageFilename -->
- <part name="loadparam" type="xsd:int"/><!-- ns__loadMat::loadparam -->
+ <part name="InputImageFilename" type="xsd:string"/>
+ <part name="loadparam" type="xsd:int"/>
 </message>
 
 <message name="loadMatResponse">
- <part name="OutputMatFilename" type="xsd:string"/><!-- ns__loadMat::OutputMatFilename -->
+ <part name="OutputMatFilename" type="xsd:string"/>
 </message>
 
 <message name="binaryThresholdRequest">
- <part name="InputMatFilename" type="xsd:string"/><!-- ns__binaryThreshold::InputMatFilename -->
- <part name="thresholdValue" type="xsd:double"/><!-- ns__binaryThreshold::thresholdValue -->
- <part name="maxValue" type="xsd:double"/><!-- ns__binaryThreshold::maxValue -->
+ <part name="InputMatFilename" type="xsd:string"/>
+ <part name="thresholdValue" type="xsd:double"/>
+ <part name="maxValue" type="xsd:double"/>
 </message>
 
 <message name="binaryThresholdResponse">
- <part name="OutputMatFilename" type="xsd:string"/><!-- ns__binaryThreshold::OutputMatFilename -->
+ <part name="OutputMatFilename" type="xsd:string"/>
 </message>
 
 <message name="morphOpenRequest">
- <part name="InpuMattFilename" type="xsd:string"/><!-- ns__morphOpen::InpuMattFilename -->
+ <part name="InpuMattFilename" type="xsd:string"/>
 </message>
 
 <message name="morphOpenResponse">
- <part name="OutputMatFilename" type="xsd:string"/><!-- ns__morphOpen::OutputMatFilename -->
+ <part name="OutputMatFilename" type="xsd:string"/>
 </message>
 
 <message name="MatToJPGRequest">
- <part name="InputMatFilename" type="xsd:string"/><!-- ns__MatToJPG::InputMatFilename -->
+ <part name="InputMatFilename" type="xsd:string"/>
 </message>
 
 <message name="MatToJPGResponse">
- <part name="OutputMatFilename" type="xsd:string"/><!-- ns__MatToJPG::OutputMatFilename -->
+ <part name="OutputMatFilename" type="xsd:string"/>
 </message>
 
 <message name="findContoursAndFillpoly">
- <part name="InputMatFilename" type="xsd:string"/><!-- ns__findContoursAndFillpoly::InputMatFilename -->
- <part name="lowerBound" type="xsd:int"/><!-- ns__findContoursAndFillpoly::lowerBound -->
+ <part name="InputMatFilename" type="xsd:string"/>
+ <part name="lowerBound" type="xsd:int"/>
 </message>
 
 <message name="FindContours">
- <part name="smallerArea" type="xsd:string"/><!-- ns__findContoursAndFillpoly::smallerArea -->
- <part name="biggerArea" type="xsd:string"/><!-- ns__findContoursAndFillpoly::biggerArea -->
+ <part name="smallerArea" type="xsd:string"/>
+ <part name="biggerArea" type="xsd:string"/>
 </message>
 
 <message name="erodeRequest">
- <part name="src" type="xsd:string"/><!-- ns__erode::src -->
- <part name="element" type="xsd:string"/><!-- ns__erode::element -->
- <part name="iteration" type="xsd:int"/><!-- ns__erode::iteration -->
+ <part name="src" type="xsd:string"/>
+ <part name="element" type="xsd:string"/>
+ <part name="iteration" type="xsd:int"/>
 </message>
 
 <message name="erodeResponse">
- <part name="OutputMatFilename" type="xsd:string"/><!-- ns__erode::OutputMatFilename -->
+ <part name="OutputMatFilename" type="xsd:string"/>
 </message>
 
-<message name="viewResult">
- <part name="src" type="xsd:string"/><!-- ns__viewResult::src -->
+<message name="dilateRequest">
+ <part name="src" type="xsd:string"/>
+ <part name="element" type="xsd:string"/>
+ <part name="iteration" type="xsd:int"/>
 </message>
 
-<message name="signalResponse">
+<message name="dilateResponse">
+ <part name="OutputMatFilename" type="xsd:string"/>
+</message>
+
+<message name="OrRequest">
+ <part name="src1" type="xsd:string"/>
+ <part name="src2" type="xsd:string"/>
+</message>
+
+<message name="OrResponse">
+ <part name="OutputMatFilename" type="xsd:string"/>
+</message>
+
+<message name="removeSmallCell">
+ <part name="inputMatFilename" type="xsd:string"/>
+</message>
+
+<message name="RemoveSmallCell">
+ <part name="keepedArea" type="xsd:string"/>
+ <part name="biggerArea" type="xsd:string"/>
 </message>
 
 <portType name="imgProcessPortType">
@@ -122,10 +143,20 @@
   <input message="tns:erodeRequest"/>
   <output message="tns:erodeResponse"/>
  </operation>
- <operation name="viewResult">
-  <documentation>Service definition of function ns__viewResult</documentation>
-  <input message="tns:viewResult"/>
-  <output message="tns:signalResponse"/>
+ <operation name="dilate">
+  <documentation>Service definition of function ns__dilate</documentation>
+  <input message="tns:dilateRequest"/>
+  <output message="tns:dilateResponse"/>
+ </operation>
+ <operation name="Or">
+  <documentation>Service definition of function ns__Or</documentation>
+  <input message="tns:OrRequest"/>
+  <output message="tns:OrResponse"/>
+ </operation>
+ <operation name="removeSmallCell">
+  <documentation>Service definition of function ns__removeSmallCell</documentation>
+  <input message="tns:removeSmallCell"/>
+  <output message="tns:RemoveSmallCell"/>
  </operation>
 </portType>
 
@@ -185,7 +216,25 @@
      <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
   </output>
  </operation>
- <operation name="viewResult">
+ <operation name="dilate">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Or">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="removeSmallCell">
   <SOAP:operation style="rpc" soapAction=""/>
   <input>
      <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
@@ -197,7 +246,7 @@
 </binding>
 
 <service name="imgProcess">
- <documentation>gSOAP 2.8.2 generated service definition</documentation>
+ <documentation>gSOAP 2.7.17 generated service definition</documentation>
  <port name="imgProcess" binding="tns:imgProcess">
   <SOAP:address location="http://localhost/cgi-bin/imgProcessServer"/>
  </port>

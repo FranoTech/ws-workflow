@@ -485,75 +485,7 @@ int ns__removeSmallCell(struct soap *soap,
 	contours.clear();
 	
 	/* generate output file name */
-    out.keepArea = (char*)soap_malloc(soap, 60);
-    out.biggerArea = (char*)soap_malloc(soap, 60);
-
-    time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
-    
-    /* save to bin */
-    if(!saveMat(out.keepedArea, outSingle))
-    {
-        soap_fault(soap);
-        cerr << "error:: save mat to binary file" << endl;
-        soap->fault->faultstring = "error:: save mat to binary file";
-        return SOAP_FAULT;
-    }
-    
-    if(!saveMat(out.biggerArea, src))
-    {
-        soap_fault(soap);
-        cerr << "error:: save mat to binary file" << endl;
-        soap->fault->faultstring = "error:: save mat to binary file";
-        return SOAP_FAULT;
-    }
-    return SOAP_OK;
-}
-
-
-
-int ns__scanningCell(struct soap *soap, 
-						char *inputMatFilename,
-						ns__RemoveSmallCell &out)
-{ 
-	Mat src;
-    if(!readMat(inputMatFilename, src))
-    {
-        soap_fault(soap);
-        cerr << "error :: can not read bin file" << endl;
-        soap->fault->faultstring = "error :: can not read bin file";
-        return SOAP_FAULT;
-    }
-    
-    //Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
-	vector<vector<Point> > contours;
-    findContours(	src, contours, CV_RETR_EXTERNAL, 
-					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-    for(size_t i = 0; i< contours.size(); i++)
-    {
-		const Point* p = &contours[i][0];
-        int n = (int)contours[i].size();
-		double area = contourArea(Mat(contours[i]));
-		
-		if(area < 1500.0) //lower bound
-		{
-			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put white area instead the old one)
-			
-		} else if (area < 7500.0) {
-			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with black color
-			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
-			
-		} else {
-			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
-			
-		}
-	}
-
-	contours.clear();
-	
-	/* generate output file name */
-    out.keepArea = (char*)soap_malloc(soap, 60);
+    out.keepedArea = (char*)soap_malloc(soap, 60);
     out.biggerArea = (char*)soap_malloc(soap, 60);
 
     time_t now = time(0);
@@ -698,5 +630,71 @@ int getMatType ( const Mat& M)
     //imshow("result", matSrc);
     //waitKey(0);
     
+    //return SOAP_OK;
+//}
+
+//int ns__scanningCell(struct soap *soap, 
+						//char *inputMatFilename,
+						//ns__RemoveSmallCell &out)
+//{ 
+	//Mat src;
+    //if(!readMat(inputMatFilename, src))
+    //{
+        //soap_fault(soap);
+        //cerr << "error :: can not read bin file" << endl;
+        //soap->fault->faultstring = "error :: can not read bin file";
+        //return SOAP_FAULT;
+    //}
+    
+    ////Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
+	//vector<vector<Point> > contours;
+    //findContours(	src, contours, CV_RETR_EXTERNAL, 
+					//CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    //for(size_t i = 0; i< contours.size(); i++)
+    //{
+		//const Point* p = &contours[i][0];
+        //int n = (int)contours[i].size();
+		//double area = contourArea(Mat(contours[i]));
+		
+		//if(area < 1500.0) //lower bound
+		//{
+			//fillPoly( src, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put white area instead the old one)
+			
+		//} else if (area < 7500.0) {
+			//fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with black color
+			//fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
+			
+		//} else {
+			//fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
+			
+		//}
+	//}
+
+	//contours.clear();
+	
+	///* generate output file name */
+    //out.keepArea = (char*)soap_malloc(soap, 60);
+    //out.biggerArea = (char*)soap_malloc(soap, 60);
+
+    //time_t now = time(0);
+    //strftime(out.keepedArea, sizeof(out.keepedArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    //strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    
+    ///* save to bin */
+    //if(!saveMat(out.keepedArea, outSingle))
+    //{
+        //soap_fault(soap);
+        //cerr << "error:: save mat to binary file" << endl;
+        //soap->fault->faultstring = "error:: save mat to binary file";
+        //return SOAP_FAULT;
+    //}
+    
+    //if(!saveMat(out.biggerArea, src))
+    //{
+        //soap_fault(soap);
+        //cerr << "error:: save mat to binary file" << endl;
+        //soap->fault->faultstring = "error:: save mat to binary file";
+        //return SOAP_FAULT;
+    //}
     //return SOAP_OK;
 //}
