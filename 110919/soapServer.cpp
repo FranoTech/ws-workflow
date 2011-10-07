@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.17 2011-10-05 03:11:47 GMT")
+SOAP_SOURCE_STAMP("@(#) soapServer.cpp ver 2.7.17 2011-10-07 08:25:09 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve(struct soap *soap)
@@ -96,6 +96,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_request(struct soap *soap)
 		return soap_serve_ns__Or(soap);
 	if (!soap_match_tag(soap, soap->tag, "ns:removeSmallCell"))
 		return soap_serve_ns__removeSmallCell(soap);
+	if (!soap_match_tag(soap, soap->tag, "ns:scanningCell"))
+		return soap_serve_ns__scanningCell(soap);
 	return soap->error = SOAP_NO_METHOD;
 }
 #endif
@@ -471,6 +473,50 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__removeSmallCell(struct soap *soap)
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || out.soap_put(soap, "ns:RemoveSmallCell", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__scanningCell(struct soap *soap)
+{	struct ns__scanningCell soap_tmp_ns__scanningCell;
+	struct ns__scanningCellResponse soap_tmp_ns__scanningCellResponse;
+	char * soap_tmp_string;
+	soap_default_ns__scanningCellResponse(soap, &soap_tmp_ns__scanningCellResponse);
+	soap_tmp_string = NULL;
+	soap_tmp_ns__scanningCellResponse.outputMatFilename = &soap_tmp_string;
+	soap_default_ns__scanningCell(soap, &soap_tmp_ns__scanningCell);
+	soap->encodingStyle = "";
+	if (!soap_get_ns__scanningCell(soap, &soap_tmp_ns__scanningCell, "ns:scanningCell", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = ns__scanningCell(soap, soap_tmp_ns__scanningCell.inputMatFilename, &soap_tmp_string);
+	if (soap->error)
+		return soap->error;
+	soap_serializeheader(soap);
+	soap_serialize_ns__scanningCellResponse(soap, &soap_tmp_ns__scanningCellResponse);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_ns__scanningCellResponse(soap, &soap_tmp_ns__scanningCellResponse, "ns:scanningCellResponse", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_ns__scanningCellResponse(soap, &soap_tmp_ns__scanningCellResponse, "ns:scanningCellResponse", NULL)
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

@@ -49,7 +49,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-/* Load image data to Mat, save to bin */
+/* Load image data to Mat, convert to 32FC1, save to bin */
 int ns__loadMat (struct soap *soap,
                 char *InputImageFilename,
                 int loadparam,
@@ -88,13 +88,18 @@ int ns__loadMat (struct soap *soap,
 		return SOAP_FAULT;
 	}
 	
+    /* convert to 32FC1 */
+    Mat dst(src.rows, src.cols, CV_32FC1);
+    src.convertTo(dst, CV_32FC1);
+    
+    
 	/* generate output file name */
 	*&OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
     strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_LoadMat", localtime(&now));
 	
 	/* save to bin */
-    if(!saveMat(OutputMatFilename, src))
+    if(!saveMat(OutputMatFilename, dst))
     {
         soap_fault(soap);
         cerr << "error:: save mat to binary file" << endl;
@@ -130,7 +135,7 @@ int ns__binaryThreshold(struct soap *soap,
     strftime(OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
 	
 	/* save to bin */
-    if(!saveMat(OutputMatFilename, src))
+    if(!saveMat(OutputMatFilename, dst))
     {
         soap_fault(soap);
         cerr << "error:: save mat to binary file" << endl;
@@ -200,6 +205,13 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char *&OutputMatFil
         cerr << "error :: can not read bin file" << endl;
         soap->fault->faultstring = "error :: can not read bin file";
         return SOAP_FAULT;
+    }
+    
+    int chan = src.channels();
+    //convert to 8UC(n)
+    if( src.getMatType() != 0 || src.getMatType() != 8 || src.getMatType() != 16 )
+    {
+       src.convertTo(src, CV_8UC(chan));
     }
     
     /* generate output file name */
@@ -475,10 +487,7 @@ int ns__removeSmallCell(struct soap *soap,
     
     if(getMatType(src)!= CV_8UC1)
     {
-        soap_fault(soap);
-        cerr << "error :: FindContours support only 8uC1 images. Use convertTo function to convert image first." << endl;
-        soap->fault->faultstring = "error :: FindContours support only 8uC1 images. Use convertTo function to convert image first.";
-        return SOAP_FAULT;
+        src.convertTo(src, CV_8UC1);
     }
     
     Mat tmp = Mat(src.rows,src.cols, CV_32FC1);
@@ -532,7 +541,7 @@ int ns__removeSmallCell(struct soap *soap,
         return SOAP_FAULT;
     }
     
-    if(!saveMat(out.biggerArea, src))
+    if(!saveMat(out.biggerArea, tmp))
     {
         soap_fault(soap);
         cerr << "error:: save mat to binary file" << endl;
@@ -545,7 +554,7 @@ int ns__removeSmallCell(struct soap *soap,
 
 int ns__scanningCell(struct soap *soap, 
 						char *inputMatFilename,
-						char *outputMatFilename)
+						char **outputMatFilename)
 { 
 	Mat src;
     if(!readMat(inputMatFilename, src))
@@ -559,7 +568,7 @@ int ns__scanningCell(struct soap *soap,
     Mat src32FC1;
     src.convertTo(src32FC1, CV_32FC1);
     Mat srcTmp;
-    Mat output = Mat::zero(src.rows,src.cols, CV_32FC1);
+    Mat output = Mat::zeros(src.rows,src.cols, CV_32FC1);
     
     int nContour = 0;
     int prevContour = 0;
@@ -577,9 +586,9 @@ int ns__scanningCell(struct soap *soap,
         if( nContour == 0){ break; }
         if( nContour == prevContour ){ 
             erode( src32FC1, src32FC1, Mat() );
-            samecount++;
+            sameCount++;
         }else {
-            samecount = 0;
+            sameCount = 0;
         }
         
         prevContour = nContour;
@@ -590,7 +599,7 @@ int ns__scanningCell(struct soap *soap,
             int n = (int)contours[i].size();
             double area = contourArea(Mat(contours[i]));
             
-            if(area < 3000.0) || (samecount > 10)
+            if((area < 3000.0) || (sameCount > 10))
             {
                 fillPoly( src32FC1, &p, &n, 1, Scalar(0, 0, 0)); // remove from src 
                 fillPoly( output, &p, &n, 1, Scalar(255, 255, 255)); 
@@ -600,16 +609,14 @@ int ns__scanningCell(struct soap *soap,
         hierarchy.clear();
     }
 
-	contours.clear();
-	
 	/* generate output file name */
-    area = (char*)soap_malloc(soap, 60);
+    *outputMatFilename = (char*)soap_malloc(soap, 60);
 
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(*outputMatFilename, sizeof(outputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_scaningCell", localtime(&now));
     
     /* save to bin */
-    if(!saveMat(area, output))
+    if(!saveMat(*outputMatFilename, output))
     {
         soap_fault(soap);
         cerr << "error:: save mat to binary file" << endl;
@@ -619,6 +626,22 @@ int ns__scanningCell(struct soap *soap,
     
     return SOAP_OK;
 }
+
+/*to do list 
+int ns__convertTo( struct soap *soap, char *inputMatFilename, 
+                    char **outputMatFilename)
+{
+
+}
+
+int ns__And(  struct soap *soap, char *src1,
+				char *src2,
+				char **OutputMatFilename)
+{
+
+}
+
+*/
 
 
 /* helper function */
@@ -723,89 +746,4 @@ int getMatType ( const Mat& M)
 }
 
 
-// not worked!!
-//int ns__viewResult( struct soap *soap, char *src, struct ns__signalResponse *out )
-//{ 
-	//Mat matSrc;
-    //if(!readMat(src, matSrc))
-    //{
-        //soap_fault(soap);
-        //cerr << "error :: can not read bin file" << endl;
-        //soap->fault->faultstring = "error :: can not read bin file";
-        //return SOAP_FAULT;
-    //}
-    
-    //namedWindow("result", CV_WINDOW_AUTOSIZE);
-    //imshow("result", matSrc);
-    //waitKey(0);
-    
-    //return SOAP_OK;
-//}
 
-
-
-//int ns__scanningCell(struct soap *soap, 
-						//char *inputMatFilename,
-						//ns__RemoveSmallCell &out)
-//{ 
-	//Mat src;
-    //if(!readMat(inputMatFilename, src))
-    //{
-        //soap_fault(soap);
-        //cerr << "error :: can not read bin file" << endl;
-        //soap->fault->faultstring = "error :: can not read bin file";
-        //return SOAP_FAULT;
-    //}
-    
-    ////Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
-	//vector<vector<Point> > contours;
-    //findContours(	src, contours, CV_RETR_EXTERNAL, 
-					//CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-    //for(size_t i = 0; i< contours.size(); i++)
-    //{
-		//const Point* p = &contours[i][0];
-        //int n = (int)contours[i].size();
-		//double area = contourArea(Mat(contours[i]));
-		
-		//if(area < 1500.0) //lower bound
-		//{
-			//fillPoly( src, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put white area instead the old one)
-			
-		//} else if (area < 7500.0) {
-			//fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with black color
-			//fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
-			
-		//} else {
-			//fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
-			
-		//}
-	//}
-
-	//contours.clear();
-	
-	///* generate output file name */
-    //out.keepArea = (char*)soap_malloc(soap, 60);
-    //out.biggerArea = (char*)soap_malloc(soap, 60);
-
-    //time_t now = time(0);
-    //strftime(out.keepedArea, sizeof(out.keepedArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    //strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
-    
-    ///* save to bin */
-    //if(!saveMat(out.keepedArea, outSingle))
-    //{
-        //soap_fault(soap);
-        //cerr << "error:: save mat to binary file" << endl;
-        //soap->fault->faultstring = "error:: save mat to binary file";
-        //return SOAP_FAULT;
-    //}
-    
-    //if(!saveMat(out.biggerArea, src))
-    //{
-        //soap_fault(soap);
-        //cerr << "error:: save mat to binary file" << endl;
-        //soap->fault->faultstring = "error:: save mat to binary file";
-        //return SOAP_FAULT;
-    //}
-    //return SOAP_OK;
-//}

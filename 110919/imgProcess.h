@@ -28,3 +28,4 @@ int ns__erode(char *src, char *element, int iteration=1, char **OutputMatFilenam
 int ns__dilate(char *src, char *element, int iteration=1, char **OutputMatFilename=NULL);
 int ns__Or( char *src1, char *src2, char **OutputMatFilename);
 int ns__removeSmallCell(char *inputMatFilename, ns__RemoveSmallCell &out);
+int ns__scanningCell(char *inputMatFilename, char **outputMatFilename);

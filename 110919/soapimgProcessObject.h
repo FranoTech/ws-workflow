@@ -63,4 +63,6 @@ SOAP_FMAC5 int SOAP_FMAC6 ns__Or(struct soap*, char *src1, char *src2, char **Ou
 
 SOAP_FMAC5 int SOAP_FMAC6 ns__removeSmallCell(struct soap*, char *inputMatFilename, ns__RemoveSmallCell &out);
 
+SOAP_FMAC5 int SOAP_FMAC6 ns__scanningCell(struct soap*, char *inputMatFilename, char **outputMatFilename);
+
 #endif

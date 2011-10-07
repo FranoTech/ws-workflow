@@ -12,7 +12,7 @@
 
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.17 2011-10-05 03:11:47 GMT")
+SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.17 2011-10-07 08:25:09 GMT")
 
 
 #ifndef WITH_NOGLOBAL
@@ -175,6 +175,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		return soap_in_ns__RemoveSmallCell(soap, NULL, NULL, "ns:RemoveSmallCell");
 	case SOAP_TYPE_ns__FindContours:
 		return soap_in_ns__FindContours(soap, NULL, NULL, "ns:FindContours");
+	case SOAP_TYPE_ns__scanningCell:
+		return soap_in_ns__scanningCell(soap, NULL, NULL, "ns:scanningCell");
+	case SOAP_TYPE_ns__scanningCellResponse:
+		return soap_in_ns__scanningCellResponse(soap, NULL, NULL, "ns:scanningCellResponse");
 	case SOAP_TYPE_ns__removeSmallCell:
 		return soap_in_ns__removeSmallCell(soap, NULL, NULL, "ns:removeSmallCell");
 	case SOAP_TYPE_ns__Or:
@@ -242,6 +246,14 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_getelement(struct soap *soap, int *type)
 		if (!soap_match_tag(soap, t, "xsd:double"))
 		{	*type = SOAP_TYPE_double;
 			return soap_in_double(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "ns:scanningCell"))
+		{	*type = SOAP_TYPE_ns__scanningCell;
+			return soap_in_ns__scanningCell(soap, NULL, NULL, NULL);
+		}
+		if (!soap_match_tag(soap, t, "ns:scanningCellResponse"))
+		{	*type = SOAP_TYPE_ns__scanningCellResponse;
+			return soap_in_ns__scanningCellResponse(soap, NULL, NULL, NULL);
 		}
 		if (!soap_match_tag(soap, t, "ns:removeSmallCell"))
 		{	*type = SOAP_TYPE_ns__removeSmallCell;
@@ -395,6 +407,10 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap *soap, const void *ptr, co
 		return ((ns__RemoveSmallCell *)ptr)->soap_out(soap, tag, id, "ns:RemoveSmallCell");
 	case SOAP_TYPE_ns__FindContours:
 		return ((ns__FindContours *)ptr)->soap_out(soap, tag, id, "ns:FindContours");
+	case SOAP_TYPE_ns__scanningCell:
+		return soap_out_ns__scanningCell(soap, tag, id, (const struct ns__scanningCell *)ptr, "ns:scanningCell");
+	case SOAP_TYPE_ns__scanningCellResponse:
+		return soap_out_ns__scanningCellResponse(soap, tag, id, (const struct ns__scanningCellResponse *)ptr, "ns:scanningCellResponse");
 	case SOAP_TYPE_ns__removeSmallCell:
 		return soap_out_ns__removeSmallCell(soap, tag, id, (const struct ns__removeSmallCell *)ptr, "ns:removeSmallCell");
 	case SOAP_TYPE_ns__Or:
@@ -457,6 +473,12 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap *soap, const void *ptr, 
 		break;
 	case SOAP_TYPE_ns__FindContours:
 		((ns__FindContours *)ptr)->soap_serialize(soap);
+		break;
+	case SOAP_TYPE_ns__scanningCell:
+		soap_serialize_ns__scanningCell(soap, (const struct ns__scanningCell *)ptr);
+		break;
+	case SOAP_TYPE_ns__scanningCellResponse:
+		soap_serialize_ns__scanningCellResponse(soap, (const struct ns__scanningCellResponse *)ptr);
 		break;
 	case SOAP_TYPE_ns__removeSmallCell:
 		soap_serialize_ns__removeSmallCell(soap, (const struct ns__removeSmallCell *)ptr);
@@ -563,6 +585,10 @@ SOAP_FMAC3 void * SOAP_FMAC4 soap_instantiate(struct soap *soap, int t, const ch
 		return (void*)soap_instantiate_ns__Or(soap, -1, type, arrayType, n);
 	case SOAP_TYPE_ns__removeSmallCell:
 		return (void*)soap_instantiate_ns__removeSmallCell(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_ns__scanningCellResponse:
+		return (void*)soap_instantiate_ns__scanningCellResponse(soap, -1, type, arrayType, n);
+	case SOAP_TYPE_ns__scanningCell:
+		return (void*)soap_instantiate_ns__scanningCell(soap, -1, type, arrayType, n);
 #ifndef WITH_NOGLOBAL
 	case SOAP_TYPE_SOAP_ENV__Header:
 		return (void*)soap_instantiate_SOAP_ENV__Header(soap, -1, type, arrayType, n);
@@ -697,6 +723,18 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_fdelete(struct soap_clist *p)
 			SOAP_DELETE((struct ns__removeSmallCell*)p->ptr);
 		else
 			SOAP_DELETE_ARRAY((struct ns__removeSmallCell*)p->ptr);
+		break;
+	case SOAP_TYPE_ns__scanningCellResponse:
+		if (p->size < 0)
+			SOAP_DELETE((struct ns__scanningCellResponse*)p->ptr);
+		else
+			SOAP_DELETE_ARRAY((struct ns__scanningCellResponse*)p->ptr);
+		break;
+	case SOAP_TYPE_ns__scanningCell:
+		if (p->size < 0)
+			SOAP_DELETE((struct ns__scanningCell*)p->ptr);
+		else
+			SOAP_DELETE_ARRAY((struct ns__scanningCell*)p->ptr);
 		break;
 	case SOAP_TYPE_SOAP_ENV__Header:
 		if (p->size < 0)
@@ -1759,6 +1797,216 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_SOAP_ENV__Header(struct soap *soap, int st,
 }
 
 #endif
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__scanningCell(struct soap *soap, struct ns__scanningCell *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_default_string(soap, &a->inputMatFilename);
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__scanningCell(struct soap *soap, const struct ns__scanningCell *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_string(soap, &a->inputMatFilename);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__scanningCell(struct soap *soap, const char *tag, int id, const struct ns__scanningCell *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns__scanningCell), type))
+		return soap->error;
+	if (soap_out_string(soap, "inputMatFilename", -1, &a->inputMatFilename, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct ns__scanningCell * SOAP_FMAC4 soap_in_ns__scanningCell(struct soap *soap, const char *tag, struct ns__scanningCell *a, const char *type)
+{
+	size_t soap_flag_inputMatFilename = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct ns__scanningCell *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns__scanningCell, sizeof(struct ns__scanningCell), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_ns__scanningCell(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_inputMatFilename && (soap->error == SOAP_TAG_MISMATCH || soap->error == SOAP_NO_TAG))
+				if (soap_in_string(soap, "inputMatFilename", &a->inputMatFilename, "xsd:string"))
+				{	soap_flag_inputMatFilename--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct ns__scanningCell *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ns__scanningCell, 0, sizeof(struct ns__scanningCell), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__scanningCell(struct soap *soap, const struct ns__scanningCell *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ns__scanningCell);
+	if (soap_out_ns__scanningCell(soap, tag?tag:"ns:scanningCell", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct ns__scanningCell * SOAP_FMAC4 soap_get_ns__scanningCell(struct soap *soap, struct ns__scanningCell *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_ns__scanningCell(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct ns__scanningCell * SOAP_FMAC2 soap_instantiate_ns__scanningCell(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns__scanningCell(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ns__scanningCell, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)SOAP_NEW(struct ns__scanningCell);
+		if (size)
+			*size = sizeof(struct ns__scanningCell);
+	}
+	else
+	{	cp->ptr = (void*)SOAP_NEW(struct ns__scanningCell[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct ns__scanningCell);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct ns__scanningCell*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__scanningCell(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	(void)soap; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct ns__scanningCell %p -> %p\n", q, p));
+	*(struct ns__scanningCell*)p = *(struct ns__scanningCell*)q;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__scanningCellResponse(struct soap *soap, struct ns__scanningCellResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	a->outputMatFilename = NULL;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_ns__scanningCellResponse(struct soap *soap, const struct ns__scanningCellResponse *a)
+{
+	(void)soap; (void)a; /* appease -Wall -Werror */
+	soap_serialize_PointerTostring(soap, &a->outputMatFilename);
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_out_ns__scanningCellResponse(struct soap *soap, const char *tag, int id, const struct ns__scanningCellResponse *a, const char *type)
+{
+	if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_ns__scanningCellResponse), type))
+		return soap->error;
+	if (soap_out_PointerTostring(soap, "outputMatFilename", -1, &a->outputMatFilename, ""))
+		return soap->error;
+	return soap_element_end_out(soap, tag);
+}
+
+SOAP_FMAC3 struct ns__scanningCellResponse * SOAP_FMAC4 soap_in_ns__scanningCellResponse(struct soap *soap, const char *tag, struct ns__scanningCellResponse *a, const char *type)
+{
+	size_t soap_flag_outputMatFilename = 1;
+	if (soap_element_begin_in(soap, tag, 0, type))
+		return NULL;
+	a = (struct ns__scanningCellResponse *)soap_id_enter(soap, soap->id, a, SOAP_TYPE_ns__scanningCellResponse, sizeof(struct ns__scanningCellResponse), 0, NULL, NULL, NULL);
+	if (!a)
+		return NULL;
+	soap_default_ns__scanningCellResponse(soap, a);
+	if (soap->body && !*soap->href)
+	{
+		for (;;)
+		{	soap->error = SOAP_TAG_MISMATCH;
+			if (soap_flag_outputMatFilename && soap->error == SOAP_TAG_MISMATCH)
+				if (soap_in_PointerTostring(soap, "outputMatFilename", &a->outputMatFilename, "xsd:string"))
+				{	soap_flag_outputMatFilename--;
+					continue;
+				}
+			if (soap->error == SOAP_TAG_MISMATCH)
+				soap->error = soap_ignore_element(soap);
+			if (soap->error == SOAP_NO_TAG)
+				break;
+			if (soap->error)
+				return NULL;
+		}
+		if (soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	else
+	{	a = (struct ns__scanningCellResponse *)soap_id_forward(soap, soap->href, (void*)a, 0, SOAP_TYPE_ns__scanningCellResponse, 0, sizeof(struct ns__scanningCellResponse), 0, NULL);
+		if (soap->body && soap_element_end_in(soap, tag))
+			return NULL;
+	}
+	return a;
+}
+
+SOAP_FMAC3 int SOAP_FMAC4 soap_put_ns__scanningCellResponse(struct soap *soap, const struct ns__scanningCellResponse *a, const char *tag, const char *type)
+{
+	register int id = soap_embed(soap, (void*)a, NULL, 0, tag, SOAP_TYPE_ns__scanningCellResponse);
+	if (soap_out_ns__scanningCellResponse(soap, tag?tag:"ns:scanningCellResponse", id, a, type))
+		return soap->error;
+	return soap_putindependent(soap);
+}
+
+SOAP_FMAC3 struct ns__scanningCellResponse * SOAP_FMAC4 soap_get_ns__scanningCellResponse(struct soap *soap, struct ns__scanningCellResponse *p, const char *tag, const char *type)
+{
+	if ((p = soap_in_ns__scanningCellResponse(soap, tag, p, type)))
+		if (soap_getindependent(soap))
+			return NULL;
+	return p;
+}
+
+SOAP_FMAC1 struct ns__scanningCellResponse * SOAP_FMAC2 soap_instantiate_ns__scanningCellResponse(struct soap *soap, int n, const char *type, const char *arrayType, size_t *size)
+{
+	(void)type; (void)arrayType; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "soap_instantiate_ns__scanningCellResponse(%d, %s, %s)\n", n, type?type:"", arrayType?arrayType:""));
+	struct soap_clist *cp = soap_link(soap, NULL, SOAP_TYPE_ns__scanningCellResponse, n, soap_fdelete);
+	if (!cp)
+		return NULL;
+	if (n < 0)
+	{	cp->ptr = (void*)SOAP_NEW(struct ns__scanningCellResponse);
+		if (size)
+			*size = sizeof(struct ns__scanningCellResponse);
+	}
+	else
+	{	cp->ptr = (void*)SOAP_NEW(struct ns__scanningCellResponse[n]);
+		if (!cp->ptr)
+		{	soap->error = SOAP_EOM;
+			return NULL;
+		}
+		if (size)
+			*size = n * sizeof(struct ns__scanningCellResponse);
+	}
+		DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Instantiated location=%p\n", cp->ptr));
+	return (struct ns__scanningCellResponse*)cp->ptr;
+}
+
+SOAP_FMAC3 void SOAP_FMAC4 soap_copy_ns__scanningCellResponse(struct soap *soap, int st, int tt, void *p, size_t len, const void *q, size_t n)
+{
+	(void)soap; (void)st; (void)len; (void)n; /* appease -Wall -Werror */
+	DBGLOG(TEST, SOAP_MESSAGE(fdebug, "Copying struct ns__scanningCellResponse %p -> %p\n", q, p));
+	*(struct ns__scanningCellResponse*)p = *(struct ns__scanningCellResponse*)q;
+}
 
 SOAP_FMAC3 void SOAP_FMAC4 soap_default_ns__removeSmallCell(struct soap *soap, struct ns__removeSmallCell *a)
 {
