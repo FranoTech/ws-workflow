@@ -112,6 +112,14 @@
  <part name="biggerArea" type="xsd:string"/>
 </message>
 
+<message name="scanningCellRequest">
+ <part name="inputMatFilename" type="xsd:string"/>
+</message>
+
+<message name="scanningCellResponse">
+ <part name="outputMatFilename" type="xsd:string"/>
+</message>
+
 <portType name="imgProcessPortType">
  <operation name="loadMat">
   <documentation>Service definition of function ns__loadMat</documentation>
@@ -157,6 +165,11 @@
   <documentation>Service definition of function ns__removeSmallCell</documentation>
   <input message="tns:removeSmallCell"/>
   <output message="tns:RemoveSmallCell"/>
+ </operation>
+ <operation name="scanningCell">
+  <documentation>Service definition of function ns__scanningCell</documentation>
+  <input message="tns:scanningCellRequest"/>
+  <output message="tns:scanningCellResponse"/>
  </operation>
 </portType>
 
@@ -235,6 +248,15 @@
   </output>
  </operation>
  <operation name="removeSmallCell">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="scanningCell">
   <SOAP:operation style="rpc" soapAction=""/>
   <input>
      <SOAP:body use="encoded" namespace="urn:img" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>

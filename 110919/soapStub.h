@@ -245,8 +245,28 @@ public:
 };
 #endif
 
+#ifndef SOAP_TYPE_ns__scanningCellResponse
+#define SOAP_TYPE_ns__scanningCellResponse (40)
+/* ns:scanningCellResponse */
+struct ns__scanningCellResponse
+{
+public:
+	char **outputMatFilename;	/* SOAP 1.2 RPC return element (when namespace qualified) */	/* optional element of type xsd:string */
+};
+#endif
+
+#ifndef SOAP_TYPE_ns__scanningCell
+#define SOAP_TYPE_ns__scanningCell (41)
+/* ns:scanningCell */
+struct ns__scanningCell
+{
+public:
+	char *inputMatFilename;	/* optional element of type xsd:string */
+};
+#endif
+
 #ifndef SOAP_TYPE_SOAP_ENV__Header
-#define SOAP_TYPE_SOAP_ENV__Header (39)
+#define SOAP_TYPE_SOAP_ENV__Header (42)
 /* SOAP Header: */
 struct SOAP_ENV__Header
 {
@@ -258,7 +278,7 @@ private:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Code
-#define SOAP_TYPE_SOAP_ENV__Code (40)
+#define SOAP_TYPE_SOAP_ENV__Code (43)
 /* SOAP Fault Code: */
 struct SOAP_ENV__Code
 {
@@ -269,7 +289,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Detail
-#define SOAP_TYPE_SOAP_ENV__Detail (42)
+#define SOAP_TYPE_SOAP_ENV__Detail (45)
 /* SOAP-ENV:Detail */
 struct SOAP_ENV__Detail
 {
@@ -281,7 +301,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Reason
-#define SOAP_TYPE_SOAP_ENV__Reason (45)
+#define SOAP_TYPE_SOAP_ENV__Reason (48)
 /* SOAP-ENV:Reason */
 struct SOAP_ENV__Reason
 {
@@ -291,7 +311,7 @@ public:
 #endif
 
 #ifndef SOAP_TYPE_SOAP_ENV__Fault
-#define SOAP_TYPE_SOAP_ENV__Fault (46)
+#define SOAP_TYPE_SOAP_ENV__Fault (49)
 /* SOAP Fault: */
 struct SOAP_ENV__Fault
 {
@@ -357,6 +377,8 @@ SOAP_FMAC5 int SOAP_FMAC6 ns__Or(struct soap*, char *src1, char *src2, char **Ou
 
 SOAP_FMAC5 int SOAP_FMAC6 ns__removeSmallCell(struct soap*, char *inputMatFilename, ns__RemoveSmallCell &out);
 
+SOAP_FMAC5 int SOAP_FMAC6 ns__scanningCell(struct soap*, char *inputMatFilename, char **outputMatFilename);
+
 /******************************************************************************\
  *                                                                            *
  * Server-Side Skeletons to Invoke Service Operations                         *
@@ -385,6 +407,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__Or(struct soap*);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__removeSmallCell(struct soap*);
 
+SOAP_FMAC5 int SOAP_FMAC6 soap_serve_ns__scanningCell(struct soap*);
+
 /******************************************************************************\
  *                                                                            *
  * Client-Side Call Stubs                                                     *
@@ -409,6 +433,8 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__dilate(struct soap *soap, const char *so
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__Or(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *src1, char *src2, char **OutputMatFilename);
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__removeSmallCell(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *inputMatFilename, ns__RemoveSmallCell &out);
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__scanningCell(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *inputMatFilename, char **outputMatFilename);
 
 #endif
 

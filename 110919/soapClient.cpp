@@ -11,7 +11,7 @@
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.17 2011-10-05 03:11:47 GMT")
+SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.7.17 2011-10-07 08:25:09 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__loadMat(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *InputImageFilename, int loadparam, char *&OutputMatFilename)
@@ -488,6 +488,60 @@ SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__removeSmallCell(struct soap *soap, const
 	 || soap_envelope_end_in(soap)
 	 || soap_end_recv(soap))
 		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__scanningCell(struct soap *soap, const char *soap_endpoint, const char *soap_action, char *inputMatFilename, char **outputMatFilename)
+{	struct ns__scanningCell soap_tmp_ns__scanningCell;
+	struct ns__scanningCellResponse *soap_tmp_ns__scanningCellResponse;
+	if (!soap_endpoint)
+		soap_endpoint = "http://localhost/cgi-bin/imgProcessServer";
+	soap->encodingStyle = "";
+	soap_tmp_ns__scanningCell.inputMatFilename = inputMatFilename;
+	soap_begin(soap);
+	soap_serializeheader(soap);
+	soap_serialize_ns__scanningCell(soap, &soap_tmp_ns__scanningCell);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if (soap->mode & SOAP_IO_LENGTH)
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put_ns__scanningCell(soap, &soap_tmp_ns__scanningCell, "ns:scanningCell", NULL)
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put_ns__scanningCell(soap, &soap_tmp_ns__scanningCell, "ns:scanningCell", NULL)
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	if (!outputMatFilename)
+		return soap_closesock(soap);
+	*outputMatFilename = NULL;
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	if (soap_recv_fault(soap, 1))
+		return soap->error;
+	soap_tmp_ns__scanningCellResponse = soap_get_ns__scanningCellResponse(soap, NULL, "", "");
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	if (outputMatFilename && soap_tmp_ns__scanningCellResponse->outputMatFilename)
+		*outputMatFilename = *soap_tmp_ns__scanningCellResponse->outputMatFilename;
 	return soap_closesock(soap);
 }
 

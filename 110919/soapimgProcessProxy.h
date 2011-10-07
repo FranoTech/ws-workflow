@@ -46,5 +46,7 @@ class imgProcess
 	virtual int ns__Or(char *src1, char *src2, char **OutputMatFilename) { return soap ? soap_call_ns__Or(soap, endpoint, NULL, src1, src2, OutputMatFilename) : SOAP_EOM; };
 	/// Invoke 'removeSmallCell' of service 'imgProcess' and return error code (or SOAP_OK)
 	virtual int ns__removeSmallCell(char *inputMatFilename, ns__RemoveSmallCell &out) { return soap ? soap_call_ns__removeSmallCell(soap, endpoint, NULL, inputMatFilename, out) : SOAP_EOM; };
+	/// Invoke 'scanningCell' of service 'imgProcess' and return error code (or SOAP_OK)
+	virtual int ns__scanningCell(char *inputMatFilename, char **outputMatFilename) { return soap ? soap_call_ns__scanningCell(soap, endpoint, NULL, inputMatFilename, outputMatFilename) : SOAP_EOM; };
 };
 #endif
