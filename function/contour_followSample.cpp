@@ -8,6 +8,8 @@ using namespace std;
 using namespace cv;
 int saveMat( string& filename, const Mat& M);
 int readMat( const string& filename, Mat& M);
+int getMatType ( const Mat& M);
+
 
 int main (int argc, char** argv){
     
