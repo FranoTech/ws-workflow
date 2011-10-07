@@ -1,3 +1,4 @@
+//worked!!
 #include <iostream>
 #include <fstream>
 #include <cv.h>
@@ -20,8 +21,8 @@ int main (int argc, char** argv){
     Mat result = Mat::zeros(src.rows,src.cols, CV_32FC1);
     
     vector<vector<Point> > contours;
-    findContours(	gray, contours, CV_RETR_EXTERNAL, 
-					CV_CHAIN_APPROX_SIMPLE);
+    vector<Vec4i> hierarchy;
+    findContours(	gray, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
     for(size_t i = 0; i< contours.size(); i++)
     {
 		const Point* p = &contours[i][0];
