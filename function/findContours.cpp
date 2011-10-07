@@ -48,8 +48,8 @@ int main (int argc, char** argv){
     cvConvert(&input_morph, tmp8UC1);
     
     cout<<"cvConvert"<<endl;
-    
-    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
+    int numcon =0;
+    numcon = cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
     cur = first_con;
     cout<<"cvFindContours(tmp8UC1"<<endl;
     while (cur != NULL) {
@@ -88,6 +88,7 @@ int main (int argc, char** argv){
     src.release();
     gray.release();
     
+    cout<<"num con ="<<numcon;
     
     return 0;
 }
