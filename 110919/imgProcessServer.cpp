@@ -449,6 +449,7 @@ int ns__removeSmallCell(struct soap *soap,
 						char *inputMatFilename,
 						ns__RemoveSmallCell &out)
 { 
+    //src type must be 8UC1
 	Mat src;
     if(!readMat(inputMatFilename, src))
     {
@@ -458,10 +459,25 @@ int ns__removeSmallCell(struct soap *soap,
         return SOAP_FAULT;
     }
     
-    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
+    if(getMatType(src)!= CV_8UC1)
+    {
+        soap_fault(soap);
+        cerr << "error :: FindContours support only 8uC1 images. Use convertTo function to convert image first." << endl;
+        soap->fault->faultstring = "error :: FindContours support only 8uC1 images. Use convertTo function to convert image first.";
+        return SOAP_FAULT;
+    }
+    
+    Mat tmp = Mat(src.rows,src.cols, CV_32FC1);
+    src.convertTo(tmp, CV_32FC1);
+    
+    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1); //black plain
 	vector<vector<Point> > contours;
-    findContours(	src, contours, CV_RETR_EXTERNAL, 
-					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    //findContours(	src, contours, CV_RETR_EXTERNAL, 
+					//CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+                    
+    vector<Vec4i> hierarchy;
+    findContours( src, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);                
+                    
     for(size_t i = 0; i< contours.size(); i++)
     {
 		const Point* p = &contours[i][0];
@@ -470,14 +486,14 @@ int ns__removeSmallCell(struct soap *soap,
 		
 		if(area < 1500.0) //lower bound
 		{
-			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put white area instead the old one)
+			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
 			
 		} else if (area < 7500.0) {
-			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with black color
-			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
+			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
+			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
 			
 		} else {
-			fillPoly( src, &p, &n, 1, Scalar(0, 0, 0));
+			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
 			
 		}
 	}

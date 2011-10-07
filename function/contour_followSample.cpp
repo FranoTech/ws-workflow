@@ -12,6 +12,13 @@ int readMat( const string& filename, Mat& M);
 int main (int argc, char** argv){
     
     Mat src  = imread(argv[1],0);
+    
+    if(getMatType(src)!= CV_8UC1)
+    {
+        cout<<"FindContours support only 8uC1 images. Use convertTo function to convert image first."<<endl;
+        exit (1);
+    }
+    
     Mat gray = Mat(src.rows,src.cols, CV_32FC1);
     threshold(src, gray, 127.0, 255.0, CV_THRESH_BINARY);
     //src.convertTo(tmp, CV_32FC1);
@@ -158,5 +165,26 @@ int readMat( const char *filename, Mat& M)
     in.close();
     return 1;
 } 
+
+int getMatType ( const Mat& M)
+{
+	int type = 0;
+    int chan = M.channels();
+    int eSiz = (M.dataend-M.datastart)/(M.cols*M.rows*chan);
+    
+    switch (eSiz){
+    case sizeof(char):
+         type = CV_8UC(chan);
+         break;
+    case sizeof(float):
+         type = CV_32FC(chan);
+         break;
+    case sizeof(double):
+         type = CV_64FC(chan);
+         break;
+    }
+    
+    return type;
+}
 
 
