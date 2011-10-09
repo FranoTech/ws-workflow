@@ -19,13 +19,15 @@ class ns__RemoveSmallCell
 	char *biggerArea;
 };
 
-int ns__loadMat (char *InputImageFilename, int loadparam, char *&OutputMatFilename);
-int ns__binaryThreshold(char *InputMatFilename, double thresholdValue, double maxValue, char *&OutputMatFilename);
-int ns__morphOpen(char *InpuMattFilename, char *&OutputMatFilename);
-int ns__MatToJPG (char *InputMatFilename, char *&OutputMatFilename);
+int ns__loadMat (char *InputImageFilename, int loadparam=0, char **OutputMatFilename=NULL);
+int ns__binaryThreshold(char *InputMatFilename, double thresholdValue=127.0, double maxValue=255, char **OutputMatFilename=NULL);
+int ns__morphOpen(char *InpuMattFilename, char **OutputMatFilename);
+int ns__MatToJPG (char *InputMatFilename, char **OutputMatFilename);
 int ns__findContoursAndFillpoly (char *InputMatFilename, int lowerBound, ns__FindContours &out);
 int ns__erode(char *src, char *element, int iteration=1, char **OutputMatFilename=NULL);
 int ns__dilate(char *src, char *element, int iteration=1, char **OutputMatFilename=NULL);
 int ns__Or( char *src1, char *src2, char **OutputMatFilename);
+int ns__And( char *src1, char *src2, char **OutputMatFilename);
+int ns__Not( char *src, char **OutputMatFilename);
 int ns__removeSmallCell(char *inputMatFilename, ns__RemoveSmallCell &out);
 int ns__scanningCell(char *inputMatFilename, char **outputMatFilename);

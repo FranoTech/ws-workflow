@@ -1,4 +1,3 @@
-//worked!!
 #include <iostream>
 #include <fstream>
 #include <cv.h>
@@ -13,88 +12,41 @@ int getMatType (const Mat& M);
 
 int main (int argc, char** argv){
     
-    Mat src  = imread(argv[1],0);
+    Mat src;
+	if(!readMat(argv[1], src)){
+			cout<<"can't read image"<<endl;
+    }
+	src.convertTo(src, CV_8UC1);
+    Mat output = Mat::zeros(src.rows,src.cols, CV_32FC1);
     
-    //if(src.type() != 0){ src.convertTo(src, CV_8UC1); }
-    
-    Mat gray = Mat(src.rows,src.cols, CV_32FC1);
-    threshold(src, gray, 127.0, 255.0, CV_THRESH_BINARY);
-    //src.convertTo(tmp, CV_32FC1);
-    
-    Mat se; 
-    Size seSize(3, 3); 
-    Point seAnc(1, 1);
-    
-    se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
-    morphologyEx(gray, gray, MORPH_OPEN, se, seAnc);
-
-    Mat tmp = Mat(src.rows,src.cols, CV_32FC1);
-    gray.convertTo(tmp, CV_32FC1);
-    Mat result = Mat::zeros(src.rows,src.cols, CV_32FC1);
-    
+    double area = 0;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
-    double area = 0;
-    findContours(	gray, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
-    for(size_t i = 0; i< contours.size(); i++)
-    {
+
+	findContours( src, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+    int count = 1;
+ 
+	for(size_t i = 0; i< contours.size(); i++)
+	{
 		const Point* p = &contours[i][0];
-        int n = (int)contours[i].size();
+		int n = (int)contours[i].size();
 		area = contourArea(Mat(contours[i]));
-		
-		if(area < 1500.0) //lower bound
-		{
-			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0));
-		} else if (area < 7500.0) {
-            fillPoly( result, &p, &n, 1, Scalar(255,255,255)); // move to result
-            fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from input
-        }else{
-			fillPoly( tmp, &p, &n, 1, Scalar(255,255,255));
-		}
-	}
-
-   Mat output = Mat(src.rows,src.cols, CV_32FC1);;
-   bitwise_or(tmp, result, output);
-   
-   //subtract(tmp, result, tmp);
-
-    //namedWindow("gray", CV_WINDOW_AUTOSIZE);
-    //imshow("gray", gray);
-    //waitKey(0);
-    
-    //namedWindow("tmp", CV_WINDOW_AUTOSIZE);
-    //imshow("tmp", tmp);
-    //waitKey(0);
-    
-    //namedWindow("result", CV_WINDOW_AUTOSIZE);
-    //imshow("result", result);
-    //waitKey(0);
-    
-    //namedWindow("output", CV_WINDOW_AUTOSIZE);
-    //imshow("output", output);
-    //waitKey(0);
-    
-	if(!saveMat("keepArea", result)){
-		cout<<"can not save mat"<<endl;
+		fillPoly( output, &p, &n, 1, Scalar((count++%254)+1, (count++%254)+1, (count++%254)+1 )); 
 	}
 	
-	if(!saveMat("bigArea", tmp)){
+	if(!saveMat("output_sep", output)){
 		cout<<"can not save mat"<<endl;
 	}
     
-	if(!saveMat("orArea", output)){
-		cout<<"can not save mat"<<endl;
-	}
-    
-    contours.clear();
+	contours.clear();
+    hierarchy.clear();
     src.release();
-    tmp.release();
-    gray.release();
-    result.release();
     output.release();
+    
     
     return 0;
 }
+
 
 /* helper function */
 /* Save matrix to binary file */
@@ -196,7 +148,5 @@ int getMatType ( const Mat& M)
     
     return type;
 }
-
-
 
 
