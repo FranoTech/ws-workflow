@@ -8,8 +8,8 @@
  <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
   <ns:binaryThreshold>
    <InputMatFilename></InputMatFilename>
-   <thresholdValue>0.0</thresholdValue>
-   <maxValue>0.0</maxValue>
+   <thresholdValue>127.000000</thresholdValue>
+   <maxValue>255.000000</maxValue>
   </ns:binaryThreshold>
  </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
