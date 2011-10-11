@@ -645,14 +645,14 @@ int ns__removeSmallCell(struct soap *soap,
 		
 		if(area < 1500.0) //lower bound
 		{
-			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
+			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); // remove from src (put black area instead the old one)
 			
 		} else if (area < 7500.0) {
 			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
-			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
+			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); // remove from src
 			
 		} else {
-			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
+			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); //left the bigger area in src
 			
 		}
 	}
