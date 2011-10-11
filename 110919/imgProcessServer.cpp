@@ -28,7 +28,7 @@
 
 using namespace std;
 using namespace cv;
-static timeval start_time, now;
+static timeval start_time, t;
 
 //global function
 //void writeToBin (char *&OutputFilename, Mat& M);
@@ -55,6 +55,7 @@ int ns__loadMat (struct soap *soap,
                 int loadparam=0,
                 char **OutputMatFilename=NULL)
 {
+    gettimeofday(&start_time, NULL);
     Mat src;
     
 	/* Determine type of the matrix */
@@ -107,6 +108,9 @@ int ns__loadMat (struct soap *soap,
         return SOAP_FAULT;
     }
     
+    gettimeofday(&t, NULL);
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    
     return SOAP_OK;
 }
 
@@ -116,6 +120,7 @@ int ns__binaryThreshold(struct soap *soap,
                         double maxValue=255.0,
                         char **OutputMatFilename=NULL)
 { 
+    gettimeofday(&start_time, NULL);
 	/* read from bin */
 	Mat src;
 	if(!readMat(InputMatFilename, src))
@@ -146,6 +151,9 @@ int ns__binaryThreshold(struct soap *soap,
     src.release();
     dst.release();
     
+    gettimeofday(&t, NULL);
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    
     return SOAP_OK;
 }
 
@@ -154,7 +162,7 @@ int ns__binaryThreshold(struct soap *soap,
 
 int ns__morphOpen(  struct soap *soap, char *InputMatFilename, char **OutputMatFilename)
 { 
-   
+    gettimeofday(&start_time, NULL);
     /* read from bin */
     Mat src;
     if(!readMat(InputMatFilename, src))
@@ -198,6 +206,9 @@ int ns__morphOpen(  struct soap *soap, char *InputMatFilename, char **OutputMatF
     dst.release();
     se.release();
     
+    gettimeofday(&t, NULL);
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    
     return SOAP_OK;
 }
 
@@ -209,6 +220,7 @@ int ns__morphOpen(  struct soap *soap, char *InputMatFilename, char **OutputMatF
 
 int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFilename)
 {
+    gettimeofday(&start_time, NULL);
     Mat src;
     if(!readMat(InputMatFilename, src))
     {
@@ -238,7 +250,8 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
         return SOAP_FAULT;
     }
     
-    
+    gettimeofday(&t, NULL);
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
     
     return SOAP_OK;
 }
@@ -259,6 +272,7 @@ int ns__findContoursAndFillpoly (struct soap *soap,
 						int lowerBound,
 						ns__FindContours &out )
 {
+    
     Mat src;
     if(!readMat(InputMatFilename, src))
     {
@@ -595,6 +609,7 @@ int ns__removeSmallCell(struct soap *soap,
 						char *inputMatFilename,
 						ns__RemoveSmallCell &out)
 { 
+    gettimeofday(&start_time, NULL);
     //src type must be 8UC1
 	Mat src;
     if(!readMat(inputMatFilename, src))
@@ -669,6 +684,9 @@ int ns__removeSmallCell(struct soap *soap,
         soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
+    
+    gettimeofday(&t, NULL);
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
     return SOAP_OK;
 }
 
@@ -680,6 +698,7 @@ int ns__scanningCell(struct soap *soap,
 						char *inputMatFilename,
 						char **outputMatFilename)
 { 
+    gettimeofday(&start_time, NULL);
 	Mat src;
     if(!readMat(inputMatFilename, src))
     {
@@ -746,6 +765,9 @@ int ns__scanningCell(struct soap *soap,
         soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
+    
+    gettimeofday(&t, NULL);
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
     
     return SOAP_OK;
 }

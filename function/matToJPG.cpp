@@ -11,30 +11,24 @@ int readMat( const char *filename, Mat& M);
 
 int main (int argc, char** argv){
 	
-	//Mat src;
-	//if(!readMat(argv[1], src)){
-			//cout<<"can't read image"<<endl;
-    //}
+	Mat src;
+	if(!readMat(argv[1], src)){
+			cout<<"can't read image"<<endl;
+    }
    
-	//int chan = src.channels();
-    ////convert to 8UC(n)
-    //if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
-    //{
-       //src.convertTo(src, CV_8UC(chan));
-    //}	
+	int chan = src.channels();
+    //convert to 8UC(n)
+    if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
+    {
+       src.convertTo(src, CV_8UC(chan));
+    }	
+
     
-    filename = (char*)soap_malloc(soap, 60);
-    time_t now = time(0);
-    strftime(*filename, sizeof(filename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S", localtime(&now));
-    
-    *filename+= "test";
-    cout<<filename<<endl;
-    
-    //if(!imwrite(filename, src))
-    //{
-		//cout<<"error writing image"<<endl;
-    //}
-    //src.release();
+    if(!imwrite(argv[2], src))
+    {
+		cout<<"error writing image"<<endl;
+    }
+    src.release();
     
     return 0;
     
