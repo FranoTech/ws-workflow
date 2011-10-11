@@ -1,3 +1,4 @@
+//worked!!
 #include <iostream>
 #include <fstream>
 #include <cv.h>
@@ -12,39 +13,71 @@ int getMatType (const Mat& M);
 
 int main (int argc, char** argv){
     
-    Mat src;
-	if(!readMat(argv[1], src)){
-			cout<<"can't read image"<<endl;
-    }
+    Mat src  = imread(argv[1],0);
     
-    Mat srcTmp;
-    Mat src32FC1;
-    src.convertTo(src32FC1, CV_32FC1);
+    //Mat input3Ch(src.rows, src.cols, CV_32FC3);
+    //Mat output1Ch;
+    Mat input_morph(src.rows, src.cols, CV_32FC1);
     
-    if( src.type() != 0){
-		src.convertTo(src, CV_8UC1);
+    threshold(src, input_morph, 127.0, 255.0, CV_THRESH_BINARY);
+    input_morph.convertTo(input_morph, CV_32FC1);
+    
+    Mat se; 
+    Size seSize(3, 3);
+    Point seAnc(1, 1);
+    
+    se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
+    morphologyEx(input_morph, input_morph, MORPH_OPEN, se, seAnc);
+
+    Mat out_single = Mat::zeros(input_morph.rows, input_morph.cols, CV_32FC1);
+    Mat tmp8UC1(src.rows, src.cols, CV_8UC1);
+    input_morph.convertTo(tmp8UC1, CV_8UC1);
+    
+    
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    double area = 0;
+    findContours( tmp8UC1, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+    for(size_t i = 0; i< contours.size(); i++)
+    {
+		const Point* p = &contours[i][0];
+        int n = (int)contours[i].size();
+		area = contourArea(Mat(contours[i]));
+		
+		if(area < 1500.0) //lower bound
+		{
+			fillPoly( input_morph, &p, &n, 1, Scalar(0, 0, 0));
+		} else if (area < 7500.0) {
+            fillPoly( out_single, &p, &n, 1, Scalar(255,255,255)); // move to result
+            fillPoly( input_morph, &p, &n, 1, Scalar(0, 0, 0)); // remove from input
+        }else{
+			fillPoly( input_morph, &p, &n, 1, Scalar(255,255,255));
+		}
 	}
 
-    Mat output = Mat::zeros(src.rows,src.cols, CV_32FC1);
-    
+   Mat output_morph = Mat(input_morph.rows, input_morph.cols, CV_32FC1);
+   cout<<"input_morph = "<<input_morph.type()<<endl;
+   cout<<"out_single = "<<out_single.type()<<endl;
+   cout<<"output_morph = "<<output_morph.type()<<endl;
+   bitwise_or(input_morph, out_single, output_morph);
+   
     int nContour = 1;
     int prevContour = 0;
     int sameCount = 0;
-    double area = 0;                                                                                                                                                                                                                                                                                                                                                                                                                                    0;
-    vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
-    
+    area = 0;                                                                                                                                                                                                                                                                                                                                                                                                                                    0;
+    contours.clear();
+    hierarchy.clear();
     
     while(nContour != 0)
     {
-        src32FC1.convertTo(srcTmp, CV_8UC1);
+        input_morph.convertTo(tmp8UC1, CV_8UC1);
 
-        findContours( srcTmp, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        findContours( tmp8UC1, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
         nContour = contours.size();
         
         if( nContour == 0){ break; }
         if( nContour == prevContour ){ 
-            erode( src32FC1, src32FC1, Mat() );
+            erode( input_morph, input_morph, Mat() );
             sameCount++;
         }else {
             sameCount = 0;
@@ -60,33 +93,32 @@ int main (int argc, char** argv){
             
             if((area < 3000.0) || (sameCount > 10))
             {
-                fillPoly( src32FC1, &p, &n, 1, Scalar(0, 0, 0)); // remove from src 
-                fillPoly( output, &p, &n, 1, Scalar(255, 255, 255)); 
+                fillPoly( input_morph, &p, &n, 1, Scalar(0, 0, 0)); // remove from src 
+                fillPoly( out_single, &p, &n, 1, Scalar(255, 255, 255)); 
             }
         }
     }
     
-    if(!saveMat("src32FC1", src32FC1)){
-        
+	if(!saveMat("keepArea", out_single)){
 		cout<<"can not save mat"<<endl;
 	}
 	
-	if(!saveMat("output_scan", output)){
+	if(!saveMat("bigArea", input_morph)){
 		cout<<"can not save mat"<<endl;
 	}
     
-	contours.clear();
-    hierarchy.clear();
+	if(!saveMat("orArea", output_morph)){
+		cout<<"can not save mat"<<endl;
+	}
+    
+    contours.clear();
     src.release();
-    srcTmp.release();
-    src32FC1.release();
-    
-    output.release();
-    
+    out_single.release();
+    input_morph.release();
+    tmp8UC1.release();
     
     return 0;
 }
-
 
 /* helper function */
 /* Save matrix to binary file */
@@ -188,5 +220,7 @@ int getMatType ( const Mat& M)
     
     return type;
 }
+
+
 
 
