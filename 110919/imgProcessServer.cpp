@@ -109,7 +109,7 @@ int ns__loadMat (struct soap *soap,
     }
     
     gettimeofday(&t, NULL);
-    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::LoadMat"<<endl;
     
     return SOAP_OK;
 }
@@ -152,7 +152,7 @@ int ns__binaryThreshold(struct soap *soap,
     dst.release();
     
     gettimeofday(&t, NULL);
-    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::BinaryThreshold"<<endl;
     
     return SOAP_OK;
 }
@@ -207,7 +207,7 @@ int ns__morphOpen(  struct soap *soap, char *InputMatFilename, char **OutputMatF
     se.release();
     
     gettimeofday(&t, NULL);
-    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::MorphOpen"<<endl;
     
     return SOAP_OK;
 }
@@ -251,7 +251,7 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
     }
     
     gettimeofday(&t, NULL);
-    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::MatToJPG"<<endl;
     
     return SOAP_OK;
 }
@@ -686,7 +686,7 @@ int ns__removeSmallCell(struct soap *soap,
     }
     
     gettimeofday(&t, NULL);
-    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::removeSmallCell"<<endl;
     return SOAP_OK;
 }
 
@@ -767,7 +767,7 @@ int ns__scanningCell(struct soap *soap,
     }
     
     gettimeofday(&t, NULL);
-    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::Ipl1ChToMat"<<endl;
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::scanningCell"<<endl;
     
     return SOAP_OK;
 }

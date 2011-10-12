@@ -30,12 +30,13 @@ int main (int argc, char** argv){
 
     Mat tmp = Mat(src.rows,src.cols, CV_32FC1);
     gray.convertTo(tmp, CV_32FC1);
-    Mat result = Mat::zeros(src.rows,src.cols, CV_32FC1);
+    Mat result_keep = Mat::zeros(src.rows,src.cols, CV_32FC1);
+    Mat result_big(src.rows,src.cols, CV_32FC1);
     
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
     double area = 0;
-    findContours(	gray, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+    findContours(	gray, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
     for(size_t i = 0; i< contours.size(); i++)
     {
 		const Point* p = &contours[i][0];
@@ -45,16 +46,18 @@ int main (int argc, char** argv){
 		if(area < 1500.0) //lower bound
 		{
 			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0));
-		} else if (area < 7500.0) {
-            fillPoly( result, &p, &n, 1, Scalar(255,255,255)); // move to result
+		} else if ((area > 1500.0)&&(area < 7500.0)) {
+            fillPoly( result_keep, &p, &n, 1, Scalar(255,255,255)); // move to result
             fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from input
+            
         }else{
 			fillPoly( tmp, &p, &n, 1, Scalar(255,255,255));
+            fillPoly( result_big, &p, &n, 1, Scalar(255,255,255));
 		}
 	}
 
-   Mat output = Mat(src.rows,src.cols, CV_32FC1);;
-   bitwise_or(tmp, result, output);
+//   Mat output = Mat(src.rows,src.cols, CV_32FC1);;
+//   bitwise_or(tmp, result, output);
    
    //subtract(tmp, result, tmp);
 
@@ -74,24 +77,42 @@ int main (int argc, char** argv){
     //imshow("output", output);
     //waitKey(0);
     
-	if(!saveMat("keepArea", result)){
-		cout<<"can not save mat"<<endl;
-	}
+	//if(!saveMat("keepArea", result_keep)){
+		//cout<<"can not save mat"<<endl;
+	//}
 	
-	if(!saveMat("bigArea", tmp)){
-		cout<<"can not save mat"<<endl;
-	}
+	//if(!saveMat("tmpArea", tmp)){
+		//cout<<"can not save mat"<<endl;
+	//}
     
-	if(!saveMat("orArea", output)){
-		cout<<"can not save mat"<<endl;
-	}
+	//if(!saveMat("orArea", output)){
+		//cout<<"can not save mat"<<endl;
+	//}
     
+    //if(!saveMat("bigArea", result_big)){
+		//cout<<"can not save mat"<<endl;
+	//}
+    
+    if(!imwrite("keep.jpg", result_keep))
+    {
+		cout<<"error writing image"<<endl;
+    }
+    if(!imwrite("tmp.jpg", tmp))
+    {
+		cout<<"error writing image"<<endl;
+    }
+    if(!imwrite("big.jpg", result_big))
+    {
+		cout<<"error writing image"<<endl;
+    }
+
     contours.clear();
     src.release();
     tmp.release();
     gray.release();
-    result.release();
-    output.release();
+    result_keep.release();
+    result_big.release();
+    //output.release();
     
     return 0;
 }
