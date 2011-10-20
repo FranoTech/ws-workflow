@@ -30,13 +30,14 @@ int main (int argc, char** argv){
 	CvSeq *cur = NULL;
     
     cvConvert(input_morph, tmp8UC1);
-    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
+    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_LIST);
     cur = first_con;
     while (cur != NULL) {
         double area = fabs(cvContourArea(cur));
         int npts = cur->total;
         CvPoint *p = new CvPoint[npts];
         cvCvtSeqToArray(cur, p);
+        cout<<area<<" ";
         if (area < 1500.0) // remove small area
             cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
         else if (area < 7500.0) {
@@ -48,6 +49,7 @@ int main (int argc, char** argv){
         cur = cur->h_next;
     }
     
+    cout<<endl;
     Mat tmpmat = cvarrToMat(out_single, true);
     tmpmat.convertTo(tmpmat, CV_8UC1);
     if(!imwrite("c_out_single.jpg", tmpmat))
@@ -71,7 +73,7 @@ int main (int argc, char** argv){
     while(ncontour != 0){
         cvConvert(input_morph, tmp8UC1);
             cvClearMemStorage(storage);
-            int ncontour = cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
+            int ncontour = cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_LIST);
             if (ncontour == 0)
                 break; // finish extract cell
             if (ncontour == prev_ncontour) {
