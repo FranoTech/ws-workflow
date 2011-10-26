@@ -30,7 +30,7 @@ int main (int argc, char** argv){
 	CvSeq *cur = NULL;
     
     cvConvert(input_morph, tmp8UC1);
-    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_LIST);
+    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
     cur = first_con;
     while (cur != NULL) {
         double area = fabs(cvContourArea(cur));
@@ -75,7 +75,7 @@ int main (int argc, char** argv){
     while(ncontour != 0){
         cvConvert(input_morph, tmp8UC1);
         cvClearMemStorage(storage);
-        int ncontour = cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_LIST);
+        int ncontour = cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
         if (ncontour == 0)
             break; // finish extract cell
         if (ncontour == prev_ncontour) {
