@@ -1,0 +1,9 @@
+#!/bin/bash
+g++ -I/usr/include/opencv -lcxcore -lhighgui -lm -o imgProcessServer imgProcessServer.cpp soapC.cpp soapServer.cpp stdsoap2.cpp
+echo "***compiled***"
+sudo chmod a+x imgProcessServer
+echo "***gived a+x***"
+sudo cp imgProcessServer /var/www/cgi-bin/
+echo "***copied imgProcessServer***"
+sudo cp imgProcess.wsdl /var/www/
+echo "***copied imgProcess.wsdl***"
