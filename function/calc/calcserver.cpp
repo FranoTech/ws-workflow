@@ -1,6 +1,8 @@
 #include "soapH.h"
 #include "calc.nsmap"
 
+using namespace std;
+
 int main(int argc, char **argv)
 { SOAP_SOCKET m, s; /* master and slave sockets */
   struct soap soap;
