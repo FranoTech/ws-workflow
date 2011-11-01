@@ -13,12 +13,13 @@
 //system
 #include <sys/types.h>
 #include <sys/stat.h> //time_t fstat
-//#include <sys/time.h>
-//#include <stdlib.h>
+#include <sys/time.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 //omp
 #include <omp.h>
+#include <glog/logging.h>
 
 
 //init variable
@@ -34,6 +35,7 @@ using namespace cv;
 int saveMat( const char *filename, const Mat& M);
 int readMat( const char *filename, Mat& M);
 int getMatType (const char *typeName);
+int getThresholdType ( const char *typeName);
 int getColorFlag(int colorflag);
 
 
@@ -62,9 +64,10 @@ int ns__loadMat (struct soap *soap,
     double start, end; 
     start = omp_get_wtime();
 
+    Mat src;
     /* load image data */
 	if(InputImageFilename){
-	    mat src;
+	    
         src = imread(InputImageFilename,getColorFlag(colorflag));
 	    if(src.empty()) {
 			soap_fault(soap);
@@ -164,34 +167,28 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
 // @return 
 //      char *types="CV_32FC1",
 //      char **outputMatFilename
-int ns__ConvertTo( struct soap *soap, char *inputMatFilename,
+int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
                     char *types="CV_32FC1",
-                    char **outputMatFilename)
+                    char **OutputMatFilename=NULL)
 {
     double start, end; 
     start = omp_get_wtime();
     
-    if(InputImageFilename){
 	    
-        mat src;
-        if(!readMat(InputMatFilename, src))
-        {
-            soap_fault(soap);
-            LOG(ERROR)<< "ConvertTo:: can not read bin file" << endl;
-            soap->fault->faultstring = "ConvertTo :: can not read bin file";
-            return SOAP_FAULT;
-        }
-        
-        if(src.type()!= getMatType(types))
-        {
-            src.convertTo(src,getMatType(types));
-        }
-    } else {
-		soap_fault(soap);
-		LOG(ERROR)<<"ConvertTo:: InputImageFilename error" << endl;
-		soap->fault->faultstring = "ConvertTo:: InputImageFilename error";
-		return SOAP_FAULT;
-	}
+    Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        soap_fault(soap);
+        LOG(ERROR)<< "ConvertTo:: can not read bin file" << endl;
+        soap->fault->faultstring = "ConvertTo :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    if(src.type()!= getMatType(types))
+    {
+        src.convertTo(src,getMatType(types));
+    }
+
     
     /* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
@@ -225,7 +222,7 @@ int ns__Threshold(struct soap *soap,
                         char *InputMatFilename, 
                         double thresholdValue=127.0, 
                         double maxValue=255.0,
-                        char *thresholdType="THRESH_BINARY"
+                        char *thresholdType="THRESH_BINARY",
                         char **OutputMatFilename=NULL)
 { 
     double start, end; 
@@ -262,8 +259,8 @@ int ns__Threshold(struct soap *soap,
     src.release();
     dst.release();
     
-    gettimeofday(&t, NULL);
-    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::BinaryThreshold"<<endl;
+    end = omp_get_wtime();
+    LOG(INFO)<<"ns__ConvertTo"<<"time elapsed "<<end-start<<endl;
     
     return SOAP_OK;
 }
@@ -384,16 +381,16 @@ int getColorFlag(int colorflag)
 {
     switch (colorflag){
 			case 0:
-                return CV_LOAD_IMAGE_GRAYSCALE);
+                return CV_LOAD_IMAGE_GRAYSCALE;
 				break;
 			case 1:
-                return CV_LOAD_IMAGE_COLOR);
+                return CV_LOAD_IMAGE_COLOR;
 				break;
 			case -1:
-				return CV_LOAD_IMAGE_UNCHANGED);
+				return CV_LOAD_IMAGE_UNCHANGED;
 				break;
 			default :
-				return CV_LOAD_IMAGE_COLOR);
+				return CV_LOAD_IMAGE_COLOR;
 	    }
 }
         
