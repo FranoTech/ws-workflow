@@ -104,7 +104,8 @@ int ns__loadMat (struct soap *soap,
     src.release();
     
     end = omp_get_wtime();
-    LOG(INFO)<<"ns__loadMat"<<"time elapsed "<<end-start<<endl;
+    LOG(INFO)<<"ns__loadMat "<<"time elapsed "<<end-start<<endl;
+    cerr<<"ns__loadMat "<<"time elapsed "<<end-start<<endl;
     
     return SOAP_OK;
 }
@@ -155,7 +156,8 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
     src.release();
     
     end = omp_get_wtime();
-    LOG(INFO)<<"ns__MatToJPG"<<"time elapsed "<<end-start<<endl;
+    LOG(INFO)<<"ns__MatToJPG "<<"time elapsed "<<end-start<<endl;
+    cerr<<"ns__MatToJPG "<<"time elapsed "<<end-start<<endl;
     
     return SOAP_OK;
 }
@@ -207,8 +209,8 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
     src.release();
     
     end = omp_get_wtime();
-    LOG(INFO)<<"ns__ConvertTo"<<"time elapsed "<<end-start<<endl;
-    
+    LOG(INFO)<<"ns__ConvertTo "<<"time elapsed "<<end-start<<endl;
+    cerr<<"ns__ConvertTo "<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
@@ -260,10 +262,15 @@ int ns__Threshold(struct soap *soap,
     dst.release();
     
     end = omp_get_wtime();
-    LOG(INFO)<<"ns__ConvertTo"<<"time elapsed "<<end-start<<endl;
-    
+    LOG(INFO)<<"ns__Threshold "<<"time elapsed "<<end-start<<endl;
+    cerr<<"ns__Threshold "<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
+
+
+
+
+
 
 
 /* helper function */
