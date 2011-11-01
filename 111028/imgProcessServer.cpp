@@ -105,7 +105,44 @@ int ns__loadMat (struct soap *soap,
     return SOAP_OK;
 }
 
-
+int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFilename)
+{
+    double start, end; 
+    start = omp_get_wtime();
+    Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        soap_fault(soap);
+        LOG(ERROR)<< "MatToJPG:: can not read bin file" << endl;
+        soap->fault->faultstring = "error :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    int chan = src.channels();
+    //convert to 8UC(n)
+    if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
+    {
+       src.convertTo(src, CV_8UC(chan));
+    }
+    
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S.jpg", localtime(&now));
+    
+    if(!imwrite(*OutputMatFilename, src))
+    {
+        soap_fault(soap);
+        LOG(ERROR)<< "MatToJPG:: can not save mat to jpg file" << endl;
+        soap->fault->faultstring = "MatToJPG:: can not mat save to jpg file";
+        return SOAP_FAULT;
+    }
+    
+    end = omp_get_wtime();
+    LOG(INFO)<<"ns__MatToJPG"<<"time elapsed"<<end-start<<endl;
+    
+    return SOAP_OK;
+}
 
 
 /* helper function */
