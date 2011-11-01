@@ -12,11 +12,13 @@
 #include <fstream>
 //system
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <stdlib.h>
+//#include <sys/stat.h> //time_t fstat
+//#include <sys/time.h>
+//#include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+//omp
+#include <omp.h>
 
 
 //init variable
@@ -27,7 +29,6 @@
 //namespace
 using namespace std;
 using namespace cv;
-static timeval start_time, t;
 
 //helper function
 int saveMat( const char *filename, const Mat& M);
@@ -38,6 +39,7 @@ int getColorFlag(int colorflag);
 
 int main(int argc, char **argv)
 { 
+    google::InitGoogleLogging(argv[0]);
     struct soap soap;
     soap_init(&soap);
     if (argc < 2)		// no args: assume this is a CGI application
@@ -50,23 +52,23 @@ int main(int argc, char **argv)
 }
 
 
-/* Load image data to Mat, convert to 32FC1, save to bin */
+/* Load image data to Mat, save to binary file */
 int ns__loadMat (struct soap *soap,
                 char *InputImageFilename,
                 int colorflag=0,
-                char *types=5,
+                char *types="CV_32FC1",
                 char **OutputMatFilename=NULL)
 {
-    gettimeofday(&start_time, NULL);
-    Mat src;
+    double start, end; 
+    start = omp_get_wtime();
     
-	/* Determine type of the matrix */
+    /* load image data */
 	if(InputImageFilename){
 	    
         src = imread(InputImageFilename,getColorFlag(colorflag));
 	    if(src.empty()) {
 			soap_fault(soap);
-			cerr << "error :: can not load image" << endl;
+			LOG(ERROR)<<"loadMat:: can not load image" << endl;
 			soap->fault->faultstring = "error :: can not load image";
 			return SOAP_FAULT;
 		}
@@ -78,8 +80,8 @@ int ns__loadMat (struct soap *soap,
 		
     } else {
 		soap_fault(soap);
-		cerr << "InputImageFilename error" << endl;
-		soap->fault->faultstring = "InputImageFilename error";
+		LOG(ERROR)<<"loadMat:: InputImageFilename error" << endl;
+		soap->fault->faultstring = "loadMat:: InputImageFilename error";
 		return SOAP_FAULT;
 	}
     
@@ -92,13 +94,13 @@ int ns__loadMat (struct soap *soap,
     if(!saveMat(*OutputMatFilename, src))
     {
         soap_fault(soap);
-        cerr << "error:: save mat to binary file" << endl;
-		soap->fault->faultstring = "error:: save mat to binary file";
+        LOG(ERROR)<<"loadMat:: can not save mat to binary file" << endl;
+		soap->fault->faultstring = "error:: can not save mat to binary file";
         return SOAP_FAULT;
     }
     
-    gettimeofday(&t, NULL);
-    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::LoadMat"<<endl;
+    end = omp_get_wtime();
+    LOG(INFO)<<"ns__loadMat"<<"time elapsed"<<end-start<<endl;
     
     return SOAP_OK;
 }
@@ -137,7 +139,6 @@ int saveMat( const char *filename, const Mat& M){
     out.close();
     return 1;
 }
-
 
 /* Read matrix from binary file */
 int readMat( const char *filename, Mat& M)
@@ -185,7 +186,6 @@ int readMat( const char *filename, Mat& M)
     in.close();
     return 1;
 } 
-
 
 int getMatType ( const char *typeName)
 {
