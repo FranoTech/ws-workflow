@@ -12,7 +12,7 @@
 #include <fstream>
 //system
 #include <sys/types.h>
-//#include <sys/stat.h> //time_t fstat
+#include <sys/stat.h> //time_t fstat
 //#include <sys/time.h>
 //#include <stdlib.h>
 #include <unistd.h>
@@ -61,10 +61,10 @@ int ns__loadMat (struct soap *soap,
 {
     double start, end; 
     start = omp_get_wtime();
-    
+
     /* load image data */
 	if(InputImageFilename){
-	    
+	    mat src;
         src = imread(InputImageFilename,getColorFlag(colorflag));
 	    if(src.empty()) {
 			soap_fault(soap);
@@ -105,10 +105,18 @@ int ns__loadMat (struct soap *soap,
     return SOAP_OK;
 }
 
+
+// 
+// name: MatToJPG
+// - convert nat to 8U and save as JPG
+// @param char *InputMatFilename
+// @return char **OutputMatFilename
+
 int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFilename)
 {
     double start, end; 
     start = omp_get_wtime();
+    
     Mat src;
     if(!readMat(InputMatFilename, src))
     {
@@ -118,8 +126,10 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
         return SOAP_FAULT;
     }
     
+    //get chan of src image
     int chan = src.channels();
-    //convert to 8UC(n)
+    
+    //check if it is not 8U then convert to 8UC(n)
     if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
     {
        src.convertTo(src, CV_8UC(chan));
@@ -144,6 +154,49 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
     return SOAP_OK;
 }
 
+
+// 
+// name: convertTo
+// @param char *inputMatFilename
+// @return 
+//      char *types="CV_32FC1",
+//      char **outputMatFilename
+
+
+int ns__ConvertTo( struct soap *soap, char *inputMatFilename,
+                    char *types="CV_32FC1",
+                    char **outputMatFilename)
+{
+    double start, end; 
+    start = omp_get_wtime();
+    
+    if(InputImageFilename){
+	    
+        mat src;
+        if(!readMat(InputMatFilename, src))
+        {
+            soap_fault(soap);
+            LOG(ERROR)<< "ConvertTo:: can not read bin file" << endl;
+            soap->fault->faultstring = "ConvertTo :: can not read bin file";
+            return SOAP_FAULT;
+        }
+        
+        if(src.type()!= getMatType(types))
+        {
+            src.convertTo(src,getMatType(types));
+        }
+        
+        
+
+		
+    } else {
+		soap_fault(soap);
+		LOG(ERROR)<<"ConvertTo:: InputImageFilename error" << endl;
+		soap->fault->faultstring = "ConvertTo:: InputImageFilename error";
+		return SOAP_FAULT;
+	}
+    
+}
 
 /* helper function */
 /* Save matrix to binary file */
