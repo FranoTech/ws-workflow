@@ -77,7 +77,6 @@ int ns__loadMat (struct soap *soap,
         {
             src.convertTo(src,getMatType(types));
         }
-		
     } else {
 		soap_fault(soap);
 		LOG(ERROR)<<"loadMat:: InputImageFilename error" << endl;
@@ -99,8 +98,10 @@ int ns__loadMat (struct soap *soap,
         return SOAP_FAULT;
     }
     
+    src.release();
+    
     end = omp_get_wtime();
-    LOG(INFO)<<"ns__loadMat"<<"time elapsed"<<end-start<<endl;
+    LOG(INFO)<<"ns__loadMat"<<"time elapsed "<<end-start<<endl;
     
     return SOAP_OK;
 }
@@ -136,9 +137,9 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
     }
     
     /* generate output file name */
-    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S.jpg", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S.jpg", localtime(&now));
     
     if(!imwrite(*OutputMatFilename, src))
     {
@@ -148,8 +149,10 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
         return SOAP_FAULT;
     }
     
+    src.release();
+    
     end = omp_get_wtime();
-    LOG(INFO)<<"ns__MatToJPG"<<"time elapsed"<<end-start<<endl;
+    LOG(INFO)<<"ns__MatToJPG"<<"time elapsed "<<end-start<<endl;
     
     return SOAP_OK;
 }
@@ -161,8 +164,6 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
 // @return 
 //      char *types="CV_32FC1",
 //      char **outputMatFilename
-
-
 int ns__ConvertTo( struct soap *soap, char *inputMatFilename,
                     char *types="CV_32FC1",
                     char **outputMatFilename)
@@ -185,10 +186,6 @@ int ns__ConvertTo( struct soap *soap, char *inputMatFilename,
         {
             src.convertTo(src,getMatType(types));
         }
-        
-        
-
-		
     } else {
 		soap_fault(soap);
 		LOG(ERROR)<<"ConvertTo:: InputImageFilename error" << endl;
@@ -196,7 +193,81 @@ int ns__ConvertTo( struct soap *soap, char *inputMatFilename,
 		return SOAP_FAULT;
 	}
     
+    /* generate output file name */
+	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_ConvertTo", localtime(&now));
+	
+	/* save to bin */
+    if(!saveMat(*OutputMatFilename, src))
+    {
+        soap_fault(soap);
+        LOG(ERROR)<<"ConvertTo:: can not save mat to binary file" << endl;
+		soap->fault->faultstring = "ConvertTo:: can not save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    src.release();
+    
+    end = omp_get_wtime();
+    LOG(INFO)<<"ns__ConvertTo"<<"time elapsed "<<end-start<<endl;
+    
+    return SOAP_OK;
 }
+
+
+// 
+// name: binaryThreshold
+// @param
+// @return
+
+int ns__Threshold(struct soap *soap, 
+                        char *InputMatFilename, 
+                        double thresholdValue=127.0, 
+                        double maxValue=255.0,
+                        char *thresholdType="THRESH_BINARY"
+                        char **OutputMatFilename=NULL)
+{ 
+    double start, end; 
+    start = omp_get_wtime();
+	
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+	    {
+	        soap_fault(soap);
+	        cerr << "error :: can not read bin file" << endl;
+			soap->fault->faultstring = "error :: can not read bin file";
+	        return SOAP_FAULT;
+	    }
+    
+    
+    Mat dst(src.rows, src.cols, src.depth());
+    threshold(src, dst, thresholdValue, maxValue, getThresholdType (thresholdType));
+    
+    /* generate output file name */
+	*OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
+	
+	/* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+		soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    src.release();
+    dst.release();
+    
+    gettimeofday(&t, NULL);
+    cerr<<(int64) (t.tv_sec - start_time.tv_sec) + (t.tv_usec -start_time.tv_usec)/1000000.0<<" secs ::BinaryThreshold"<<endl;
+    
+    return SOAP_OK;
+}
+
 
 /* helper function */
 /* Save matrix to binary file */
@@ -292,6 +363,22 @@ int getMatType ( const char *typeName)
     else if(strcmp("CV_32FC3", typeName) == 0)
         return 21;
 }
+
+
+int getThresholdType ( const char *typeName)
+{
+    if(strcmp("THRESH_BINARY", typeName) == 0)
+        return THRESH_BINARY;
+    else if(strcmp("THRESH_BINARY_INV", typeName) == 0)
+        return THRESH_BINARY_INV;
+    else if(strcmp("THRESH_TRUNC", typeName) == 0)
+        return THRESH_TRUNC;
+    else if(strcmp("THRESH_TOZERO", typeName) == 0)
+        return THRESH_TOZERO;
+    else if(strcmp("THRESH_TOZERO_INV", typeName) == 0)
+        return THRESH_TOZERO_INV;
+}
+
 
 int getColorFlag(int colorflag)
 {
