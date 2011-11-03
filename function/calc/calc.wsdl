@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="calc"
+ targetNamespace="http://localhost/calc.wsdl"
+ xmlns:tns="http://localhost/calc.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:calc"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:calc"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:calc"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="addRequest">
+ <part name="a" type="xsd:double"/><!-- ns__add::a -->
+ <part name="b" type="xsd:double"/><!-- ns__add::b -->
+</message>
+
+<message name="addResponse">
+ <part name="result" type="xsd:double"/><!-- ns__add::result -->
+</message>
+
+<message name="testRequest">
+ <part name="s" type="xsd:string"/><!-- ns__test::s -->
+ <part name="i" type="xsd:int"/><!-- ns__test::i -->
+</message>
+
+<message name="testResponse">
+ <part name="t" type="xsd:string"/><!-- ns__test::t -->
+</message>
+
+<portType name="calcPortType">
+ <operation name="add">
+  <documentation>Sums two values</documentation>
+  <input message="tns:addRequest"/>
+  <output message="tns:addResponse"/>
+ </operation>
+ <operation name="test">
+  <documentation>Service definition of function ns__test</documentation>
+  <input message="tns:testRequest"/>
+  <output message="tns:testResponse"/>
+ </operation>
+</portType>
+
+<binding name="calc" type="tns:calcPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="add">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:calc" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:calc" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="test">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:calc" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:calc" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="calc">
+ <documentation>Simple calculator service</documentation>
+ <port name="calc" binding="tns:calc">
+  <SOAP:address location="http://localhost/cgi-bin/calcserver"/>
+ </port>
+</service>
+
+</definitions>

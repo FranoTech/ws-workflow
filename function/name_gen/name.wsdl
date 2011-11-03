@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="name"
+ targetNamespace="http://localhost/name.wsdl"
+ xmlns:tns="http://localhost/name.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:n"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:n"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:n"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="genNameRequest">
+ <part name="InputFilename" type="xsd:string"/><!-- ns__genName::InputFilename -->
+</message>
+
+<message name="genNameResponse">
+ <part name="OutputFilename" type="xsd:string"/><!-- ns__genName::OutputFilename -->
+</message>
+
+<message name="genName2Request">
+ <part name="InputFilename" type="xsd:string"/><!-- ns__genName2::InputFilename -->
+</message>
+
+<message name="genName2Response">
+ <part name="OutputFilename" type="xsd:string"/><!-- ns__genName2::OutputFilename -->
+</message>
+
+<message name="genName3">
+ <part name="InputFilename" type="xsd:string"/><!-- ns__genName3::InputFilename -->
+</message>
+
+<message name="Output">
+ <part name="outputFilename" type="xsd:string"/><!-- ns__genName3::outputFilename -->
+ <part name="anotherOutputFilename" type="xsd:string"/><!-- ns__genName3::anotherOutputFilename -->
+</message>
+
+<portType name="namePortType">
+ <operation name="genName">
+  <documentation>Service definition of function ns__genName</documentation>
+  <input message="tns:genNameRequest"/>
+  <output message="tns:genNameResponse"/>
+ </operation>
+ <operation name="genName2">
+  <documentation>Service definition of function ns__genName2</documentation>
+  <input message="tns:genName2Request"/>
+  <output message="tns:genName2Response"/>
+ </operation>
+ <operation name="genName3">
+  <documentation>Service definition of function ns__genName3</documentation>
+  <input message="tns:genName3"/>
+  <output message="tns:Output"/>
+ </operation>
+</portType>
+
+<binding name="name" type="tns:namePortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="genName">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="genName2">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="genName3">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:n" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="name">
+ <documentation>gSOAP 2.8.2 generated service definition</documentation>
+ <port name="name" binding="tns:name">
+  <SOAP:address location="http://localhost/cgi-bin/name"/>
+ </port>
+</service>
+
+</definitions>
