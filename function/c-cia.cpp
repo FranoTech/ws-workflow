@@ -13,7 +13,7 @@ int main (int argc, char** argv){
     cvConvertScale(img, output1Ch);
     
     //do threshold
-    cvThreshold(output1Ch, input_morph, 100, 255.0, CV_THRESH_BINARY);
+    cvThreshold(output1Ch, input_morph, 127.0, 255.0, CV_THRESH_BINARY);
     
     // morph open
     IplConvKernel *se1 = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
@@ -30,7 +30,7 @@ int main (int argc, char** argv){
 	CvSeq *cur = NULL;
     
     cvConvert(input_morph, tmp8UC1);
-    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_LIST);
+    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
     cur = first_con;
     while (cur != NULL) {
         double area = fabs(cvContourArea(cur));
@@ -75,7 +75,7 @@ int main (int argc, char** argv){
     while(ncontour != 0){
         cvConvert(input_morph, tmp8UC1);
         cvClearMemStorage(storage);
-        int ncontour = cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_LIST);
+        int ncontour = cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
         if (ncontour == 0)
             break; // finish extract cell
         if (ncontour == prev_ncontour) {
@@ -126,7 +126,7 @@ int main (int argc, char** argv){
     
     cvConvert(out_single, tmp8UC1);
     cvClearMemStorage(storage);
-    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_LIST);
+    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
     int count = 1;
     cur = first_con;
     while (cur != NULL) {
