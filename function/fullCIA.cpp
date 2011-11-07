@@ -2,21 +2,27 @@
 #include <fstream>
 #include <cv.h>
 #include <highgui.h>
+#include <ml.h>
 using namespace std;
 using namespace cv;
+
+void ByteArrayToANN(char *annfile, CvANN_MLP* ann);
 
 int main (int argc, char** argv){
     
     CvANN_MLP* neuron = NULL ;
     IplImage *img = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
-    CvMat *input3Ch = cvCreateMat(img->Height, img->Width, CV_32FC3);
+    CvMat *input3Ch = cvCreateMat(img->height, img->width, CV_32FC3);
     CvMat *output1Ch = cvCreateMat(img->height, img->width, CV_32FC1);
     CvMat *input_morph = cvCreateMat(img->height, img->width, CV_32FC1);
     //cvConvertScale(img, output1Ch);
     
     cvConvertScale(img, input3Ch);
     
-    InitTraining();
+    if (neuron == NULL )
+		neuron = new CvANN_MLP();
+	else
+		neuron->clear();
     ByteArrayToANN("cia.tmp", neuron);
 
     
@@ -218,16 +224,8 @@ void ByteArrayToANN(char *annfile, CvANN_MLP* ann)
     file.close();
 	CvFileStorage *cvfs = cvOpenFileStorage(annfile, NULL, CV_STORAGE_READ);
 
-	if (cvfs != nullptr) {
+	if (cvfs != NULL) {
 		ann->read(cvfs, cvGetFileNodeByName(cvfs, NULL, "CIA_Neuron"));
 		cvReleaseFileStorage(&cvfs);
 	}
-}
-
-void InitTraining(void)
-{
-	if (neuron == NULL )
-		neuron = new CvANN_MLP();
-	else
-		neuron->clear();
 }
