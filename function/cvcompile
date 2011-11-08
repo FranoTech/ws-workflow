@@ -1,4 +1,0 @@
-#!/bin/bash
-g++ `pkg-config opencv --cflags` $1.cpp `pkg-config opencv --libs` -o $1 
-
-#g++ -I/usr/include/opencv2 -lopencv_core -lopencv_highgui -o $1 $1.cpp
