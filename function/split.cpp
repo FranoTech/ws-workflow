@@ -36,6 +36,15 @@ int main (int argc, char** argv){
         }
         cout<<endl;
     }   
+    cout<<"=============================================================================="<<endl;
+    for( int y = 0; y < splited[2].rows; y++ )
+    {   for( int x = 0; x < splited[2].cols; x++ )
+        {
+            cout<<(int)splited[0].at<uchar>(y,x)<<" ";
+            
+        }
+        cout<<endl;
+    } 
     
     //for( int y = 0; y < RB.rows; y++ )
     //{   for( int x = 0; x < RB.cols; x++ ){ 
