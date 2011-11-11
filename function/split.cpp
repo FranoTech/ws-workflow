@@ -37,7 +37,9 @@ int main (int argc, char** argv){
         //}
         //cout<<endl;
     //}   
-
+    
+    
+/* Find POS Cell */
     for( int y = 0; y < RB.rows; y++ )
     {   for( int x = 0; x < RB.cols; x++ ){ 
             if(splited[0].at<float>(y,x) != 0 && (splited[2].at<float>(y,x)/splited[0].at<float>(y,x) >= 1))
@@ -46,7 +48,7 @@ int main (int argc, char** argv){
                 RB.at<float>(y,x) = 0;
             //cout<<(float)RB.at<uchar>(y,x)<<" ";
         }
-        cout<<endl;
+        //cout<<endl;
     }   
         
     namedWindow("RB", CV_WINDOW_AUTOSIZE);
