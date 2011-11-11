@@ -9,11 +9,8 @@ using namespace cv;
 int main (int argc, char** argv){
    
     Mat src  = imread(argv[1], CV_LOAD_IMAGE_COLOR);
-    //src.convertTo(src, CV_8UC3);
-    
     vector<Mat> splited;
-    Mat RB (src.rows, src.cols, CV_32FC1);
-    //Mat BR;
+    
     cv::split(src, splited); 
     
     /* splited[0] = B
@@ -22,39 +19,37 @@ int main (int argc, char** argv){
     */
     
     //R/B
-    //cv::divide(splited[2], splited[0], RB, 1);
-
+    Mat RB (splited[0].rows, splited[0].cols, CV_32FC1);
+    //cv::divide(splited[2], splited[1], RB, 1);
+    
     
     for( int y = 0; y < splited[2].rows; y++ )
     {   for( int x = 0; x < splited[2].cols; x++ )
         {
-            //cout<<RB.at<int>(y,x)<<" ";
             //if(splited[0].at<int>(y,x) != 0)
                 //RB.at<int>(y,x) = splited[2].at<int>(y,x)/splited[0].at<int>(y,x);
             //else
                 //RB.at<int>(y,x) = 12345;
                 
-            cout<<splited[2].at<int>(y,x)<<" ";
+            cout<<(int)splited[2].at<uchar>(y,x)<<" ";
             
         }
         cout<<endl;
     }   
     
-    //int c = 0;
-    //int r = 0;
-    
-    for( int y = 0; y < RB.rows; y++ )
-    {   for( int x = 0; x < RB.cols; x++ )
-            cout<<RB.at<int>(y,x)<<" ";
-        cout<<endl;
-    }   
+    //for( int y = 0; y < RB.rows; y++ )
+    //{   for( int x = 0; x < RB.cols; x++ ){ 
+            //if(splited[0].at<uchar>(y,x) != 0 && (splited[2].at<uchar>(y,x)/splited[0].at<uchar>(y,x) == 1))
+                //RB.at<uchar>(y,x) = 0;
+            //else
+                //RB.at<uchar>(y,x) = 255;
+            //cout<<(int)RB.at<uchar>(y,x)<<" ";
+        //}
+        //cout<<endl;
+    //}   
         
-    namedWindow("src", CV_WINDOW_AUTOSIZE);
-    imshow("src", splited[0]);
-    waitKey(0);    
-    
-    namedWindow("src", CV_WINDOW_AUTOSIZE);
-    imshow("src", splited[2]);
+    namedWindow("RB", CV_WINDOW_AUTOSIZE);
+    imshow("RB", RB);
     waitKey(0);   
     
     
