@@ -21,7 +21,8 @@ int main (int argc, char** argv){
     
     //R/B
     Mat RB (splited[0].rows, splited[0].cols, CV_32FC1);
-    cv::divide(splited[2], splited[1], RB, 1);
+    Mat result = Mat::zeros(splited[0].rows, splited[0].cols, CV_32FC1);
+    cv::divide(splited[2], splited[0], RB, 1);
     
     
     //for( int y = 0; y < splited[2].rows; y++ )
@@ -42,17 +43,18 @@ int main (int argc, char** argv){
 /* Find POS Cell */
     for( int y = 0; y < RB.rows; y++ )
     {   for( int x = 0; x < RB.cols; x++ ){ 
-            if(splited[0].at<float>(y,x) != 0 && (splited[2].at<float>(y,x)/splited[0].at<float>(y,x) >= 1))
-                RB.at<float>(y,x) = 255;
+            //if(splited[0].at<float>(y,x) != 0 && (splited[2].at<float>(y,x)/splited[0].at<float>(y,x) >= 1))
+            if(RB.at<float>(y,x) >= 1)
+                result.at<float>(y,x) = 0;
             else
-                RB.at<float>(y,x) = 0;
+                result.at<float>(y,x) = 255;
             //cout<<(float)RB.at<uchar>(y,x)<<" ";
         }
         //cout<<endl;
     }   
         
     namedWindow("RB", CV_WINDOW_AUTOSIZE);
-    imshow("RB", RB);
+    imshow("RB", result);
     waitKey(0);   
     
     
@@ -60,6 +62,7 @@ int main (int argc, char** argv){
     src.release();
     splited.clear();
     RB.release();
+    result.release();
     
     return 0;
 }
