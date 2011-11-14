@@ -2,9 +2,15 @@
 #include <fstream>
 #include <cv.h>
 #include <highgui.h>
+#include <sys/time.h>
+#include <time.h>
 
 using namespace std;
 using namespace cv;
+
+#define FILENAME_SIZE 60
+
+int saveMat( string& filename, const Mat& M);
 
 int main (int argc, char** argv){
    
@@ -44,8 +50,19 @@ int main (int argc, char** argv){
         
     namedWindow("RB", CV_WINDOW_AUTOSIZE);
     imshow("RB", result);
-    waitKey(0);   
+    waitKey(0);  
     
+    char filename[FILENAME_SIZE];
+    
+    time_t now = time(0);
+    strftime(filename, sizeof(filename)*FILENAME_SIZE, "/home/lluu/thesis/result/split/%Y%m%d_%H%M%S_split.jpg", localtime(&now));
+    
+    
+    result.convertTo(result, CV_8UC1);
+    if(!imwrite(filename, result))
+    {
+		cout<<"error writing image"<<endl;
+    }
     
     //cout<<"c = "<<c<<endl<<"r = "<<r<<endl;
     src.release();
@@ -56,4 +73,8 @@ int main (int argc, char** argv){
     
     return 0;
 }
-    
+
+
+
+
+
