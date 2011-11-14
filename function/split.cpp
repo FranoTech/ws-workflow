@@ -39,7 +39,7 @@ int main (int argc, char** argv){
     for( int y = 0; y < RB.rows; y++ )
     {   for( int x = 0; x < RB.cols; x++ ){ 
             //if(splited[0].at<float>(y,x) != 0 && (splited[2].at<float>(y,x)/splited[0].at<float>(y,x) >= 1))
-            if(RB.at<float>(y,x) >= 1 && BR.at<float>(y,x) < 0.9)
+            if(RB.at<float>(y,x) >= 1.2 && BR.at<float>(y,x) < 1)
                 result.at<float>(y,x) = 0;   // pos cell is black
             else
                 result.at<float>(y,x) = 255;
