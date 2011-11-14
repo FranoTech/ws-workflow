@@ -325,6 +325,7 @@ int ns__MorphologyEx( struct soap *soap,
     return SOAP_OK;
 }
 
+
 // 
 // name: ns__erode
 // @param
@@ -449,6 +450,158 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
 }
 
 
+// 
+// name: ns__Or
+// @param char *src1, char *src2
+// @return char **OutputMatFilename
+
+int ns__Or(  struct soap *soap, char *src1,
+				char *src2,
+				char **OutputMatFilename)
+{ 
+	Mat matSrc1;
+    if(!readMat(src1, matSrc1))
+    {
+        soap_fault(soap);
+        cerr << "Or :: can not read bin file" << endl;
+        soap->fault->faultstring = "Or :: can not read bin file";
+        return SOAP_FAULT;
+    }
+
+    Mat matSrc2; 
+    if(!readMat(src2, matSrc2))
+    {
+		soap_fault(soap);
+        cerr << "Or :: can not read bin file" << endl;
+        soap->fault->faultstring = "Or :: can not read bin file";
+    }
+    
+    if(matSrc1.type() != matSrc2.type()){
+		matSrc2.convertTo(matSrc2, matSrc1.type());
+	}
+    
+    Mat dst;
+    bitwise_or(matSrc1, matSrc2, dst);
+    
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_or", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    matSrc1.release();
+    matSrc2.release();
+    dst.release();
+    
+    return SOAP_OK;
+}
+
+
+// 
+// name: ns__And
+// @param char *src1, char *src2,
+// @return char **OutputMatFilename
+
+int ns__And(  struct soap *soap, char *src1,
+				char *src2,
+				char **OutputMatFilename)
+{ 
+	Mat matSrc1;
+    if(!readMat(src1, matSrc1))
+    {
+        soap_fault(soap);
+        cerr << "And :: can not read bin file" << endl;
+        soap->fault->faultstring = "And :: can not read bin file";
+        return SOAP_FAULT;
+    }
+
+    Mat matSrc2; 
+    if(!readMat(src2, matSrc2))
+    {
+		soap_fault(soap);
+        cerr << "And :: can not read bin file" << endl;
+        soap->fault->faultstring = "And :: can not read bin file";
+    }
+    
+    if(matSrc1.type() != matSrc2.type()){
+		matSrc2.convertTo(matSrc2, matSrc1.type());
+	}
+    
+    Mat dst;
+    bitwise_and(matSrc1, matSrc2, dst);
+    
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_and", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "And :: save mat to binary file" << endl;
+        soap->fault->faultstring = "And :: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    matSrc1.release();
+    matSrc2.release();
+    dst.release();
+    
+    return SOAP_OK;
+}
+
+
+// 
+// name: ns__Not 
+// @param char *src
+// @return char **OutputMatFilename
+
+
+int ns__Not(  struct soap *soap, char *src,
+			  char **OutputMatFilename)
+{ 
+	Mat matSrc;
+    if(!readMat(src, matSrc))
+    {
+        soap_fault(soap);
+        cerr << "Not :: can not read bin file" << endl;
+        soap->fault->faultstring = "Not :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat dst;
+    bitwise_not(matSrc, dst);
+    
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_not", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    matSrc.release();
+    dst.release();
+    
+    
+    return SOAP_OK;
+}
+
 
 // 
 // name: removeSmallCell
@@ -541,6 +694,7 @@ int ns__removeSmallCell(struct soap *soap,
     return SOAP_OK;
 }
 
+
 // 
 // name: ns__scanningCell
 // @param char *inputMatFilename
@@ -628,6 +782,144 @@ int ns__scanningCell(struct soap *soap,
     end = omp_get_wtime();
     cerr<<"ns__scanningCell"<<"time elapsed "<<end-start<<endl;
     
+    return SOAP_OK;
+}
+
+// 
+// name: unknown
+// @param
+// @return
+
+int ns__trainANN(struct soap *soap, 
+                char *inputMatFilename, 
+                char *neuralFile,
+                char **outputMatFilename)
+{
+    double start, end; 
+    start = omp_get_wtime();
+    
+	Mat src;
+    if(!readMat(inputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "trainANN :: can not read bin file" << endl;
+        soap->fault->faultstring = "trainANN :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    // convert src to CvMat to use an old-school function
+    CvMat input3Ch = src;
+    CV_Assert(input3Ch.cols == src.cols && input3Ch.rows == src.rows &&
+    input3Ch.data.ptr == (uchar*)src.data && input3Ch.step == src.step);
+    
+    CvMat *output1Ch = cvCreateMat(src.rows, src.cols, CV_32FC1);
+    
+    if (neuron == NULL ) 
+        neuron = new CvANN_MLP();
+	else 
+        neuron->clear();
+        
+    ByteArrayToANN(neuralFile, neuron);
+
+    
+    CvMat input_nn = cvMat(input3Ch->height*input3Ch->width, 3, CV_32FC1, input3Ch->data.fl);
+    CvMat output_nn = cvMat(output1Ch->height*output1Ch->width, 1, CV_32FC1, output1Ch->data.fl);
+
+    neuron->predict(&input_nn, &output_nn);
+    
+    Mat resultNN = cvarrToMat(output1Ch, false);
+    
+    /* generate output file name */
+    *outputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+
+    time_t now = time(0);
+    strftime(*outputMatFilename, sizeof(outputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_trainANN", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(*outputMatFilename, output))
+    {
+        soap_fault(soap);
+        cerr << "trainANN :: save mat to binary file" << endl;
+        soap->fault->faultstring = "trainANN :: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    src.release();
+    resultNN.release();
+    cvReleaseMat(&output1Ch);
+    
+    
+    end = omp_get_wtime();
+    cerr<<"ns__trainANN "<<"time elapsed "<<end-start<<endl;
+    
+    return SOAP_OK;
+}
+
+// 
+// name: colorRatioMethod
+// @param
+// @return
+// 
+
+int ns__colorRatioMethod(struct soap *soap, 
+						char *inputMatFilename,
+						char **outputMatFilename)
+{ 
+    double start, end; 
+    start = omp_get_wtime();
+
+	Mat src;
+    if(!readMat(inputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "colorRatioMethod :: can not read bin file" << endl;
+        soap->fault->faultstring = "colorRatioMethod :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
+    
+    if( src.type() != CV_8UC1)
+    {
+        src.convertTo(src, CV_8UC1);
+    }
+
+src.convertTo(src, CV_32FC3);
+    vector<Mat> splited;
+    
+    cv::split(src, splited); 
+	
+	/* generate output file name */
+    out.keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
+    out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
+
+    time_t now = time(0);
+    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(out.keepedArea, outSingle))
+    {
+        soap_fault(soap);
+        cerr << "removeSmallCell:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    if(!saveMat(out.biggerArea, tmp))
+    {
+        soap_fault(soap);
+        cerr << "removeSmallCell:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    src.release();
+    tmp.release();
+    outSingle.release();
+    
+    end = omp_get_wtime();
+    cerr<<"ns__removeSmallCell"<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
