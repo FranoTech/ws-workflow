@@ -19,7 +19,6 @@
 #include <time.h>
 //omp
 #include <omp.h>
-#include <glog/logging.h>
 
 
 //init variable
@@ -212,7 +211,7 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
 
 
 // 
-// name: binaryThreshold
+// name: Threshold
 // @param
 // @return
 
@@ -260,6 +259,7 @@ int ns__Threshold(struct soap *soap,
     cerr<<"ns__Threshold "<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
+
 
 // 
 // name: ns__MorphologyEx
@@ -348,22 +348,18 @@ int ns__removeSmallCell(struct soap *soap,
     }
     
     Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
-    //src.convertTo(tmp, CV_32FC1);
     
     if( src.type() != CV_8UC1)
     {
         src.convertTo(src, CV_8UC1);
     }
 
-    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1); //black plain
+    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
 	vector<vector<Point> > contours;
+    double area = 0;
     findContours(	src, contours, CV_RETR_EXTERNAL, 
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-                    
-    //vector<Vec4i> hierarchy;
-    double area = 0;
-    //findContours( src, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);                
-                    
+
     for(size_t i = 0; i< contours.size(); i++)
     {
 		const Point* p = &contours[i][0];
@@ -385,7 +381,6 @@ int ns__removeSmallCell(struct soap *soap,
 	}
 
 	contours.clear();
-    //hierarchy.clear();
 	
 	/* generate output file name */
     out.keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
@@ -453,7 +448,6 @@ int ns__scanningCell(struct soap *soap,
     int sameCount = 0;
     double area = 0;
     vector<vector<Point> > contours;
-    //vector<Vec4i> hierarchy;
     
     while(nContour != 0)
     {
