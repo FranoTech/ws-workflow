@@ -144,6 +144,7 @@ int main (int argc, char** argv){
     
     cvSaveImage("c_tmp8UC1_scanningCell.jpg", tmp8UC1);
     
+    /* ### separate cells ### */
     cvConvert(out_single, tmp8UC1);
     cvClearMemStorage(storage);
     cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
@@ -196,6 +197,43 @@ int main (int argc, char** argv){
 		cout<<"error writing c_output_morph_sep.jpg"<<endl;
     }
     
+    /* ### prepare result ### */
+    
+    cvConvertScale(output_morph, tmp8UC1);
+    cvClearMemStorage(storage);
+    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
+    
+
+    IplImage *tmpImage = cvCreateImage(cvSize(tmp8UC1->width, tmp8UC1->height), IPL_DEPTH_8U, 3);
+    cvSet(tmpImage, CV_RGB(0,0,255)); // Background, blue
+
+    cvSetZero(tmp8UC1);
+    CvScalar pixel;
+    cur = first_con;
+    ncell = 0; // total cells
+    while (cur != NULL) {
+        if ((cur->total > 2) && (fabs(cvContourArea(cur)) > 1500.0)) { // remove small area
+            int npts = cur->total;
+            CvPoint *p = new CvPoint[npts];
+            cvCvtSeqToArray(cur, p);
+            cvFillPoly(tmp8UC1, &p, &npts, 1, cvScalar(255)); // set mask
+            pixel = cvAvg(output1Ch, tmp8UC1);
+            cvFillPoly(tmp8UC1, &p, &npts, 1, cvScalar(0)); // clear mask
+            if (pixel.val[0] > 0.5) { // Negative, green
+                if (tmpImage != NULL)
+                    cvFillPoly(tmpImage, &p, &npts, 1, CV_RGB(0,255,0));
+                    
+            } else if (pixel.val[0] > -0.5) { // Positive, red
+                if (tmpImage != NULL)
+                    cvFillPoly(tmpImage, &p, &npts, 1, CV_RGB(255,0,0));
+            }
+            delete[] p;
+        }
+        cur = cur->h_next;
+    }
+    
+    cvSaveImage("result.jpg", tmpImage);
+
     cvReleaseMat(&inwater);
     //cvReleaseMat(outwater);
 	if (tmp8UC1 != NULL) cvReleaseImage(&tmp8UC1);
@@ -204,7 +242,7 @@ int main (int argc, char** argv){
 	if (output_morph != NULL) cvReleaseMat(&output_morph);
 	//if (input3Ch != NULL) cvReleaseMat(&input3Ch);
 	if (output1Ch != NULL) cvReleaseMat(&output1Ch);
-	//if (tmpImage != NULL) cvReleaseImageHeader(&tmpImage);
+	if (tmpImage != NULL) cvReleaseImageHeader(&tmpImage);
 	if (storage != NULL) cvReleaseMemStorage(&storage);
     
         
