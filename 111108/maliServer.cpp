@@ -326,6 +326,131 @@ int ns__MorphologyEx( struct soap *soap,
 }
 
 // 
+// name: ns__erode
+// @param
+//		- src Source image.
+//		- element Structuring element used for erosion.
+//		- iteration  Number of times erosion is applied.
+// @return
+// 		- OutputMatFilename
+
+
+int ns__erode(  struct soap *soap, char *InputMatFilename,
+				char *elementFilename,
+				int iteration=1,
+				char **OutputMatFilename=NULL)
+{ 
+    double start, end; 
+    start = omp_get_wtime();
+    
+	Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "erode :: can not read bin file" << endl;
+        soap->fault->faultstring = "erode :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat dst;
+    Mat element;
+    
+    if(!readMat(elementFilename, element))
+    {
+		cerr<<"erode: use default element"<<endl;
+        element.release();
+        erode(src, dst, Mat(), Point(-1, -1), iteration);
+    } else {
+		cerr<<"erode: use defined element"<<endl;
+        erode(src, dst, element, Point(-1, -1), iteration);
+    }
+    
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_erode", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "error:: save mat to binary file" << endl;
+        soap->fault->faultstring = "error:: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    src.release();
+    dst.release();
+    element.release();
+    
+    return SOAP_OK;
+}
+
+
+// 
+// name: ns__dilate
+// @param
+//		- src Source image.
+//		- element Structuring element used for dilation.
+//		- iteration  Number of times erosion is applied.
+// @return
+// 		- OutputMatFilename
+
+
+int ns__dilate(  struct soap *soap, char *InputMatFilename,
+				char *elementFilename,
+				int iteration=1,
+				char **OutputMatFilename=NULL)
+{ 
+    double start, end; 
+    start = omp_get_wtime();
+    
+	Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        soap_fault(soap);
+        cerr << "dilate :: can not read bin file" << endl;
+        soap->fault->faultstring = "dilate :: can not read bin file";
+        return SOAP_FAULT;
+    }
+    
+    Mat dst;
+    Mat element;
+    
+    if(!readMat(elementFilename, element))
+    {
+		cerr<<"dilate :: use default element"<<endl;
+        element.release();
+        dilate(src, dst, Mat(), Point(-1, -1), iteration);
+    } else {
+		cerr<<"dilate :: use defined element"<<endl;
+        dilate(src, dst, element, Point(-1, -1), iteration);
+    }
+    
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    time_t now = time(0);
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_dilate", localtime(&now));
+    
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        soap_fault(soap);
+        cerr << "dilate :: save mat to binary file" << endl;
+        soap->fault->faultstring = "dilate :: save mat to binary file";
+        return SOAP_FAULT;
+    }
+    
+    src.release();
+    dst.release();
+    element.release();
+    
+    return SOAP_OK;
+}
+
+
+
+// 
 // name: removeSmallCell
 // @param
 // @return
