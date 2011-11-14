@@ -876,50 +876,57 @@ int ns__colorRatioMethod(struct soap *soap,
         soap->fault->faultstring = "colorRatioMethod :: can not read bin file";
         return SOAP_FAULT;
     }
-    
-    Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
-    
-    if( src.type() != CV_8UC1)
-    {
-        src.convertTo(src, CV_8UC1);
-    }
 
-src.convertTo(src, CV_32FC3);
+    src.convertTo(src, CV_32FC3);
     vector<Mat> splited;
     
     cv::split(src, splited); 
 	
-	/* generate output file name */
-    out.keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
-    out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
+    /* splited[0] = B
+    * splited[1] = G
+    * splited[2] = R
+    */
+    
+    Mat RB (splited[0].rows, splited[0].cols, CV_32FC1);
+    Mat BR (splited[0].rows, splited[0].cols, CV_32FC1);
+    Mat result = Mat::zeros(splited[0].rows, splited[0].cols, CV_32FC1);
+    
+    /* find R:B */
+    cv::divide(splited[2], splited[0], RB, 1);
+    
+    /* find B:R */
+    cv::divide(splited[0], splited[2], BR, 1);
 
+    /* Find POS Cell */
+    for( int y = 0; y < RB.rows; y++ )
+    {   for( int x = 0; x < RB.cols; x++ ){ 
+            if(RB.at<float>(y,x) >= 1.2 && BR.at<float>(y,x) < 1)
+                result.at<float>(y,x) = 0;   // pos cell is black
+            else
+                result.at<float>(y,x) = 255;
+        }
+    }   
+    
+
+    /* generate output file name */
+	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
-    
-    /* save to bin */
-    if(!saveMat(out.keepedArea, outSingle))
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_posCells", localtime(&now));
+	
+	/* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
     {
         soap_fault(soap);
-        cerr << "removeSmallCell:: save mat to binary file" << endl;
-        soap->fault->faultstring = "error:: save mat to binary file";
-        return SOAP_FAULT;
-    }
-    
-    if(!saveMat(out.biggerArea, tmp))
-    {
-        soap_fault(soap);
-        cerr << "removeSmallCell:: save mat to binary file" << endl;
-        soap->fault->faultstring = "error:: save mat to binary file";
+        cerr << "colorRatioMethod :: can not save mat to binary file" << endl;
+		soap->fault->faultstring = "colorRatioMethod :: can not save mat to binary file";
         return SOAP_FAULT;
     }
     
     src.release();
-    tmp.release();
-    outSingle.release();
+    dst.release();
     
     end = omp_get_wtime();
-    cerr<<"ns__removeSmallCell"<<"time elapsed "<<end-start<<endl;
+    cerr<<"ns__colorRatioMethod "<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
