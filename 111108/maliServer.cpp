@@ -1,9 +1,10 @@
 //gsoap
 #include "soapH.h"
-#include "imgProcess.nsmap"
+#include "mali.nsmap"
 //opencv
-#include "cv.h"
-#include "highgui.h"
+#include <cv.h>
+#include <highgui.h>
+#include <ml.h>
 //STL
 #include <sstream>
 #include <iostream>
@@ -36,6 +37,8 @@ int readMat( const char *filename, Mat& M);
 int getMatType (const char *typeName);
 int getThresholdType ( const char *typeName);
 int getColorFlag(int colorflag);
+int getMorphOperation ( const char *typeName);
+void ByteArrayToANN(char *annfile, CvANN_MLP* ann);
 
 
 int main(int argc, char **argv)
@@ -703,7 +706,7 @@ int ns__removeSmallCell(struct soap *soap,
 
 int ns__scanningCell(struct soap *soap, 
 						char *inputMatFilename,
-						char **outputMatFilename)
+						char **OutputMatFilename)
 { 
     double start, end; 
     start = omp_get_wtime();
@@ -753,20 +756,20 @@ int ns__scanningCell(struct soap *soap,
             
             if((area < 3000.0) || (sameCount > 10))
             {
-                fillPoly( src3d2FC1, &p, &n, 1, Scalar(0, 0, 0)); // remove from src 
+                fillPoly( src32FC1, &p, &n, 1, Scalar(0, 0, 0)); // remove from src 
                 fillPoly( output, &p, &n, 1, Scalar(255, 255, 255)); 
             }
         }
     }
 
 	/* generate output file name */
-    *outputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+    *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
-    strftime(*outputMatFilename, sizeof(outputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_scaningCell", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_scaningCell", localtime(&now));
     
     /* save to bin */
-    if(!saveMat(*outputMatFilename, output))
+    if(!saveMat(*OutputMatFilename, output))
     {
         soap_fault(soap);
         cerr << "scanningCell:: save mat to binary file" << endl;
@@ -793,7 +796,7 @@ int ns__scanningCell(struct soap *soap,
 int ns__trainANN(struct soap *soap, 
                 char *inputMatFilename, 
                 char *neuralFile,
-                char **outputMatFilename)
+                char **OutputMatFilename)
 {
     double start, end; 
     start = omp_get_wtime();
@@ -807,6 +810,7 @@ int ns__trainANN(struct soap *soap,
         return SOAP_FAULT;
     }
     
+    CvANN_MLP* neuron = NULL ;
     // convert src to CvMat to use an old-school function
     CvMat input3Ch = src;
     CV_Assert(input3Ch.cols == src.cols && input3Ch.rows == src.rows &&
@@ -822,7 +826,7 @@ int ns__trainANN(struct soap *soap,
     ByteArrayToANN(neuralFile, neuron);
 
     
-    CvMat input_nn = cvMat(input3Ch->height*input3Ch->width, 3, CV_32FC1, input3Ch->data.fl);
+    CvMat input_nn = cvMat(input3Ch.height*input3Ch.width, 3, CV_32FC1, input3Ch.data.fl);
     CvMat output_nn = cvMat(output1Ch->height*output1Ch->width, 1, CV_32FC1, output1Ch->data.fl);
 
     neuron->predict(&input_nn, &output_nn);
@@ -830,13 +834,13 @@ int ns__trainANN(struct soap *soap,
     Mat resultNN = cvarrToMat(output1Ch, false);
     
     /* generate output file name */
-    *outputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+    *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
-    strftime(*outputMatFilename, sizeof(outputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_trainANN", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_trainANN", localtime(&now));
     
     /* save to bin */
-    if(!saveMat(*outputMatFilename, output))
+    if(!saveMat(*OutputMatFilename, resultNN))
     {
         soap_fault(soap);
         cerr << "trainANN :: save mat to binary file" << endl;
@@ -863,7 +867,7 @@ int ns__trainANN(struct soap *soap,
 
 int ns__colorRatioMethod(struct soap *soap, 
 						char *inputMatFilename,
-						char **outputMatFilename)
+						char **OutputMatFilename)
 { 
     double start, end; 
     start = omp_get_wtime();
@@ -914,7 +918,7 @@ int ns__colorRatioMethod(struct soap *soap,
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_posCells", localtime(&now));
 	
 	/* save to bin */
-    if(!saveMat(*OutputMatFilename, dst))
+    if(!saveMat(*OutputMatFilename, result))
     {
         soap_fault(soap);
         cerr << "colorRatioMethod :: can not save mat to binary file" << endl;
@@ -923,7 +927,10 @@ int ns__colorRatioMethod(struct soap *soap,
     }
     
     src.release();
-    dst.release();
+    splited.clear();
+    RB.release();    
+    BR.release();
+    result.release();
     
     end = omp_get_wtime();
     cerr<<"ns__colorRatioMethod "<<"time elapsed "<<end-start<<endl;
@@ -1027,7 +1034,6 @@ int getMatType ( const char *typeName)
         return 21;
 }
 
-
 int getThresholdType ( const char *typeName)
 {
     if(strcmp("THRESH_BINARY", typeName) == 0)
@@ -1041,7 +1047,6 @@ int getThresholdType ( const char *typeName)
     else if(strcmp("THRESH_TOZERO_INV", typeName) == 0)
         return THRESH_TOZERO_INV;
 }
-
 
 int getColorFlag(int colorflag)
 {
@@ -1073,3 +1078,21 @@ int getMorphOperation ( const char *typeName)
     else if(strcmp("MORPH_BLACKHAT", typeName) == 0)
         return MORPH_BLACKHAT;
 }        
+
+void ByteArrayToANN(char *annfile, CvANN_MLP* ann)
+{
+    char *buffer;
+    long size;
+	ifstream file (annfile, ios::in|ios::binary|ios::ate);
+    size = file.tellg();
+    file.seekg (0, ios::beg);
+    buffer = new char [size];
+    file.read (buffer, size);
+    file.close();
+	CvFileStorage *cvfs = cvOpenFileStorage(annfile, NULL, CV_STORAGE_READ);
+
+	if (cvfs != NULL) {
+		ann->read(cvfs, cvGetFileNodeByName(cvfs, NULL, "CIA_Neuron"));
+		cvReleaseFileStorage(&cvfs);
+	}
+}
