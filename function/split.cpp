@@ -48,9 +48,9 @@ int main (int argc, char** argv){
         //cout<<endl;
     }   
         
-    namedWindow("RB", CV_WINDOW_AUTOSIZE);
-    imshow("RB", result);
-    waitKey(0);  
+    //namedWindow("RB", CV_WINDOW_AUTOSIZE);
+    //imshow("RB", result);
+    //waitKey(0);  
     
     char filename[FILENAME_SIZE];
     
