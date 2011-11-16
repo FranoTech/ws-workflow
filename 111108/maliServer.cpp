@@ -801,7 +801,7 @@ int ns__trainANN(struct soap *soap,
     double start, end; 
     start = omp_get_wtime();
     
-	Mat src;
+	Mat src; //must be 3ch image
     if(!readMat(inputMatFilename, src))
     {
         soap_fault(soap);
