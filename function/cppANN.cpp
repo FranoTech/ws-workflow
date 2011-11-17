@@ -18,12 +18,13 @@ int readMat( const char *filename, Mat& M);
 
 int main (int argc, char** argv){
     
-    Mat src; //must be 3ch image
-    if(!readMat(argv[1], src))
-    {
-        cerr << "trainANN :: can not read bin file" << endl;
-    }
+    //Mat src; //must be 3ch image
+    //if(!readMat(argv[1], src))
+    //{
+        //cerr << "trainANN :: can not read bin file" << endl;
+    //}
     
+    Mat src  = imread(argv[1],1);
     CvANN_MLP* neuron = NULL ;
     
     // convert src to CvMat to use an old-school function
