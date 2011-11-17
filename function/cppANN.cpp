@@ -55,14 +55,39 @@ int main (int argc, char** argv){
     
     Mat resultNN(output1Ch); 
     
-    if(!saveMat("cppANN_result", resultNN))
+    //if(!saveMat("cppANN_result", resultNN))
+    //{
+        //cerr << "trainANN :: save mat to binary file" << endl;
+    //}
+    
+    Mat result;
+    resultNN.copyTo(result);
+    
+    //cout<<"result.type() = "<<result.type()<<endl;
+    
+    result.convertTo(result, CV_8U);
+    
+    //namedWindow("src", CV_WINDOW_AUTOSIZE);
+    //imshow("src", result);
+    //waitKey(0);
+    
+    
+    if(!imwrite("cppANN_result.jpg", result))
     {
-        cerr << "trainANN :: save mat to binary file" << endl;
+        cerr<< "can not save mat to jpg file" << endl;
     }
     
+    //IplImage *tmp8UC1 = cvCreateImage(cvGetSize(output1Ch), IPL_DEPTH_8U, 1);
+    //cvConvert(output1Ch, tmp8UC1);
+    //cvSaveImage("cppANN_result.jpg", tmp8UC1);
+    
+    result.release();
     src.release();
     resultNN.release();
     cvReleaseMat(&output1Ch);
+    cvReleaseMat(&input3Ch);
+    
+   // cvReleaseImage(&tmp8UC1);
     
     return 0;
 }
