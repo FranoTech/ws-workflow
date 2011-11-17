@@ -38,7 +38,7 @@ int getMatType (const char *typeName);
 int getThresholdType ( const char *typeName);
 int getColorFlag(int colorflag);
 int getMorphOperation ( const char *typeName);
-void ByteArrayToANN(char *annfile, CvANN_MLP* ann);
+int ByteArrayToANN(char *annfile, CvANN_MLP* ann);
 
 
 int main(int argc, char **argv)
@@ -789,9 +789,10 @@ int ns__scanningCell(struct soap *soap,
 }
 
 // 
-// name: unknown
-// @param
-// @return
+// name: trainANN
+// @param   char *inputMatFilename, 
+//          char *neuralFile
+// @return  char **OutputMatFilename
 
 int ns__trainANN(struct soap *soap, 
                 char *inputMatFilename, 
@@ -810,25 +811,30 @@ int ns__trainANN(struct soap *soap,
         return SOAP_FAULT;
     }
     
-    CvANN_MLP* neuron = NULL ;
     // convert src to CvMat to use an old-school function
-    CvMat input3Ch = src;
-    CV_Assert(input3Ch.cols == src.cols && input3Ch.rows == src.rows &&
-    input3Ch.data.ptr == (uchar*)src.data && input3Ch.step == src.step);
+    CvMat tmp = src;
+    CV_Assert(tmp.cols == src.cols && tmp.rows == src.rows &&
+    tmp.data.ptr == (uchar*)src.data && tmp.step == src.step);
     
+    CvMat *input3Ch = cvCreateMat(src.rows, src.cols, CV_32FC3);
+    cvConvert(&tmp, input3Ch);
     CvMat *output1Ch = cvCreateMat(src.rows, src.cols, CV_32FC1);
     
+    CvANN_MLP* neuron = NULL ;
     if (neuron == NULL ) 
         neuron = new CvANN_MLP();
 	else 
         neuron->clear();
         
-    ByteArrayToANN(neuralFile, neuron);
-
-    
-    CvMat input_nn = cvMat(input3Ch.height*input3Ch.width, 3, CV_32FC1, input3Ch.data.fl);
+    if(!ByteArrayToANN(neuralFile, neuron)){
+        soap_fault(soap);
+        cerr << "trainANN :: can not load byte array to neural" << endl;
+        soap->fault->faultstring = "trainANN :: can not load byte array to neural";
+        return SOAP_FAULT;
+    }
+        
+    CvMat input_nn = cvMat(input3Ch->height*input3Ch->width, 3, CV_32FC1, input3Ch->data.fl);
     CvMat output_nn = cvMat(output1Ch->height*output1Ch->width, 1, CV_32FC1, output1Ch->data.fl);
-
     neuron->predict(&input_nn, &output_nn);
     
     Mat resultNN = cvarrToMat(output1Ch, false);
@@ -851,7 +857,6 @@ int ns__trainANN(struct soap *soap,
     src.release();
     resultNN.release();
     cvReleaseMat(&output1Ch);
-    
     
     end = omp_get_wtime();
     cerr<<"ns__trainANN "<<"time elapsed "<<end-start<<endl;
@@ -937,7 +942,7 @@ int ns__colorRatioMethod(struct soap *soap,
     return SOAP_OK;
 }
 
-
+//home/lluu/thesis/CIA/T51-1549A23.jpg
 
 /* helper function */
 /* Save matrix to binary file */
@@ -1079,20 +1084,24 @@ int getMorphOperation ( const char *typeName)
         return MORPH_BLACKHAT;
 }        
 
-void ByteArrayToANN(char *annfile, CvANN_MLP* ann)
+int ByteArrayToANN(char *annfile, CvANN_MLP* ann)
 {
     char *buffer;
     long size;
 	ifstream file (annfile, ios::in|ios::binary|ios::ate);
+    if(!file){ return 0; }
+    
     size = file.tellg();
     file.seekg (0, ios::beg);
     buffer = new char [size];
     file.read (buffer, size);
     file.close();
+    
 	CvFileStorage *cvfs = cvOpenFileStorage(annfile, NULL, CV_STORAGE_READ);
-
 	if (cvfs != NULL) {
 		ann->read(cvfs, cvGetFileNodeByName(cvfs, NULL, "CIA_Neuron"));
 		cvReleaseFileStorage(&cvfs);
-	}
+	} else {
+        return 0;
+    }
 }
