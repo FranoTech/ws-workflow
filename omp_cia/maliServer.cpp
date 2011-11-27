@@ -65,8 +65,8 @@ int ns__loadMat (struct soap *soap,
     double start, end; 
     start = omp_get_wtime();
     
-    #pragma parallel sections{
-        #pragma parallel section {
+    #pragma omp parallel sections {
+        #pragma omp section {
             Mat src;
             /* load image data */
             if(InputImageFilename){
@@ -90,7 +90,7 @@ int ns__loadMat (struct soap *soap,
                 return SOAP_FAULT;
             }
         }
-        #pragma parallel section {
+        #pragma omp section {
     
             /* generate output file name */
             *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
@@ -127,29 +127,33 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
 {
     double start, end; 
     start = omp_get_wtime();
-    
-    Mat src;
-    if(!readMat(InputMatFilename, src))
-    {
-        soap_fault(soap);
-        cerr<< "MatToJPG:: can not read bin file" << endl;
-        soap->fault->faultstring = "error :: can not read bin file";
-        return SOAP_FAULT;
+    #pragma omp parallel sections{
+        #pragma omp section{
+            Mat src;
+            if(!readMat(InputMatFilename, src))
+            {
+                soap_fault(soap);
+                cerr<< "MatToJPG:: can not read bin file" << endl;
+                soap->fault->faultstring = "error :: can not read bin file";
+                return SOAP_FAULT;
+            }
+            
+            //get chan of src image
+            int chan = src.channels();
+            
+            //check if it is not 8U then convert to 8UC(n)
+            if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
+            {
+               src.convertTo(src, CV_8UC(chan));
+            }
+        }
+        #pragma omp section{
+            /* generate output file name */
+            *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+            time_t now = time(0);
+            strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S.jpg", localtime(&now));
+        }
     }
-    
-    //get chan of src image
-    int chan = src.channels();
-    
-    //check if it is not 8U then convert to 8UC(n)
-    if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
-    {
-       src.convertTo(src, CV_8UC(chan));
-    }
-    
-    /* generate output file name */
-    *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S.jpg", localtime(&now));
     
     if(!imwrite(*OutputMatFilename, src))
     {
@@ -181,27 +185,31 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
     double start, end; 
     start = omp_get_wtime();
     
+    #pragma omp parallel sections {
+        #pragma omp section {
 	    
-    Mat src;
-    if(!readMat(InputMatFilename, src))
-    {
-        soap_fault(soap);
-        cerr<< "ConvertTo:: can not read bin file" << endl;
-        soap->fault->faultstring = "ConvertTo :: can not read bin file";
-        return SOAP_FAULT;
+            Mat src;
+            if(!readMat(InputMatFilename, src))
+            {
+                soap_fault(soap);
+                cerr<< "ConvertTo:: can not read bin file" << endl;
+                soap->fault->faultstring = "ConvertTo :: can not read bin file";
+                return SOAP_FAULT;
+            }
+            
+            if(src.type()!= getMatType(types))
+            {
+                src.convertTo(src,getMatType(types));
+            }
+        }
+       #pragma omp section{ 
+            /* generate output file name */
+            *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+            time_t now = time(0);
+            strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_ConvertTo", localtime(&now));
+        }
     }
     
-    if(src.type()!= getMatType(types))
-    {
-        src.convertTo(src,getMatType(types));
-    }
-
-    
-    /* generate output file name */
-	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_ConvertTo", localtime(&now));
-	
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, src))
     {
@@ -234,24 +242,30 @@ int ns__Threshold(struct soap *soap,
     double start, end; 
     start = omp_get_wtime();
 	
-    /* read from bin */
-    Mat src;
-	if(!readMat(InputMatFilename, src))
-	    {
-	        soap_fault(soap);
-	        cerr << "error :: can not read bin file" << endl;
-			soap->fault->faultstring = "error :: can not read bin file";
-	        return SOAP_FAULT;
-	    }
-    
-    Mat dst(src.rows, src.cols, src.depth());
-    threshold(src, dst, thresholdValue, maxValue, getThresholdType (thresholdType));
-    
-    /* generate output file name */
-	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
-	
+    #pragma omp parallel sections {
+        #pragma omp section {
+            
+            /* read from bin */
+            Mat src;
+            if(!readMat(InputMatFilename, src))
+                {
+                    soap_fault(soap);
+                    cerr << "error :: can not read bin file" << endl;
+                    soap->fault->faultstring = "error :: can not read bin file";
+                    return SOAP_FAULT;
+                }
+            
+            Mat dst(src.rows, src.cols, src.depth());
+            threshold(src, dst, thresholdValue, maxValue, getThresholdType (thresholdType));
+        }
+        #pragma omp section {
+            /* generate output file name */
+            *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+            time_t now = time(0);
+            strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
+        }
+     }
+        
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
@@ -285,36 +299,40 @@ int ns__MorphologyEx( struct soap *soap,
 {     
     double start, end; 
     start = omp_get_wtime();
-    /* read from bin */
-    Mat src;
-    if(!readMat(InputMatFilename, src))
-        {
-            soap_fault(soap);
-            cerr << "MorphologyEx:: can not read bin file" << endl;
-            soap->fault->faultstring = "MorphologyEx :: can not read bin file";
-            return SOAP_FAULT;
+    #pragma omp parallel sections {
+        #pragma omp section {
+            /* read from bin */
+            Mat src;
+            if(!readMat(InputMatFilename, src))
+                {
+                    soap_fault(soap);
+                    cerr << "MorphologyEx:: can not read bin file" << endl;
+                    soap->fault->faultstring = "MorphologyEx :: can not read bin file";
+                    return SOAP_FAULT;
+                }
+            
+            Mat dst(src.rows, src.cols, src.depth());
+            Mat se; 
+            Size seSize(3, 3); 
+            Point seAnc(1, 1);
+    
+            se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
+            morphologyEx(src, dst, getMorphOperation(morphOperation), se, seAnc);
+    
+            if(src.empty()) {
+                soap_fault(soap);
+                cerr << "MorphologyEx :: something wrong" << endl;
+                soap->fault->faultstring = "MorphologyEx :: something wrong";
+                return SOAP_FAULT;
+            }
         }
-    
-    Mat dst(src.rows, src.cols, src.depth());
-    Mat se; 
-    Size seSize(3, 3); 
-    Point seAnc(1, 1);
-    
-    se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
-    morphologyEx(src, dst, getMorphOperation(morphOperation), se, seAnc);
-    
-    if(src.empty()) {
-			soap_fault(soap);
-			cerr << "MorphologyEx :: something wrong" << endl;
-			soap->fault->faultstring = "MorphologyEx :: something wrong";
-			return SOAP_FAULT;
+        #pragma omp section {
+            /* generate output file name */
+            *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+            time_t now = time(0);
+            strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_MorphOpen", localtime(&now));
+        }
     }
-    
-    /* generate output file name */
-    *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_MorphOpen", localtime(&now));
-    
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
