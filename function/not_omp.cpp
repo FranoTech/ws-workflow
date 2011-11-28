@@ -11,28 +11,30 @@ int readMat( const char *filename, Mat& M);
 
 int main (int argc, char** argv){
     
-    Mat src  = imread(argv[1],0);
-    Mat dst;
-    
-    //Mat src1;
-	//if(!readMat(argv[1], src1)){
-			//cout<<"can't read image"<<endl;
-    //}
-    int tid = omp_get_thread_num();
-    int numt = omp_get_num_thread();
-    
-    // data/numt => number of data per thread
-    for 
-    
-    bitwise_xor(src1, src2, dst);
-    
-    if(!imwrite("xorArea.jpg", dst))
+    //Mat src  = imread(argv[1],0);
+    // Mat dst;
+    Mat src = 
+    //int height    = src.rows;
+    //int width     = src.cols;
+    //int step      = src.step;
+    //uchar *data   = (uchar *)src.data;
+    //uchar *ddst   = (uchar *)dst.data;
+    //uchar *data2      = (uchar *)dst->imageData;
+    int i = step;
+    #pragma omp parallel for
+        for(int i = 0; i < src.rows; i++)
+        {       
+            for(int j = 0; j < src.cols; j++)
+            {
+                bitwise_not(src.at<uchar>(i, j), src.at<uchar>(i, j));
+            }
+        }
+    if(!imwrite("not.jpg", src))
     {
 		cout<<"error writing image"<<endl;
     }
     
-    src1.release();
-    src2.release();
+    src.release();
     
     return 0;
 }
