@@ -1,5 +1,5 @@
 #!/bin/bash
-g++ `pkg-config opencv --cflags` `pkg-config opencv --libs` -fopenmp -o maliServer maliServer.cpp soapC.cpp soapServer.cpp stdsoap2.cpp
+g++ `pkg-config opencv --cflags` -fopenmp -o maliServer maliServer.cpp soapC.cpp soapServer.cpp stdsoap2.cpp `pkg-config opencv --libs`
 #g++ `pkg-config opencv --cflags` `pkg-config opencv --libs` -o maliServer maliServer.cpp soapC.cpp soapServer.cpp stdsoap2.cpp
 echo "***compiled***"
 sudo chmod a+x maliServer
