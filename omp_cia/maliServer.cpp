@@ -38,6 +38,7 @@ int getThresholdType ( const char *typeName);
 int getColorFlag(int colorflag);
 int getMorphOperation ( const char *typeName);
 int ByteArrayToANN(char *annfile, CvANN_MLP* ann);
+bool fault;  //check fault
 
 
 int main(int argc, char **argv)
@@ -77,7 +78,7 @@ int ns__loadMat (struct soap *soap,
                     soap_fault(soap);
                     cerr<<"loadMat:: can not load image" << endl;
                     soap->fault->faultstring = "error :: can not load image";
-                    return SOAP_FAULT;
+                    //return SOAP_FAULT;
                 }
                 
                 if(src.type()!= getMatType(types))
@@ -89,7 +90,7 @@ int ns__loadMat (struct soap *soap,
                 soap_fault(soap);
                 cerr<<"loadMat:: InputImageFilename error" << endl;
                 soap->fault->faultstring = "loadMat:: InputImageFilename error";
-                return SOAP_FAULT;
+                //return SOAP_FAULT;
             }
         }
         #pragma omp section
