@@ -64,12 +64,12 @@ int ns__loadMat (struct soap *soap,
 {
     double start, end; 
     start = omp_get_wtime();
+    Mat src;
     
-    #pragma omp parallel sections{
-        
-        #pragma omp section {
+    #pragma omp parallel sections 
+    {   
+        { 
             /* load image data */            
-            Mat src;
             if(InputImageFilename){
                 
                 src = imread(InputImageFilename,getColorFlag(colorflag));
@@ -92,7 +92,8 @@ int ns__loadMat (struct soap *soap,
                 return SOAP_FAULT;
             }
         }
-        #pragma omp section {
+        #pragma omp section
+        {
     
             /* generate output file name */
             *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
@@ -129,9 +130,11 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
 {
     double start, end; 
     start = omp_get_wtime();
-    #pragma omp parallel sections{
-        #pragma omp section {
-            Mat src;
+    
+    Mat src;
+    #pragma omp parallel sections
+    {
+        {
             if(!readMat(InputMatFilename, src))
             {
                 soap_fault(soap);
@@ -149,7 +152,8 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
                src.convertTo(src, CV_8UC(chan));
             }
         }
-        #pragma omp section {
+        #pragma omp section 
+        {
             /* generate output file name */
             *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
             time_t now = time(0);
@@ -185,10 +189,10 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
 {
     double start, end; 
     start = omp_get_wtime();
-    
-    #pragma omp sections{
-        #pragma omp section{
-            Mat src;
+    Mat src;
+    #pragma omp parallel sections
+    {
+        {
             if(!readMat(InputMatFilename, src))
             {
                 soap_fault(soap);
@@ -202,8 +206,8 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
                 src.convertTo(src,getMatType(types));
             }
         }
-        
-        #pragma omp section{
+        #pragma omp section
+        {
             /* generate output file name */
             *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
             time_t now = time(0);
@@ -241,11 +245,13 @@ int ns__Threshold(struct soap *soap,
 { 
     double start, end; 
     start = omp_get_wtime();
-	
-    #pragma omp parallel sections{
-        #pragma omp section{
+    
+    Mat src;
+    Mat dst;
+    #pragma omp parallel sections
+    {
+        {
             /* read from bin */
-            Mat src;
             if(!readMat(InputMatFilename, src))
                 {
                     soap_fault(soap);
@@ -254,11 +260,11 @@ int ns__Threshold(struct soap *soap,
                     return SOAP_FAULT;
                 }
             
-            Mat dst(src.rows, src.cols, src.depth());
+            dst = Mat(src.rows, src.cols, src.depth());
             threshold(src, dst, thresholdValue, maxValue, getThresholdType (thresholdType));
         }
-        
-        #pragma omp section{        
+        #pragma omp section
+        {        
             /* generate output file name */
             *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
             time_t now = time(0);
@@ -366,13 +372,13 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
     double start, end; 
     start = omp_get_wtime();
     
-    
+    Mat src;
     Mat dst;
     Mat element;
     
-    #pragma omp parallel sections{
-        #pragma omp section{
-            Mat src;
+    #pragma omp parallel sections
+    {
+        {    
             if(!readMat(InputMatFilename, src))
             {
                 soap_fault(soap);
@@ -391,8 +397,8 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
                 erode(src, dst, element, Point(-1, -1), iteration);
             }
         }
-        
-        #pragma omp section{
+        #pragma omp section
+        {
             /* generate output file name */
             *OutputMatFilename = (char*)soap_malloc(soap, 60);
             time_t now = time(0);
@@ -408,10 +414,21 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
         return SOAP_FAULT;
     }
 
-    #pragma omp parallel sections{
-        #pragma omp section{ src.release(); }
-        #pragma omp section{ dst.release(); }
-        #pragma omp section{ element.release(); }
+    #pragma omp parallel sections
+    {
+        { 
+            src.release()
+        }
+        
+        #pragma omp section
+        { 
+            dst.release(); 
+        }
+    
+        #pragma omp section
+        { 
+            element.release(); 
+        }
     }
     
     return SOAP_OK;
@@ -436,9 +453,13 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
     double start, end; 
     start = omp_get_wtime();
     
-    #pragma omp parallel sections{
-        #pragma omp section{
-            Mat src;
+    Mat src;
+    Mat dst;
+    Mat element;
+    
+    #pragma omp parallel sections
+    {
+        {
             if(!readMat(InputMatFilename, src))
             {
                 soap_fault(soap);
@@ -446,9 +467,6 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
                 soap->fault->faultstring = "dilate :: can not read bin file";
                 return SOAP_FAULT;
             }
-            
-            Mat dst;
-            Mat element;
             
             if(!readMat(elementFilename, element))
             {
@@ -460,7 +478,8 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
                 dilate(src, dst, element, Point(-1, -1), iteration);
             }
         }
-        #pragma omp section{
+        #pragma omp section
+        {
             /* generate output file name */
             *OutputMatFilename = (char*)soap_malloc(soap, 60);
             time_t now = time(0);
@@ -493,9 +512,16 @@ int ns__Or(  struct soap *soap, char *src1,
 				char *src2,
 				char **OutputMatFilename)
 { 
-    #pragma omp parallel sections{
-        #pragma omp section{
-            Mat matSrc1;
+    double start, end; 
+    start = omp_get_wtime();
+    
+    Mat matSrc1;
+    Mat matSrc2; 
+    
+    #pragma omp parallel sections
+    {   
+        {
+            
             if(!readMat(src1, matSrc1))
             {
                 soap_fault(soap);
@@ -504,8 +530,8 @@ int ns__Or(  struct soap *soap, char *src1,
                 return SOAP_FAULT;
             }
         }
-        #pragma omp section{
-            Mat matSrc2; 
+        #pragma omp section
+        {
             if(!readMat(src2, matSrc2))
             {
                 soap_fault(soap);
