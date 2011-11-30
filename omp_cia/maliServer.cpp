@@ -79,7 +79,6 @@ int ns__loadMat (struct soap *soap,
                     cerr<<"loadMat:: can not load image" << endl;
                     soap->fault->faultstring = "error :: can not load image";
                     //return SOAP_FAULT;
-                    break;
                 }
                 
                 if(src.type()!= getMatType(types))
