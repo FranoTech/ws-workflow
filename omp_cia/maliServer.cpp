@@ -38,7 +38,7 @@ int getThresholdType ( const char *typeName);
 int getColorFlag(int colorflag);
 int getMorphOperation ( const char *typeName);
 int ByteArrayToANN(char *annfile, CvANN_MLP* ann);
-bool fault;  //check fault
+//bool fault;  //check fault
 
 
 int main(int argc, char **argv)
@@ -65,6 +65,13 @@ int ns__loadMat (struct soap *soap,
     double start, end; 
     start = omp_get_wtime();
     Mat src;
+    src = imread(InputImageFilename,getColorFlag(colorflag));
+    if(src.empty()) 
+    {
+        cerr<<"loadMat:: can not load image" << endl;
+        soap->fault->faultstring = "error :: can not load image";
+                    
+    }
     
     #pragma omp parallel sections
     {   
@@ -73,13 +80,7 @@ int ns__loadMat (struct soap *soap,
             /* load image data */            
             if(InputImageFilename){
                 
-                src = imread(InputImageFilename,getColorFlag(colorflag));
-                if(src.empty()) {
-                    soap_fault(soap);
-                    cerr<<"loadMat:: can not load image" << endl;
-                    soap->fault->faultstring = "error :: can not load image";
-                    //return SOAP_FAULT;
-                }
+                
                 
                 if(src.type()!= getMatType(types))
                 {
@@ -87,15 +88,12 @@ int ns__loadMat (struct soap *soap,
                 }
                 
             } else {
-                soap_fault(soap);
                 cerr<<"loadMat:: InputImageFilename error" << endl;
                 soap->fault->faultstring = "loadMat:: InputImageFilename error";
-                //return SOAP_FAULT;
             }
         }
         #pragma omp section
         {
-    
             /* generate output file name */
             *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
             time_t now = time(0);
@@ -111,6 +109,8 @@ int ns__loadMat (struct soap *soap,
 		soap->fault->faultstring = "error:: can not save mat to binary file";
         return SOAP_FAULT;
     }
+    
+    
     
     src.release();
     
