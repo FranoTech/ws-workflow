@@ -1,3 +1,10 @@
+/* * to do list * *
+ * initial service => ตั้งค่า environment ทั้งหมด เรียกก่อนจะรัน workflow
+ * - ตั้งค่า tmpfs , กำหนดจำนวน thread, base directory,
+ */
+
+
+
 //gsoap
 #include "soapH.h"
 #include "mali.nsmap"
@@ -26,6 +33,7 @@
 #define BASE_DIR "/home/lluu/dir/"
 #define FILENAME_SIZE 60
 #define int64 long long
+#define _THREAD 2
 
 //namespace
 using namespace std;
@@ -43,11 +51,11 @@ void getOutputFilename (char **filename, const char *toAppend);
 
 
 int main(int argc, char **argv)
-{ 
+{
     struct soap soap;
     soap_init(&soap);
     if (argc < 2)		// no args: assume this is a CGI application
-    { 
+    {
         soap_serve(&soap);	// serve request
         soap_destroy(&soap);// cleanup class instances
         soap_end(&soap);	// cleanup
@@ -63,46 +71,46 @@ int ns__loadMat (struct soap *soap,
                 char *types="CV_32FC1",
                 char **OutputMatFilename=NULL)
 {
-    double start, end; 
+    double start, end;
     start = omp_get_wtime();
 
     Mat src;
-    
+
     /* load image data */
     src = imread(InputImageFilename,getColorFlag(colorflag));
     if(src.empty()) {
         cerr<<"loadMat:: can not load image" << endl;
-        soap_receiver_fault(soap, "loadMat:: can not load image", NULL);
+        return soap_receiver_fault(soap, "loadMat:: can not load image", NULL);
     }
-    
-    /* convert Mat to required type */    
+
+    /* convert Mat to required type */
     if(src.type()!= getMatType(types))
     {
         src.convertTo(src,getMatType(types));
     }
-		
-    
+
+
 	/* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,"_loadMat");
-	
+
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, src))
     {
         cerr<<"loadMat:: can not save mat to binary file" << endl;
-        soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
+        return soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
     }
-    
+
     src.release();
-    
+
     end = omp_get_wtime();
     cerr<<"ns__loadMat "<<"time elapsed "<<end-start<<endl;
-    
+
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: MatToJPG
 // - convert nat to 8U and save as JPG
 // @param char *InputMatFilename
@@ -110,10 +118,10 @@ int ns__loadMat (struct soap *soap,
 
 int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFilename)
 {
-    double start, end; 
+    double start, end;
     start = omp_get_wtime();
-    
-    Mat src;    
+
+    Mat src;
 
     /* check if it is not 8U then convert to 8UC(n) */
     int chan = src.channels();
@@ -121,86 +129,102 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
     {
        src.convertTo(src, CV_8UC(chan));
     }
-    
+
     /* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,".jpg");
-    
+
     if(!imwrite(*OutputMatFilename, src))
     {
         cerr<< "MatToJPG:: can not save mat to jpg file" << endl;
-        soap_receiver_fault(soap, "MatToJPG:: can not save mat to jpg file", NULL);
+        return soap_receiver_fault(soap, "MatToJPG:: can not save mat to jpg file", NULL);
     }
-    
+
     src.release();
-    
+
     end = omp_get_wtime();
     cerr<<"ns__MatToJPG "<<"time elapsed "<<end-start<<endl;
-    
+
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: convertTo
 // @param char *inputMatFilename
-// @return 
+// @return
 //      char *types="CV_32FC1",
 //      char **outputMatFilename
 int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
                     char *types="CV_32FC1",
                     char **OutputMatFilename=NULL)
 {
-    double start, end; 
+    double start, end;
     start = omp_get_wtime();
-    
-	    
+
     Mat src;
     if(!readMat(InputMatFilename, src))
     {
         cerr<< "ConvertTo:: can not read bin file" << endl;
-        soap_receiver_fault(soap, "ConvertTo:: can not read bin file", NULL);
+        return soap_receiver_fault(soap, "ConvertTo:: can not read bin file", NULL);
     }
-    
-    if(src.type()!= getMatType(types))
+
+    int MatType = getMatType(types);
+
+    if(src.type()!= MatType)
     {
-        src.convertTo(src,getMatType(types));
+        Mat dummy[_THREAD];
+        #pragma omp parallel
+        {
+            int numt = omp_get_num_threads();
+            int tid = omp_get_thread_num();
+            int start;
+            if(tid == 0)
+            {
+                start = tid*(src.cols/numt);
+            } else {
+                start = (tid*(src.cols/numt))+1;
+            }
+            int end = (tid+1)*(src.cols/numt);
+            
+            dummy[tid].convertTo(dummy[tid], MatType);
+        }
     }
 
     /* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,"_ConvertTo");
-	
+
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, src))
     {
         cerr<<"ConvertTo:: can not save mat to binary file" << endl;
-		soap_receiver_fault(soap, "ConvertTo:: can not read bin file", NULL);
+		return soap_receiver_fault(soap, "ConvertTo:: can not save mat to binary file", NULL);
     }
-    
+
     src.release();
-    
+
     end = omp_get_wtime();
     cerr<<"ns__ConvertTo "<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: Threshold
 // @param
 // @return
 
-int ns__Threshold(struct soap *soap, 
-                        char *InputMatFilename, 
-                        double thresholdValue=127.0, 
+int ns__Threshold(struct soap *soap,
+                        char *InputMatFilename,
+                        double thresholdValue=127.0,
                         double maxValue=255.0,
                         char *thresholdType="THRESH_BINARY",
                         char **OutputMatFilename=NULL)
-{ 
-    double start, end; 
+{
+    double start, end;
     start = omp_get_wtime();
-	
+
     /* read from bin */
     Mat src;
 	if(!readMat(InputMatFilename, src))
@@ -210,15 +234,15 @@ int ns__Threshold(struct soap *soap,
 			soap->fault->faultstring = "error :: can not read bin file";
 	        return SOAP_FAULT;
 	    }
-    
+
     Mat dst(src.rows, src.cols, src.depth());
     threshold(src, dst, thresholdValue, maxValue, getThresholdType (thresholdType));
-    
+
     /* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
-	
+
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
@@ -227,17 +251,17 @@ int ns__Threshold(struct soap *soap,
 		soap->fault->faultstring = "Threshold:: can not save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     src.release();
     dst.release();
-    
+
     end = omp_get_wtime();
     cerr<<"ns__Threshold "<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: ns__MorphologyEx
 // @param
 //      char *InputMatFilename,
@@ -245,12 +269,12 @@ int ns__Threshold(struct soap *soap,
 // @return
 //      char **OutputMatFilename=NULL
 
-int ns__MorphologyEx( struct soap *soap, 
+int ns__MorphologyEx( struct soap *soap,
                     char *InputMatFilename,
                     char *morphOperation="MORPH_OPEN",
                     char **OutputMatFilename=NULL)
-{     
-    double start, end; 
+{
+    double start, end;
     start = omp_get_wtime();
     /* read from bin */
     Mat src;
@@ -261,27 +285,27 @@ int ns__MorphologyEx( struct soap *soap,
             soap->fault->faultstring = "MorphologyEx :: can not read bin file";
             return SOAP_FAULT;
         }
-    
+
     Mat dst(src.rows, src.cols, src.depth());
-    Mat se; 
-    Size seSize(3, 3); 
+    Mat se;
+    Size seSize(3, 3);
     Point seAnc(1, 1);
-    
+
     se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
     morphologyEx(src, dst, getMorphOperation(morphOperation), se, seAnc);
-    
+
     if(src.empty()) {
 			soap_fault(soap);
 			cerr << "MorphologyEx :: something wrong" << endl;
 			soap->fault->faultstring = "MorphologyEx :: something wrong";
 			return SOAP_FAULT;
     }
-    
+
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_MorphOpen", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
@@ -290,19 +314,19 @@ int ns__MorphologyEx( struct soap *soap,
         soap->fault->faultstring = "MorphologyEx:: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     src.release();
     dst.release();
     se.release();
-    
+
     end = omp_get_wtime();
     cerr<<"ns__MorphologyEx"<<"time elapsed "<<end-start<<endl;
-    
+
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: ns__erode
 // @param
 //		- src Source image.
@@ -316,10 +340,10 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
 				char *elementFilename,
 				int iteration=1,
 				char **OutputMatFilename=NULL)
-{ 
-    double start, end; 
+{
+    double start, end;
     start = omp_get_wtime();
-    
+
 	Mat src;
     if(!readMat(InputMatFilename, src))
     {
@@ -328,10 +352,10 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
         soap->fault->faultstring = "erode :: can not read bin file";
         return SOAP_FAULT;
     }
-    
+
     Mat dst;
     Mat element;
-    
+
     if(!readMat(elementFilename, element))
     {
 		cerr<<"erode: use default element"<<endl;
@@ -341,12 +365,12 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
 		cerr<<"erode: use defined element"<<endl;
         erode(src, dst, element, Point(-1, -1), iteration);
     }
-    
+
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_erode", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
@@ -355,16 +379,16 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
         soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     src.release();
     dst.release();
     element.release();
-    
+
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: ns__dilate
 // @param
 //		- src Source image.
@@ -378,10 +402,10 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
 				char *elementFilename,
 				int iteration=1,
 				char **OutputMatFilename=NULL)
-{ 
-    double start, end; 
+{
+    double start, end;
     start = omp_get_wtime();
-    
+
 	Mat src;
     if(!readMat(InputMatFilename, src))
     {
@@ -390,10 +414,10 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
         soap->fault->faultstring = "dilate :: can not read bin file";
         return SOAP_FAULT;
     }
-    
+
     Mat dst;
     Mat element;
-    
+
     if(!readMat(elementFilename, element))
     {
 		cerr<<"dilate :: use default element"<<endl;
@@ -403,12 +427,12 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
 		cerr<<"dilate :: use defined element"<<endl;
         dilate(src, dst, element, Point(-1, -1), iteration);
     }
-    
+
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_dilate", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
@@ -417,16 +441,16 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
         soap->fault->faultstring = "dilate :: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     src.release();
     dst.release();
     element.release();
-    
+
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: ns__Or
 // @param char *src1, char *src2
 // @return char **OutputMatFilename
@@ -434,7 +458,7 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
 int ns__Or(  struct soap *soap, char *src1,
 				char *src2,
 				char **OutputMatFilename)
-{ 
+{
 	Mat matSrc1;
     if(!readMat(src1, matSrc1))
     {
@@ -444,26 +468,26 @@ int ns__Or(  struct soap *soap, char *src1,
         return SOAP_FAULT;
     }
 
-    Mat matSrc2; 
+    Mat matSrc2;
     if(!readMat(src2, matSrc2))
     {
 		soap_fault(soap);
         cerr << "Or :: can not read bin file" << endl;
         soap->fault->faultstring = "Or :: can not read bin file";
     }
-    
+
     if(matSrc1.type() != matSrc2.type()){
 		matSrc2.convertTo(matSrc2, matSrc1.type());
 	}
-    
+
     Mat dst;
     bitwise_or(matSrc1, matSrc2, dst);
-    
+
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_or", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
@@ -472,16 +496,16 @@ int ns__Or(  struct soap *soap, char *src1,
         soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     matSrc1.release();
     matSrc2.release();
     dst.release();
-    
+
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: ns__And
 // @param char *src1, char *src2,
 // @return char **OutputMatFilename
@@ -489,7 +513,7 @@ int ns__Or(  struct soap *soap, char *src1,
 int ns__And(  struct soap *soap, char *src1,
 				char *src2,
 				char **OutputMatFilename)
-{ 
+{
 	Mat matSrc1;
     if(!readMat(src1, matSrc1))
     {
@@ -499,26 +523,26 @@ int ns__And(  struct soap *soap, char *src1,
         return SOAP_FAULT;
     }
 
-    Mat matSrc2; 
+    Mat matSrc2;
     if(!readMat(src2, matSrc2))
     {
 		soap_fault(soap);
         cerr << "And :: can not read bin file" << endl;
         soap->fault->faultstring = "And :: can not read bin file";
     }
-    
+
     if(matSrc1.type() != matSrc2.type()){
 		matSrc2.convertTo(matSrc2, matSrc1.type());
 	}
-    
+
     Mat dst;
     bitwise_and(matSrc1, matSrc2, dst);
-    
+
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_and", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
@@ -527,24 +551,24 @@ int ns__And(  struct soap *soap, char *src1,
         soap->fault->faultstring = "And :: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     matSrc1.release();
     matSrc2.release();
     dst.release();
-    
+
     return SOAP_OK;
 }
 
 
-// 
-// name: ns__Not 
+//
+// name: ns__Not
 // @param char *src
 // @return char **OutputMatFilename
 
 
 int ns__Not(  struct soap *soap, char *src,
 			  char **OutputMatFilename)
-{ 
+{
 	Mat matSrc;
     if(!readMat(src, matSrc))
     {
@@ -553,15 +577,15 @@ int ns__Not(  struct soap *soap, char *src,
         soap->fault->faultstring = "Not :: can not read bin file";
         return SOAP_FAULT;
     }
-    
+
     Mat dst;
     bitwise_not(matSrc, dst);
-    
+
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_not", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
@@ -570,26 +594,26 @@ int ns__Not(  struct soap *soap, char *src,
         soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     matSrc.release();
     dst.release();
-    
-    
+
+
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: removeSmallCell
 // @param
 // @return
-// 
+//
 
-int ns__removeSmallCell(struct soap *soap, 
+int ns__removeSmallCell(struct soap *soap,
 						char *inputMatFilename,
 						ns__RemoveSmallCell &out)
-{ 
-    double start, end; 
+{
+    double start, end;
     start = omp_get_wtime();
 
 	Mat src;
@@ -600,9 +624,9 @@ int ns__removeSmallCell(struct soap *soap,
         soap->fault->faultstring = "removeSmallCell :: can not read bin file";
         return SOAP_FAULT;
     }
-    
+
     Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
-    
+
     if( src.type() != CV_8UC1)
     {
         src.convertTo(src, CV_8UC1);
@@ -611,7 +635,7 @@ int ns__removeSmallCell(struct soap *soap,
     Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
 	vector<vector<Point> > contours;
     double area = 0;
-    findContours(	src, contours, CV_RETR_EXTERNAL, 
+    findContours(	src, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
 
     for(size_t i = 0; i< contours.size(); i++)
@@ -619,23 +643,23 @@ int ns__removeSmallCell(struct soap *soap,
 		const Point* p = &contours[i][0];
         int n = (int)contours[i].size();
 		area = contourArea(Mat(contours[i]));
-		
+
 		if(area < 1500.0) //lower bound
 		{
 			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
-			
+
 		} else if (area < 7500.0) {
 			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
 			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
-			
+
 		} else {
 			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
-			
+
 		}
 	}
 
 	contours.clear();
-	
+
 	/* generate output file name */
     out.keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
     out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
@@ -643,7 +667,7 @@ int ns__removeSmallCell(struct soap *soap,
     time_t now = time(0);
     strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
     strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
     {
@@ -652,7 +676,7 @@ int ns__removeSmallCell(struct soap *soap,
         soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     if(!saveMat(out.biggerArea, tmp))
     {
         soap_fault(soap);
@@ -660,30 +684,30 @@ int ns__removeSmallCell(struct soap *soap,
         soap->fault->faultstring = "error:: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     src.release();
     tmp.release();
     outSingle.release();
-    
+
     end = omp_get_wtime();
     cerr<<"ns__removeSmallCell"<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
 
-// 
+//
 // name: ns__scanningCell
 // @param char *inputMatFilename
 // @return char **outputMatFilename
-// 
+//
 
-int ns__scanningCell(struct soap *soap, 
+int ns__scanningCell(struct soap *soap,
 						char *inputMatFilename,
 						char **OutputMatFilename)
-{ 
-    double start, end; 
+{
+    double start, end;
     start = omp_get_wtime();
-    
+
 	Mat src;
     if(!readMat(inputMatFilename, src))
     {
@@ -692,45 +716,45 @@ int ns__scanningCell(struct soap *soap,
         soap->fault->faultstring = "scanningCell :: can not read bin file";
         return SOAP_FAULT;
     }
-    
+
     Mat srcTmp;
     Mat src32FC1;
     src.convertTo(src32FC1, CV_32FC1);
     Mat output = Mat::zeros(src.rows,src.cols, CV_32FC1);
-   
+
     int nContour = 1;
     int prevContour = 0;
     int sameCount = 0;
     double area = 0;
     vector<vector<Point> > contours;
-    
+
     while(nContour != 0)
     {
         src32FC1.convertTo(srcTmp, CV_8UC1);
 
         findContours( srcTmp, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
         nContour = contours.size();
-        
+
         if( nContour == 0){ break; }
-        if( nContour == prevContour ){ 
+        if( nContour == prevContour ){
             erode( src32FC1, src32FC1, Mat() );
             sameCount++;
         }else {
             sameCount = 0;
         }
-        
+
         prevContour = nContour;
-        
+
         for(size_t i = 0; i< contours.size(); i++)
         {
             const Point* p = &contours[i][0];
             int n = (int)contours[i].size();
             area = contourArea(Mat(contours[i]));
-            
+
             if((area < 3000.0) || (sameCount > 10))
             {
-                fillPoly( src32FC1, &p, &n, 1, Scalar(0, 0, 0)); // remove from src 
-                fillPoly( output, &p, &n, 1, Scalar(255, 255, 255)); 
+                fillPoly( src32FC1, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
+                fillPoly( output, &p, &n, 1, Scalar(255, 255, 255));
             }
         }
     }
@@ -740,7 +764,7 @@ int ns__scanningCell(struct soap *soap,
 
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_scaningCell", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(*OutputMatFilename, output))
     {
@@ -749,32 +773,32 @@ int ns__scanningCell(struct soap *soap,
         soap->fault->faultstring = "scanningCell:: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     src.release();
     srcTmp.release();
     src32FC1.release();
     output.release();
-    
+
     end = omp_get_wtime();
     cerr<<"ns__scanningCell"<<"time elapsed "<<end-start<<endl;
-    
+
     return SOAP_OK;
 }
 
-// 
+//
 // name: trainANN
-// @param   char *inputMatFilename, 
+// @param   char *inputMatFilename,
 //          char *neuralFile
 // @return  char **OutputMatFilename
 
-int ns__trainANN(struct soap *soap, 
-                char *inputMatFilename, 
+int ns__trainANN(struct soap *soap,
+                char *inputMatFilename,
                 char *neuralFile,
                 char **OutputMatFilename)
 {
-    double start, end; 
+    double start, end;
     start = omp_get_wtime();
-    
+
 	Mat src; //must be 3ch image
     if(!readMat(inputMatFilename, src))
     {
@@ -783,41 +807,41 @@ int ns__trainANN(struct soap *soap,
         soap->fault->faultstring = "trainANN :: can not read bin file";
         return SOAP_FAULT;
     }
-    
+
     // convert src to CvMat to use an old-school function
     CvMat tmp = src;
     CV_Assert(tmp.cols == src.cols && tmp.rows == src.rows &&
     tmp.data.ptr == (uchar*)src.data && tmp.step == src.step);
-    
+
     CvMat *input3Ch = cvCreateMat(src.rows, src.cols, CV_32FC3);
     cvConvert(&tmp, input3Ch);
     CvMat *output1Ch = cvCreateMat(src.rows, src.cols, CV_32FC1);
-    
+
     CvANN_MLP* neuron = NULL ;
-    if (neuron == NULL ) 
+    if (neuron == NULL )
         neuron = new CvANN_MLP();
-	else 
+	else
         neuron->clear();
-        
+
     if(!ByteArrayToANN(neuralFile, neuron)){
         soap_fault(soap);
         cerr << "trainANN :: can not load byte array to neural" << endl;
         soap->fault->faultstring = "trainANN :: can not load byte array to neural";
         return SOAP_FAULT;
     }
-        
+
     CvMat input_nn = cvMat(input3Ch->height*input3Ch->width, 3, CV_32FC1, input3Ch->data.fl);
     CvMat output_nn = cvMat(output1Ch->height*output1Ch->width, 1, CV_32FC1, output1Ch->data.fl);
     neuron->predict(&input_nn, &output_nn);
-    
+
     Mat resultNN = cvarrToMat(output1Ch, false);
-    
+
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_trainANN", localtime(&now));
-    
+
     /* save to bin */
     if(!saveMat(*OutputMatFilename, resultNN))
     {
@@ -826,28 +850,28 @@ int ns__trainANN(struct soap *soap,
         soap->fault->faultstring = "trainANN :: save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     src.release();
     resultNN.release();
     cvReleaseMat(&output1Ch);
-    
+
     end = omp_get_wtime();
     cerr<<"ns__trainANN "<<"time elapsed "<<end-start<<endl;
-    
+
     return SOAP_OK;
 }
 
-// 
+//
 // name: colorRatioMethod
 // @param
 // @return
-// 
+//
 
-int ns__colorRatioMethod(struct soap *soap, 
+int ns__colorRatioMethod(struct soap *soap,
 						char *inputMatFilename,
 						char **OutputMatFilename)
-{ 
-    double start, end; 
+{
+    double start, end;
     start = omp_get_wtime();
 
 	Mat src;
@@ -861,40 +885,40 @@ int ns__colorRatioMethod(struct soap *soap,
 
     src.convertTo(src, CV_32FC3);
     vector<Mat> splited;
-    
-    cv::split(src, splited); 
-	
+
+    cv::split(src, splited);
+
     /* splited[0] = B
     * splited[1] = G
     * splited[2] = R
     */
-    
+
     Mat RB (splited[0].rows, splited[0].cols, CV_32FC1);
     Mat BR (splited[0].rows, splited[0].cols, CV_32FC1);
     Mat result = Mat::zeros(splited[0].rows, splited[0].cols, CV_32FC1);
-    
+
     /* find R:B */
     cv::divide(splited[2], splited[0], RB, 1);
-    
+
     /* find B:R */
     cv::divide(splited[0], splited[2], BR, 1);
 
     /* Find POS Cell */
     for( int y = 0; y < RB.rows; y++ )
-    {   for( int x = 0; x < RB.cols; x++ ){ 
+    {   for( int x = 0; x < RB.cols; x++ ){
             if(RB.at<float>(y,x) >= 1.2 && BR.at<float>(y,x) < 1)
                 result.at<float>(y,x) = 0;   // pos cell is black
             else
                 result.at<float>(y,x) = 255;
         }
-    }   
-    
+    }
+
 
     /* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     time_t now = time(0);
     strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_posCells", localtime(&now));
-	
+
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, result))
     {
@@ -903,13 +927,13 @@ int ns__colorRatioMethod(struct soap *soap,
 		soap->fault->faultstring = "colorRatioMethod :: can not save mat to binary file";
         return SOAP_FAULT;
     }
-    
+
     src.release();
     splited.clear();
-    RB.release();    
+    RB.release();
     BR.release();
     result.release();
-    
+
     end = omp_get_wtime();
     cerr<<"ns__colorRatioMethod "<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
@@ -951,7 +975,7 @@ int saveMat( const char *filename, const Mat& M){
 
 /* Read matrix from binary file */
 int readMat( const char *filename, Mat& M)
-{    
+{
     ifstream in(filename, ios::in|ios::binary);
     if (!in){
        M.data = NULL;
@@ -983,7 +1007,7 @@ int readMat( const char *filename, Mat& M)
     }
 
     /* Alocate Matrix. */
-    M = Mat(rows,cols,type,Scalar(1));  
+    M = Mat(rows,cols,type,Scalar(1));
 
     /* Read data. */
     if (M.isContinuous()){
@@ -994,7 +1018,7 @@ int readMat( const char *filename, Mat& M)
     }
     in.close();
     return 1;
-} 
+}
 
 int getMatType ( const char *typeName)
 {
@@ -1055,7 +1079,7 @@ int getMorphOperation ( const char *typeName)
         return MORPH_TOPHAT;
     else if(strcmp("MORPH_BLACKHAT", typeName) == 0)
         return MORPH_BLACKHAT;
-}        
+}
 
 int ByteArrayToANN(char *annfile, CvANN_MLP* ann)
 {
@@ -1063,13 +1087,13 @@ int ByteArrayToANN(char *annfile, CvANN_MLP* ann)
     long size;
 	ifstream file (annfile, ios::in|ios::binary|ios::ate);
     if(!file){ return 0; }
-    
+
     size = file.tellg();
     file.seekg (0, ios::beg);
     buffer = new char [size];
     file.read (buffer, size);
     file.close();
-    
+
 	CvFileStorage *cvfs = cvOpenFileStorage(annfile, NULL, CV_STORAGE_READ);
 	if (cvfs != NULL) {
 		ann->read(cvfs, cvGetFileNodeByName(cvfs, NULL, "CIA_Neuron"));
@@ -1081,12 +1105,14 @@ int ByteArrayToANN(char *annfile, CvANN_MLP* ann)
 
 void getOutputFilename (char **filename, const char *toAppend)
 {
-    
+
     time_t now = time(0);
     strftime(*filename, sizeof(filename)*60, BASE_DIR"%Y%m%d_%H%M%S", localtime(&now));
     /* to do
      * do check if there's no data in toAppend
      */
-    strcat (*h,a);
+    strcat (*filename,toAppend);
 }
+
+
 
