@@ -1,6 +1,8 @@
 /* * to do list * *
  * initial service => ตั้งค่า environment ทั้งหมด เรียกก่อนจะรัน workflow
- * - ตั้งค่า tmpfs , กำหนดจำนวน thread, base directory,
+ *      - ตั้งค่า tmpfs , กำหนดจำนวน thread, base directory
+ * 
+ * 
  */
 
 
@@ -33,7 +35,7 @@
 #define BASE_DIR "/home/lluu/dir/"
 #define FILENAME_SIZE 60
 #define int64 long long
-#define _THREAD 2
+#define _THREAD_ 2
 
 //namespace
 using namespace std;
@@ -90,11 +92,9 @@ int ns__loadMat (struct soap *soap,
     }
 
 
-	/* generate output file name */
+	/* generate output file name  and save to bin*/
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,"_loadMat");
-
-	/* save to bin */
     if(!saveMat(*OutputMatFilename, src))
     {
         cerr<<"loadMat:: can not save mat to binary file" << endl;
@@ -173,7 +173,7 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
 
     if(src.type()!= MatType)
     {
-        Mat dummy[_THREAD];
+        Mat dummy[_THREAD_];
         #pragma omp parallel
         {
             int numt = omp_get_num_threads();
@@ -182,6 +182,7 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
             if(tid == 0)
             {
                 start = tid*(src.cols/numt);
+                cerr<<"Entered parallel region"<<endl;
             } else {
                 start = (tid*(src.cols/numt))+1;
             }
