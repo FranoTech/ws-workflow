@@ -10,6 +10,7 @@ int main(int argc, char **argv)
     Mat src = imread(argv[1],0);
     
     //vector<Mat> result;
+    Mat divSrc[4];
     Mat result[4];
     
     #pragma omp parallel num_threads(4)
@@ -32,18 +33,20 @@ int main(int argc, char **argv)
             <<"num thread = "<<numt<<endl
             <<"src.cols = "<<src.cols<<endl; 
             
-        //result[tid] = src.colRange(start, end);
+        divSrc[tid] = src.colRange(start, end);
+        threshold(divSrc[tid], result[tid], 127.0, 255.0, THRESH_BINARY);
+        
     }
     
-    //namedWindow("src1", CV_WINDOW_AUTOSIZE);
-    //imshow("src1", src);
+    namedWindow("src1", CV_WINDOW_AUTOSIZE);
+    imshow("src1", src);
     
-    //namedWindow("src2", CV_WINDOW_AUTOSIZE);
-    //imshow("src2", result[0]);
+    namedWindow("src2", CV_WINDOW_AUTOSIZE);
+    imshow("src2", result[0]);
 
-    //namedWindow("src3", CV_WINDOW_AUTOSIZE);
-    //imshow("src3", result[1]);
-    //waitKey(0);
+    namedWindow("src3", CV_WINDOW_AUTOSIZE);
+    imshow("src3", result[1]);
+    waitKey(0);
  
     return 0;
 }
