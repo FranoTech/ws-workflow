@@ -113,35 +113,23 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
     double start, end; 
     start = omp_get_wtime();
     
-    Mat src;
-    if(!readMat(InputMatFilename, src))
-    {
-        soap_fault(soap);
-        cerr<< "MatToJPG:: can not read bin file" << endl;
-        soap->fault->faultstring = "error :: can not read bin file";
-        return SOAP_FAULT;
-    }
-    
-    //get chan of src image
+    Mat src;    
+
+    /* check if it is not 8U then convert to 8UC(n) */
     int chan = src.channels();
-    
-    //check if it is not 8U then convert to 8UC(n)
     if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
     {
        src.convertTo(src, CV_8UC(chan));
     }
     
     /* generate output file name */
-    *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S.jpg", localtime(&now));
+	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+    getOutputFilename(OutputMatFilename,".jpg");
     
     if(!imwrite(*OutputMatFilename, src))
     {
-        soap_fault(soap);
         cerr<< "MatToJPG:: can not save mat to jpg file" << endl;
-        soap->fault->faultstring = "MatToJPG:: can not mat save to jpg file";
-        return SOAP_FAULT;
+        soap_receiver_fault(soap, "MatToJPG:: can not save mat to jpg file", NULL);
     }
     
     src.release();
@@ -170,10 +158,8 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
     Mat src;
     if(!readMat(InputMatFilename, src))
     {
-        soap_fault(soap);
         cerr<< "ConvertTo:: can not read bin file" << endl;
-        soap->fault->faultstring = "ConvertTo :: can not read bin file";
-        return SOAP_FAULT;
+        soap_receiver_fault(soap, "ConvertTo:: can not read bin file", NULL);
     }
     
     if(src.type()!= getMatType(types))
@@ -181,19 +167,15 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
         src.convertTo(src,getMatType(types));
     }
 
-    
     /* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_ConvertTo", localtime(&now));
+    getOutputFilename(OutputMatFilename,"_ConvertTo");
 	
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, src))
     {
-        soap_fault(soap);
         cerr<<"ConvertTo:: can not save mat to binary file" << endl;
-		soap->fault->faultstring = "ConvertTo:: can not save mat to binary file";
-        return SOAP_FAULT;
+		soap_receiver_fault(soap, "ConvertTo:: can not read bin file", NULL);
     }
     
     src.release();
