@@ -9,10 +9,10 @@ int main(int argc, char **argv)
 {
     Mat src = imread(argv[1],0);
     
-    Mat result[2];
+    vector<Mat> result;
+    //Mat result[4];
     
-    
-    #pragma omp parallel num_threads(2)
+    #pragma omp parallel num_threads(4)
     {
         int numt = omp_get_num_threads(); // 2
         int tid = omp_get_thread_num(); // 0,1
@@ -20,12 +20,12 @@ int main(int argc, char **argv)
         int end = (tid+1)*(src.cols/numt); //3
         
         
-        //cout<<"tid = "<<tid<<endl
-            //<<"start = "<<start<<endl
-            //<<"end = "<<end<<endl
-            //<<"num thread = "<<numt<<endl
-            //<<"src.cols = "<<src.cols<<endl; 
-
+        cout<<"tid = "<<tid<<endl
+            <<"start = "<<start<<endl
+            <<"end = "<<end<<endl
+            <<"num thread = "<<numt<<endl
+            <<"src.cols = "<<src.cols<<endl; 
+            
         result[tid] = src.colRange(start, end);
     }
     
