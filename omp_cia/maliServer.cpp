@@ -39,6 +39,7 @@ int getThresholdType ( const char *typeName);
 int getColorFlag(int colorflag);
 int getMorphOperation ( const char *typeName);
 int ByteArrayToANN(char *annfile, CvANN_MLP* ann);
+void getOutputFilename (char **filename, const char *toAppend);
 
 
 int main(int argc, char **argv)
@@ -66,40 +67,30 @@ int ns__loadMat (struct soap *soap,
     start = omp_get_wtime();
 
     Mat src;
+    
     /* load image data */
-	if(InputImageFilename){
-	    
-        src = imread(InputImageFilename,getColorFlag(colorflag));
-	    if(src.empty()) {
-			soap_fault(soap);
-			cerr<<"loadMat:: can not load image" << endl;
-			soap->fault->faultstring = "error :: can not load image";
-			return SOAP_FAULT;
-		}
-        
-        if(src.type()!= getMatType(types))
-        {
-            src.convertTo(src,getMatType(types));
-        }
-    } else {
-		soap_fault(soap);
-		cerr<<"loadMat:: InputImageFilename error" << endl;
-		soap->fault->faultstring = "loadMat:: InputImageFilename error";
-		return SOAP_FAULT;
-	}
+    src = imread(InputImageFilename,getColorFlag(colorflag));
+    if(src.empty()) {
+        cerr<<"loadMat:: can not load image" << endl;
+        soap_receiver_fault(soap, "loadMat:: can not load image", NULL);
+    }
+    
+    /* convert Mat to required type */    
+    if(src.type()!= getMatType(types))
+    {
+        src.convertTo(src,getMatType(types));
+    }
+		
     
 	/* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_LoadMat", localtime(&now));
+    getOutputFilename(OutputMatFilename,"_loadMat");
 	
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, src))
     {
-        soap_fault(soap);
         cerr<<"loadMat:: can not save mat to binary file" << endl;
-		soap->fault->faultstring = "error:: can not save mat to binary file";
-        return SOAP_FAULT;
+        soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
     }
     
     src.release();
@@ -1105,3 +1096,15 @@ int ByteArrayToANN(char *annfile, CvANN_MLP* ann)
         return 0;
     }
 }
+
+void getOutputFilename (char **filename, const char *toAppend)
+{
+    
+    time_t now = time(0);
+    strftime(*filename, sizeof(filename)*60, BASE_DIR"%Y%m%d_%H%M%S", localtime(&now));
+    /* to do
+     * do check if there's no data in toAppend
+     */
+    strcat (*h,a);
+}
+
