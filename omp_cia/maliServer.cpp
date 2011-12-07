@@ -1,7 +1,7 @@
 /* * to do list * *
  * initial service => ตั้งค่า environment ทั้งหมด เรียกก่อนจะรัน workflow
  *      - ตั้งค่า tmpfs , กำหนดจำนวน thread, base directory
- * 
+ * num thread variablle
  * 
  */
 
@@ -229,35 +229,48 @@ int ns__Threshold(struct soap *soap,
     /* read from bin */
     Mat src;
 	if(!readMat(InputMatFilename, src))
-	    {
-	        soap_fault(soap);
-	        cerr << "error :: can not read bin file" << endl;
-			soap->fault->faultstring = "error :: can not read bin file";
-	        return SOAP_FAULT;
-	    }
+    {
+        cerr<< "Threshold:: can not read bin file" << endl;
+        return soap_receiver_fault(soap, "Threshold:: can not read bin file", NULL);
+    }
 
-    Mat dst(src.rows, src.cols, src.depth());
-    threshold(src, dst, thresholdValue, maxValue, getThresholdType (thresholdType));
+    //~ Mat dst(src.rows, src.cols, src.depth());
+    Mat tmpSrc[_THREAD_];
+    Mat dst[_THREAD_];
+    
+    #pragma omp parallel shared(src)
+    {
+        int numt = omp_get_num_threads();
+        int tid = omp_get_thread_num();
+        int start;
+        if(tid == 0)
+        {
+            start = tid*(src.cols/numt);
+            cerr<<"Threshold:: Entered parallel region"<<endl;
+        } else {
+            start = (tid*(src.cols/numt))+1;
+        }
+        int end = (tid+1)*(src.cols/numt);
+        
+        tmpSrc[tid] = src.colRange(start, end);
+        threshold(src, dst[tid], thresholdValue, maxValue, getThresholdType (thresholdType));
+    }
+    
 
-    /* generate output file name */
+    /* generate output file name and save to binary file */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
-
-	/* save to bin */
+    getOutputFilename(OutputMatFilename,"_Threshold");
     if(!saveMat(*OutputMatFilename, dst))
     {
-        soap_fault(soap);
         cerr << "Threshold:: can not save mat to binary file" << endl;
-		soap->fault->faultstring = "Threshold:: can not save mat to binary file";
-        return SOAP_FAULT;
+        return soap_receiver_fault(soap, "Threshold:: can not save mat to binary file", NULL);
     }
 
     src.release();
     dst.release();
 
     end = omp_get_wtime();
-    cerr<<"ns__Threshold "<<"time elapsed "<<end-start<<endl;
+    cerr<<"ns__Threshold time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
