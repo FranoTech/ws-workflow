@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     Mat divSrc[4];
     Mat result[4];
     
-    #pragma omp parallel num_threads(4)
+    #pragma omp parallel shared(src) num_threads(4)
     {
         int numt = omp_get_num_threads();       // 2
         int tid = omp_get_thread_num();         // 0,1
@@ -27,11 +27,11 @@ int main(int argc, char **argv)
         int end = (tid+1)*(src.cols/numt);      //3
         
         
-        cout<<"tid = "<<tid<<endl
-            <<"start = "<<start<<endl
-            <<"end = "<<end<<endl
-            <<"num thread = "<<numt<<endl
-            <<"src.cols = "<<src.cols<<endl; 
+        //~ cout<<"tid = "<<tid<<endl
+            //~ <<"start = "<<start<<endl
+            //~ <<"end = "<<end<<endl
+            //~ <<"num thread = "<<numt<<endl
+            //~ <<"src.cols = "<<src.cols<<endl; 
             
         divSrc[tid] = src.colRange(start, end);
         threshold(divSrc[tid], result[tid], 127.0, 255.0, THRESH_BINARY);
