@@ -188,6 +188,7 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
             }
             int end = (tid+1)*(src.cols/numt);
             
+            dummy[tid] = src.colRange(start, end);
             dummy[tid].convertTo(dummy[tid], MatType);
         }
     }
@@ -253,7 +254,7 @@ int ns__Threshold(struct soap *soap,
         int end = (tid+1)*(src.cols/numt);
         
         tmpSrc[tid] = src.colRange(start, end);
-        threshold(src, dst[tid], thresholdValue, maxValue, getThresholdType (thresholdType));
+        threshold(tmpSrc[tid], dst[tid], thresholdValue, maxValue, getThresholdType (thresholdType));
     }
     
 
@@ -294,10 +295,8 @@ int ns__MorphologyEx( struct soap *soap,
     Mat src;
     if(!readMat(InputMatFilename, src))
         {
-            soap_fault(soap);
             cerr << "MorphologyEx:: can not read bin file" << endl;
-            soap->fault->faultstring = "MorphologyEx :: can not read bin file";
-            return SOAP_FAULT;
+            return soap_receiver_fault(soap, "MorphologyEx:: can not read bin file", NULL);
         }
 
     Mat dst(src.rows, src.cols, src.depth());
@@ -310,23 +309,19 @@ int ns__MorphologyEx( struct soap *soap,
 
     if(src.empty()) {
 			soap_fault(soap);
-			cerr << "MorphologyEx :: something wrong" << endl;
-			soap->fault->faultstring = "MorphologyEx :: something wrong";
-			return SOAP_FAULT;
+			cerr << "MorphologyEx :: something's wrong" << endl;
+            return soap_receiver_fault(soap, "MorphologyEx:: something's wrong", NULL);
     }
 
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_MorphOpen", localtime(&now));
+    getOutputFilename(OutputMatFilename,"_Threshold");
 
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
     {
-        soap_fault(soap);
-        cerr << "MorphologyEx:: save mat to binary file" << endl;
-        soap->fault->faultstring = "MorphologyEx:: save mat to binary file";
-        return SOAP_FAULT;
+        cerr << "MorphologyEx:: can not save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "MorphologyEx:: can not save mat to binary file", NULL);
     }
 
     src.release();
@@ -334,7 +329,7 @@ int ns__MorphologyEx( struct soap *soap,
     se.release();
 
     end = omp_get_wtime();
-    cerr<<"ns__MorphologyEx"<<"time elapsed "<<end-start<<endl;
+    cerr<<"ns__MorphologyEx time elapsed "<<end-start<<endl;
 
     return SOAP_OK;
 }
@@ -476,25 +471,61 @@ int ns__Or(  struct soap *soap, char *src1,
 	Mat matSrc1;
     if(!readMat(src1, matSrc1))
     {
-        soap_fault(soap);
-        cerr << "Or :: can not read bin file" << endl;
-        soap->fault->faultstring = "Or :: can not read bin file";
-        return SOAP_FAULT;
+        cerr << "Or :: src1 can not read bin file" << endl;
+        return soap_receiver_fault(soap, "Or :: src1 can not read bin file", NULL);
     }
 
     Mat matSrc2;
     if(!readMat(src2, matSrc2))
     {
 		soap_fault(soap);
-        cerr << "Or :: can not read bin file" << endl;
-        soap->fault->faultstring = "Or :: can not read bin file";
+        cerr << "Or :: src2 can not read bin file" << endl;
+        return soap_receiver_fault(soap, "Or :: src2 can not read bin file", NULL);
     }
 
-    if(matSrc1.type() != matSrc2.type()){
-		matSrc2.convertTo(matSrc2, matSrc1.type());
+    if(matSrc1.type() != matSrc2.type())
+    {
+        Mat dummy[_THREAD_];
+        #pragma omp parallel
+        {
+            int numt = omp_get_num_threads();
+            int tid = omp_get_thread_num();
+            int start;
+            if(tid == 0)
+            {
+                start = tid*(src.cols/numt);
+                cerr<<"Entered parallel region"<<endl;
+            } else {
+                start = (tid*(src.cols/numt))+1;
+            }
+            int end = (tid+1)*(src.cols/numt);
+            
+            dummy[tid] = matSrc2.colRange(start, end);
+            dummy[tid].convertTo(dummy[tid], matSrc1.type());
+        }
 	}
 
-    Mat dst;
+    Mat dst[_THREAD_];
+    #pragma omp parallel
+    {
+            int numt = omp_get_num_threads();
+            int tid = omp_get_thread_num();
+            int start;
+            if(tid == 0)
+            {
+                start = tid*(src.cols/numt);
+                cerr<<"Entered parallel region"<<endl;
+            } else {
+                start = (tid*(src.cols/numt))+1;
+            }
+            int end = (tid+1)*(src.cols/numt);
+            
+            dummy[tid] = matSrc2.colRange(start, end);
+            dummy[tid].convertTo(dummy[tid], matSrc1.type());
+            bitwise_or(dummy[tid], matSrc2, dst);
+    }
+    
+    
     bitwise_or(matSrc1, matSrc2, dst);
 
     /* generate output file name */
