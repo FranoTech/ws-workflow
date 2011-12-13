@@ -152,7 +152,7 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
         #pragma omp parallel
         {
             int numt = omp_get_num_threads();
-            int tid = omp_getMAX_THREADnum();
+            int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
@@ -216,7 +216,7 @@ int ns__Threshold(struct soap *soap,
     #pragma omp parallel shared(src)
     {
         int numt = omp_get_num_threads();
-        int tid = omp_getMAX_THREADnum();
+        int tid = omp_get_thread_num();
         int start;
         if(tid == 0)
         {
@@ -318,51 +318,51 @@ int ns__MorphologyEx( struct soap *soap,
 // 		- OutputMatFilename
 
 
-int ns__erode(  struct soap *soap, char *InputMatFilename,
-				char *elementFilename,
-				int iteration=1,
-				char **OutputMatFilename=NULL)
-{
-    double start, end;
-    start = omp_get_wtime();
+//int ns__erode(  struct soap *soap, char *InputMatFilename,
+				//char *elementFilename,
+				//int iteration=1,
+				//char **OutputMatFilename=NULL)
+//{
+    //double start, end;
+    //start = omp_get_wtime();
 
-	Mat src;
-    if(!readMat(InputMatFilename, src))
-    {
-        cerr << "erode :: can not read bin file" << endl;
-        return soap_receiver_fault(soap, "erode :: can not read bin file", NULL);
-    }
+	//Mat src;
+    //if(!readMat(InputMatFilename, src))
+    //{
+        //cerr << "erode :: can not read bin file" << endl;
+        //return soap_receiver_fault(soap, "erode :: can not read bin file", NULL);
+    //}
 
-    Mat dst;
-    Mat element;
+    //Mat dst;
+    //Mat element;
 
-    if(!readMat(elementFilename, element))
-    {
-		cerr<<"erode: use default element"<<endl;
-        element.release();
-        erode(src, dst, Mat(), Point(-1, -1), iteration);
-    } else {
-		cerr<<"erode: use defined element"<<endl;
-        erode(src, dst, element, Point(-1, -1), iteration);
-    }
+    //if(!readMat(elementFilename, element))
+    //{
+		//cerr<<"erode: use default element"<<endl;
+        //element.release();
+        //erode(src, dst, Mat(), Point(-1, -1), iteration);
+    //} else {
+		//cerr<<"erode: use defined element"<<endl;
+        //erode(src, dst, element, Point(-1, -1), iteration);
+    //}
 
-    /* generate output file name */
-    *OutputMatFilename = (char*)soap_malloc(soap, 60);
-    getOutputFilename(OutputMatFilename,"_erode");
+    ///* generate output file name */
+    //*OutputMatFilename = (char*)soap_malloc(soap, 60);
+    //getOutputFilename(OutputMatFilename,"_erode");
 
-    /* save to bin */
-    if(!saveMat(*OutputMatFilename, dst))
-    {
-        cerr << "erode:: save mat to binary file" << endl;
-        return soap_receiver_fault(soap, "erode :: save mat to binary file", NULL);
-    }
+    ///* save to bin */
+    //if(!saveMat(*OutputMatFilename, dst))
+    //{
+        //cerr << "erode:: save mat to binary file" << endl;
+        //return soap_receiver_fault(soap, "erode :: save mat to binary file", NULL);
+    //}
 
-    src.release();
-    dst.release();
-    element.release();
+    //src.release();
+    //dst.release();
+    //element.release();
 
-    return SOAP_OK;
-}
+    //return SOAP_OK;
+//}
 
 
 //
@@ -375,51 +375,51 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
 // 		- OutputMatFilename
 
 
-int ns__dilate(  struct soap *soap, char *InputMatFilename,
-				char *elementFilename,
-				int iteration=1,
-				char **OutputMatFilename=NULL)
-{
-    double start, end;
-    start = omp_get_wtime();
+//int ns__dilate(  struct soap *soap, char *InputMatFilename,
+				//char *elementFilename,
+				//int iteration=1,
+				//char **OutputMatFilename=NULL)
+//{
+    //double start, end;
+    //start = omp_get_wtime();
 
-	Mat src;
-    if(!readMat(InputMatFilename, src))
-    {
-        cerr << "dilate :: can not read bin file" << endl;
-        return soap_receiver_fault(soap, "dilate :: can not read bin file", NULL);
-    }
+	//Mat src;
+    //if(!readMat(InputMatFilename, src))
+    //{
+        //cerr << "dilate :: can not read bin file" << endl;
+        //return soap_receiver_fault(soap, "dilate :: can not read bin file", NULL);
+    //}
 
-    Mat dst;
-    Mat element;
+    //Mat dst;
+    //Mat element;
 
-    if(!readMat(elementFilename, element))
-    {
-		cerr<<"dilate :: use default element"<<endl;
-        element.release();
-        dilate(src, dst, Mat(), Point(-1, -1), iteration);
-    } else {
-		cerr<<"dilate :: use defined element"<<endl;
-        dilate(src, dst, element, Point(-1, -1), iteration);
-    }
+    //if(!readMat(elementFilename, element))
+    //{
+		//cerr<<"dilate :: use default element"<<endl;
+        //element.release();
+        //dilate(src, dst, Mat(), Point(-1, -1), iteration);
+    //} else {
+		//cerr<<"dilate :: use defined element"<<endl;
+        //dilate(src, dst, element, Point(-1, -1), iteration);
+    //}
 
-    /* generate output file name */
-    *OutputMatFilename = (char*)soap_malloc(soap, 60);
-    getOutputFilename(OutputMatFilename,"_dilate");
+    ///* generate output file name */
+    //*OutputMatFilename = (char*)soap_malloc(soap, 60);
+    //getOutputFilename(OutputMatFilename,"_dilate");
 
-    /* save to bin */
-    if(!saveMat(*OutputMatFilename, dst))
-    {
-        cerr << "dilate :: save mat to binary file" << endl;
-        return soap_receiver_fault(soap, "dilate :: save mat to binary file", NULL);
-    }
+    ///* save to bin */
+    //if(!saveMat(*OutputMatFilename, dst))
+    //{
+        //cerr << "dilate :: save mat to binary file" << endl;
+        //return soap_receiver_fault(soap, "dilate :: save mat to binary file", NULL);
+    //}
 
-    src.release();
-    dst.release();
-    element.release();
+    //src.release();
+    //dst.release();
+    //element.release();
 
-    return SOAP_OK;
-}
+    //return SOAP_OK;
+//}
 
 
 //
@@ -450,7 +450,7 @@ int ns__Or(  struct soap *soap, char *src1,
         #pragma omp parallel
         {
             int numt = omp_get_num_threads();
-            int tid = omp_getMAX_THREADnum();
+            int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
@@ -470,7 +470,7 @@ int ns__Or(  struct soap *soap, char *src1,
     #pragma omp parallel
     {
             int numt = omp_get_num_threads();
-            int tid = omp_getMAX_THREADnum();
+            int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
@@ -534,7 +534,7 @@ int ns__And(  struct soap *soap, char *src1,
         #pragma omp parallel
         {
             int numt = omp_get_num_threads();
-            int tid = omp_getMAX_THREADnum();
+            int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
@@ -554,7 +554,7 @@ int ns__And(  struct soap *soap, char *src1,
     #pragma omp parallel
     {
             int numt = omp_get_num_threads();
-            int tid = omp_getMAX_THREADnum();
+            int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
@@ -609,7 +609,7 @@ int ns__Not(  struct soap *soap, char *src,
     #pragma omp parallel
     {
             int numt = omp_get_num_threads();
-            int tid = omp_getMAX_THREADnum();
+            int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
@@ -668,7 +668,7 @@ int ns__Not(  struct soap *soap, char *src,
         //#pragma omp parallel
         //{
             //int numt = omp_get_num_threads();
-            //int tid = omp_getMAX_THREADnum();
+            //int tid = omp_get_thread_num();
             //int start;
             //if(tid == 0)
             //{
