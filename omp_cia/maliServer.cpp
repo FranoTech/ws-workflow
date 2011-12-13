@@ -164,7 +164,7 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
             int end = (tid+1)*(src.cols/numt);
             
             Mat dummy = src.colRange(start, end);
-            dummy.convertTo(dummy[tid], MatType);
+            dummy.convertTo(dummy, MatType);
         }
     }
 
@@ -454,11 +454,11 @@ int ns__Or(  struct soap *soap, char *src1,
             int start;
             if(tid == 0)
             {
-                start = tid*(src.cols/numt);
+                start = tid*(matSrc1.cols/numt);
             } else {
-                start = (tid*(src.cols/numt))+1;
+                start = (tid*(matSrc1.cols/numt))+1;
             }
-            int end = (tid+1)*(src.cols/numt);
+            int end = (tid+1)*(matSrc1.cols/numt);
             
             Mat tmpSrc2 = matSrc2.colRange(start, end);
             tmpSrc2.convertTo(tmpSrc2, matSrc1.type());
@@ -474,11 +474,11 @@ int ns__Or(  struct soap *soap, char *src1,
             int start;
             if(tid == 0)
             {
-                start = tid*(src.cols/numt);
+                start = tid*(matSrc1.cols/numt);
             } else {
-                start = (tid*(src.cols/numt))+1;
+                start = (tid*(matSrc1.cols/numt))+1;
             }
-            int end = (tid+1)*(src.cols/numt);
+            int end = (tid+1)*(matSrc1.cols/numt);
             
             Mat tmpSrc1 = matSrc1.colRange(start, end);
             Mat tmpSrc2 = matSrc2.colRange(start, end);
@@ -538,11 +538,11 @@ int ns__And(  struct soap *soap, char *src1,
             int start;
             if(tid == 0)
             {
-                start = tid*(src.cols/numt);
+                start = tid*(matSrc1.cols/numt);
             } else {
-                start = (tid*(src.cols/numt))+1;
+                start = (tid*(matSrc1.cols/numt))+1;
             }
-            int end = (tid+1)*(src.cols/numt);
+            int end = (tid+1)*(matSrc1.cols/numt);
             
             Mat tmpSrc2 = matSrc2.colRange(start, end);
             tmpSrc2.convertTo(tmpSrc2, matSrc1.type());
@@ -558,11 +558,11 @@ int ns__And(  struct soap *soap, char *src1,
             int start;
             if(tid == 0)
             {
-                start = tid*(src.cols/numt);
+                start = tid*(matSrc1.cols/numt);
             } else {
-                start = (tid*(src.cols/numt))+1;
+                start = (tid*(matSrc1.cols/numt))+1;
             }
-            int end = (tid+1)*(src.cols/numt);
+            int end = (tid+1)*(matSrc1.cols/numt);
             
             Mat tmpSrc1 = matSrc1.colRange(start, end);
             Mat tmpSrc2 = matSrc2.colRange(start, end);
@@ -613,11 +613,11 @@ int ns__Not(  struct soap *soap, char *src,
             int start;
             if(tid == 0)
             {
-                start = tid*(src.cols/numt);
+                start = tid*(matSrc.cols/numt);
             } else {
-                start = (tid*(src.cols/numt))+1;
+                start = (tid*(matSrc.cols/numt))+1;
             }
-            int end = (tid+1)*(src.cols/numt);
+            int end = (tid+1)*(matSrc.cols/numt);
             
             Mat tmpSrc = matSrc.colRange(start, end);
             bitwise_not(tmpSrc, tmpSrc);
