@@ -628,7 +628,7 @@ int ns__Not(  struct soap *soap, char *src,
     getOutputFilename(OutputMatFilename,"_bitwiseNot");
     
     /* save to bin */
-    if(!saveMat(*OutputMatFilename, dst))
+    if(!saveMat(*OutputMatFilename, matSrc))
     {
         cerr << "Not:: save mat to binary file" << endl;
         return soap_receiver_fault(soap, "Not :: save mat to binary file", NULL);
