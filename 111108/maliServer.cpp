@@ -387,6 +387,9 @@ int ns__erode(  struct soap *soap, char *InputMatFilename,
     dst.release();
     element.release();
     
+    end = omp_get_wtime();
+    cerr<<"ns__erode"<<"time elapsed "<<end-start<<endl;
+    
     return SOAP_OK;
 }
 
@@ -406,6 +409,7 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
 				int iteration=1,
 				char **OutputMatFilename=NULL)
 { 
+    
     double start, end; 
     start = omp_get_wtime();
     
@@ -449,6 +453,9 @@ int ns__dilate(  struct soap *soap, char *InputMatFilename,
     dst.release();
     element.release();
     
+    end = omp_get_wtime();
+    cerr<<"ns__Dilate time elapsed "<<end-start<<endl;
+    
     return SOAP_OK;
 }
 
@@ -462,6 +469,9 @@ int ns__Or(  struct soap *soap, char *src1,
 				char *src2,
 				char **OutputMatFilename)
 { 
+    double start, end; 
+    start = omp_get_wtime();
+    
 	Mat matSrc1;
     if(!readMat(src1, matSrc1))
     {
@@ -504,6 +514,9 @@ int ns__Or(  struct soap *soap, char *src1,
     matSrc2.release();
     dst.release();
     
+    end = omp_get_wtime();
+    cerr<<"ns__Or time elapsed "<<end-start<<endl;
+    
     return SOAP_OK;
 }
 
@@ -517,6 +530,9 @@ int ns__And(  struct soap *soap, char *src1,
 				char *src2,
 				char **OutputMatFilename)
 { 
+    double start, end; 
+    start = omp_get_wtime();
+    
 	Mat matSrc1;
     if(!readMat(src1, matSrc1))
     {
@@ -559,6 +575,9 @@ int ns__And(  struct soap *soap, char *src1,
     matSrc2.release();
     dst.release();
     
+    end = omp_get_wtime();
+    cerr<<"ns__And time elapsed "<<end-start<<endl;
+    
     return SOAP_OK;
 }
 
@@ -572,6 +591,9 @@ int ns__And(  struct soap *soap, char *src1,
 int ns__Not(  struct soap *soap, char *src,
 			  char **OutputMatFilename)
 { 
+    double start, end; 
+    start = omp_get_wtime();
+    
 	Mat matSrc;
     if(!readMat(src, matSrc))
     {
@@ -600,6 +622,9 @@ int ns__Not(  struct soap *soap, char *src,
     
     matSrc.release();
     dst.release();
+    
+    end = omp_get_wtime();
+    cerr<<"ns__Not time elapsed "<<end-start<<endl;
     
     
     return SOAP_OK;
