@@ -11,7 +11,7 @@
 #define BASE_DIR "/home/lluu/dir/"
 #define FILENAME_SIZE 60
 #define int64 long long
-#define MAX_THREAD 2
+#define MAX_THREAD 4
 
 //namespace
 using namespace std;
@@ -431,6 +431,9 @@ int ns__Or(  struct soap *soap, char *src1,
 				char *src2,
 				char **OutputMatFilename)
 {
+    double start, end;
+    start = omp_get_wtime();
+    
 	Mat matSrc1;
     if(!readMat(src1, matSrc1))
     {
@@ -501,6 +504,9 @@ int ns__Or(  struct soap *soap, char *src1,
     matSrc1.release();
     matSrc2.release();
     dst.release();
+    
+    end = omp_get_wtime();
+    cerr<<"ns__Or time elapsed "<<end-start<<endl;
 
     return SOAP_OK;
 }
@@ -515,6 +521,9 @@ int ns__And(  struct soap *soap, char *src1,
 				char *src2,
 				char **OutputMatFilename)
 {
+    double start, end;
+    start = omp_get_wtime();
+    
 	Mat matSrc1;
     if(!readMat(src1, matSrc1))
     {
@@ -585,7 +594,9 @@ int ns__And(  struct soap *soap, char *src1,
     matSrc1.release();
     matSrc2.release();
     dst.release();
-
+    
+    end = omp_get_wtime();
+    cerr<<"ns__And time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
@@ -599,6 +610,9 @@ int ns__And(  struct soap *soap, char *src1,
 int ns__Not(  struct soap *soap, char *src,
 			  char **OutputMatFilename)
 {
+    double start, end;
+    start = omp_get_wtime();
+    
 	Mat matSrc;
     if(!readMat(src, matSrc))
     {
@@ -635,6 +649,9 @@ int ns__Not(  struct soap *soap, char *src,
     }
 
     matSrc.release();
+    
+    end = omp_get_wtime();
+    cerr<<"ns__Not time elapsed "<<end-start<<endl;
     
     return SOAP_OK;
 }
