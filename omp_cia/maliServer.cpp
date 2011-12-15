@@ -146,22 +146,22 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
     }
 
     int MatType = getMatType(types);
+    int cols = src.cols ;
     
     if(src.type()!= MatType)
     {
-        #pragma omp parallel
+        #pragma omp parallel shared(src, cols, MatType)
         {
             int numt = omp_get_num_threads();
             int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
-                start = tid*(src.cols/numt);
-                cerr<<"Entered parallel region"<<endl;
+                start = tid*(cols/numt);
             } else {
-                start = (tid*(src.cols/numt))+1;
+                start = (tid*(cols/numt))+1;
             }
-            int end = (tid+1)*(src.cols/numt);
+            int end = (tid+1)*(cols/numt);
             
             Mat dummy = src.colRange(start, end);
             dummy.convertTo(dummy, MatType);
@@ -209,27 +209,25 @@ int ns__Threshold(struct soap *soap,
         cerr<< "Threshold:: can not read bin file" << endl;
         return soap_receiver_fault(soap, "Threshold:: can not read bin file", NULL);
     }
-
-    //~ Mat tmpSrc[MAX_THREAD];
-    //~ Mat dst[MAX_THREAD];
     
-    #pragma omp parallel shared(src)
+    int threstype = getThresholdType (thresholdType);
+    int cols = src.cols ;
+    
+    #pragma omp parallel shared(src, cols, thresholdValue, maxValue, threstype)
     {
         int numt = omp_get_num_threads();
         int tid = omp_get_thread_num();
         int start;
         if(tid == 0)
         {
-            start = tid*(src.cols/numt);
-            cerr<<"Threshold:: Entered parallel region"<<endl;
+            start = tid*(cols/numt);
         } else {
-            start = (tid*(src.cols/numt))+1;
+            start = (tid*(cols/numt))+1;
         }
-        int end = (tid+1)*(src.cols/numt);
+        int end = (tid+1)*(cols/numt);
         
         Mat tmpSrc = src.colRange(start, end);
-        //~ threshold(tmpSrc[tid], dst[tid], thresholdValue, maxValue, getThresholdType (thresholdType));
-        threshold(tmpSrc, tmpSrc, thresholdValue, maxValue, getThresholdType (thresholdType));
+        threshold(tmpSrc, tmpSrc, thresholdValue, maxValue, threstype);
     }
     
     /* generate output file name and save to binary file */
@@ -242,7 +240,6 @@ int ns__Threshold(struct soap *soap,
     }
 
     src.release();
-    //~ dst.release();
 
     end = omp_get_wtime();
     cerr<<"ns__Threshold time elapsed "<<end-start<<endl;
@@ -265,6 +262,7 @@ int ns__MorphologyEx( struct soap *soap,
 {
     double start, end;
     start = omp_get_wtime();
+
     /* read from bin */
     Mat src;
     if(!readMat(InputMatFilename, src))
@@ -277,9 +275,10 @@ int ns__MorphologyEx( struct soap *soap,
     Mat se;
     Size seSize(3, 3);
     Point seAnc(1, 1);
+    int opt = getMorphOperation(morphOperation);
 
     se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
-    morphologyEx(src, dst, getMorphOperation(morphOperation), se, seAnc);
+    morphologyEx(src, dst, opt, se, seAnc);
 
     if(src.empty()) {
 			cerr << "MorphologyEx :: something's wrong" << endl;
@@ -288,7 +287,7 @@ int ns__MorphologyEx( struct soap *soap,
 
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    getOutputFilename(OutputMatFilename,"_Threshold");
+    getOutputFilename(OutputMatFilename,"_MorphologyEx");
 
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
@@ -318,51 +317,51 @@ int ns__MorphologyEx( struct soap *soap,
 // 		- OutputMatFilename
 
 
-//int ns__erode(  struct soap *soap, char *InputMatFilename,
-				//char *elementFilename,
-				//int iteration=1,
-				//char **OutputMatFilename=NULL)
-//{
-    //double start, end;
-    //start = omp_get_wtime();
+int ns__erode(  struct soap *soap, char *InputMatFilename,
+				char *elementFilename,
+				int iteration=1,
+				char **OutputMatFilename=NULL)
+{
+    double start, end;
+    start = omp_get_wtime();
 
-	//Mat src;
-    //if(!readMat(InputMatFilename, src))
-    //{
-        //cerr << "erode :: can not read bin file" << endl;
-        //return soap_receiver_fault(soap, "erode :: can not read bin file", NULL);
-    //}
+	Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        cerr << "erode :: can not read bin file" << endl;
+        return soap_receiver_fault(soap, "erode :: can not read bin file", NULL);
+    }
 
-    //Mat dst;
-    //Mat element;
+    Mat dst;
+    Mat element;
 
-    //if(!readMat(elementFilename, element))
-    //{
-		//cerr<<"erode: use default element"<<endl;
-        //element.release();
-        //erode(src, dst, Mat(), Point(-1, -1), iteration);
-    //} else {
-		//cerr<<"erode: use defined element"<<endl;
-        //erode(src, dst, element, Point(-1, -1), iteration);
-    //}
+    if(!readMat(elementFilename, element))
+    {
+		cerr<<"erode: use default element"<<endl;
+        element.release();
+        erode(src, dst, Mat(), Point(-1, -1), iteration);
+    } else {
+		cerr<<"erode: use defined element"<<endl;
+        erode(src, dst, element, Point(-1, -1), iteration);
+    }
 
-    ///* generate output file name */
-    //*OutputMatFilename = (char*)soap_malloc(soap, 60);
-    //getOutputFilename(OutputMatFilename,"_erode");
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    getOutputFilename(OutputMatFilename,"_erode");
 
-    ///* save to bin */
-    //if(!saveMat(*OutputMatFilename, dst))
-    //{
-        //cerr << "erode:: save mat to binary file" << endl;
-        //return soap_receiver_fault(soap, "erode :: save mat to binary file", NULL);
-    //}
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        cerr << "erode:: save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "erode :: save mat to binary file", NULL);
+    }
 
-    //src.release();
-    //dst.release();
-    //element.release();
+    src.release();
+    dst.release();
+    element.release();
 
-    //return SOAP_OK;
-//}
+    return SOAP_OK;
+}
 
 
 //
@@ -375,51 +374,51 @@ int ns__MorphologyEx( struct soap *soap,
 // 		- OutputMatFilename
 
 
-//int ns__dilate(  struct soap *soap, char *InputMatFilename,
-				//char *elementFilename,
-				//int iteration=1,
-				//char **OutputMatFilename=NULL)
-//{
-    //double start, end;
-    //start = omp_get_wtime();
+int ns__dilate(  struct soap *soap, char *InputMatFilename,
+				char *elementFilename,
+				int iteration=1,
+				char **OutputMatFilename=NULL)
+{
+    double start, end;
+    start = omp_get_wtime();
 
-	//Mat src;
-    //if(!readMat(InputMatFilename, src))
-    //{
-        //cerr << "dilate :: can not read bin file" << endl;
-        //return soap_receiver_fault(soap, "dilate :: can not read bin file", NULL);
-    //}
+	Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        cerr << "dilate :: can not read bin file" << endl;
+        return soap_receiver_fault(soap, "dilate :: can not read bin file", NULL);
+    }
 
-    //Mat dst;
-    //Mat element;
+    Mat dst;
+    Mat element;
 
-    //if(!readMat(elementFilename, element))
-    //{
-		//cerr<<"dilate :: use default element"<<endl;
-        //element.release();
-        //dilate(src, dst, Mat(), Point(-1, -1), iteration);
-    //} else {
-		//cerr<<"dilate :: use defined element"<<endl;
-        //dilate(src, dst, element, Point(-1, -1), iteration);
-    //}
+    if(!readMat(elementFilename, element))
+    {
+		cerr<<"dilate :: use default element"<<endl;
+        element.release();
+        dilate(src, dst, Mat(), Point(-1, -1), iteration);
+    } else {
+		cerr<<"dilate :: use defined element"<<endl;
+        dilate(src, dst, element, Point(-1, -1), iteration);
+    }
 
-    ///* generate output file name */
-    //*OutputMatFilename = (char*)soap_malloc(soap, 60);
-    //getOutputFilename(OutputMatFilename,"_dilate");
+    /* generate output file name */
+    *OutputMatFilename = (char*)soap_malloc(soap, 60);
+    getOutputFilename(OutputMatFilename,"_dilate");
 
-    ///* save to bin */
-    //if(!saveMat(*OutputMatFilename, dst))
-    //{
-        //cerr << "dilate :: save mat to binary file" << endl;
-        //return soap_receiver_fault(soap, "dilate :: save mat to binary file", NULL);
-    //}
+    /* save to bin */
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        cerr << "dilate :: save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "dilate :: save mat to binary file", NULL);
+    }
 
-    //src.release();
-    //dst.release();
-    //element.release();
+    src.release();
+    dst.release();
+    element.release();
 
-    //return SOAP_OK;
-//}
+    return SOAP_OK;
+}
 
 
 //
@@ -447,41 +446,45 @@ int ns__Or(  struct soap *soap, char *src1,
         cerr << "Or :: src2 can not read bin file" << endl;
         return soap_receiver_fault(soap, "Or :: src2 can not read bin file", NULL);
     }
+    
+    int cols = matSrc1.cols ;
+    int srcType1 = matSrc1.type();
+    int srcType2 = matSrc2.type();
 
-    if(matSrc1.type() != matSrc2.type())
+    if(srcType1 != srcType2)
     {
-        #pragma omp parallel
+        #pragma omp parallel shared (src, cols, srcType1)
         {
             int numt = omp_get_num_threads();
             int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
-                start = tid*(matSrc1.cols/numt);
+                start = tid*(cols/numt);
             } else {
-                start = (tid*(matSrc1.cols/numt))+1;
+                start = (tid*(cols/numt))+1;
             }
-            int end = (tid+1)*(matSrc1.cols/numt);
+            int end = (tid+1)*(cols/numt);
             
             Mat tmpSrc2 = matSrc2.colRange(start, end);
-            tmpSrc2.convertTo(tmpSrc2, matSrc1.type());
+            tmpSrc2.convertTo(tmpSrc2, srcType1);
         }
 	}
 
     Mat dst;
     
-    #pragma omp parallel
+    #pragma omp parallel shared (matSrc1, matSrc2 , cols)
     {
             int numt = omp_get_num_threads();
             int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
-                start = tid*(matSrc1.cols/numt);
+                start = tid*(cols/numt);
             } else {
-                start = (tid*(matSrc1.cols/numt))+1;
+                start = (tid*(cols/numt))+1;
             }
-            int end = (tid+1)*(matSrc1.cols/numt);
+            int end = (tid+1)*(cols/numt);
             
             Mat tmpSrc1 = matSrc1.colRange(start, end);
             Mat tmpSrc2 = matSrc2.colRange(start, end);
@@ -538,40 +541,44 @@ int ns__And(  struct soap *soap, char *src1,
         return soap_receiver_fault(soap, "And :: src2 can not read bin file", NULL);
     }
 
-    if(matSrc1.type() != matSrc2.type())
+    int cols = matSrc1.cols ;
+    int srcType1 = matSrc1.type();
+    int srcType2 = matSrc2.type();
+    
+    if(srcType1 != srcType2 )
     {
-        #pragma omp parallel
+        #pragma omp parallel shared ( matSrc2, cols, srcType1)
         {
             int numt = omp_get_num_threads();
             int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
-                start = tid*(matSrc1.cols/numt);
+                start = tid*(cols/numt);
             } else {
-                start = (tid*(matSrc1.cols/numt))+1;
+                start = (tid*(cols/numt))+1;
             }
-            int end = (tid+1)*(matSrc1.cols/numt);
+            int end = (tid+1)*(cols/numt);
             
             Mat tmpSrc2 = matSrc2.colRange(start, end);
-            tmpSrc2.convertTo(tmpSrc2, matSrc1.type());
+            tmpSrc2.convertTo(tmpSrc2, srcType1);
         }
 	}
 
     Mat dst;
     
-    #pragma omp parallel
+    #pragma omp parallel shared (matSrc1, matSrc2, cols)
     {
             int numt = omp_get_num_threads();
             int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
-                start = tid*(matSrc1.cols/numt);
+                start = tid*(cols/numt);
             } else {
-                start = (tid*(matSrc1.cols/numt))+1;
+                start = (tid*(cols/numt))+1;
             }
-            int end = (tid+1)*(matSrc1.cols/numt);
+            int end = (tid+1)*(cols/numt);
             
             Mat tmpSrc1 = matSrc1.colRange(start, end);
             Mat tmpSrc2 = matSrc2.colRange(start, end);
@@ -620,18 +627,19 @@ int ns__Not(  struct soap *soap, char *src,
         return soap_receiver_fault(soap, "And :: src1 can not read bin file", NULL);
     }
 
-    #pragma omp parallel
+    int cols = matSrc.cols;
+    #pragma omp parallel shared(matSrc, cols)
     {
             int numt = omp_get_num_threads();
             int tid = omp_get_thread_num();
             int start;
             if(tid == 0)
             {
-                start = tid*(matSrc.cols/numt);
+                start = tid*(cols/numt);
             } else {
-                start = (tid*(matSrc.cols/numt))+1;
+                start = (tid*(cols/numt))+1;
             }
-            int end = (tid+1)*(matSrc.cols/numt);
+            int end = (tid+1)*(cols/numt);
             
             Mat tmpSrc = matSrc.colRange(start, end);
             bitwise_not(tmpSrc, tmpSrc);
@@ -706,7 +714,7 @@ int ns__Not(  struct soap *soap, char *src,
     //findContours(	src, contours, CV_RETR_EXTERNAL,
 					//CV_CHAIN_APPROX_SIMPLE, Point(0,0));
 ///*        check this          */
-    ////~ #pragma omp parallel for share()
+    ////~ #pragma omp parallel for shared()
     //for(size_t i = 0; i< contours.size(); i++)
     //{
 		//const Point* p = &contours[i][0];
