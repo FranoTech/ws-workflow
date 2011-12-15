@@ -453,7 +453,7 @@ int ns__Or(  struct soap *soap, char *src1,
 
     if(srcType1 != srcType2)
     {
-        #pragma omp parallel shared (src, cols, srcType1)
+        #pragma omp parallel shared (matSrc2, cols, srcType1)
         {
             int numt = omp_get_num_threads();
             int tid = omp_get_thread_num();
