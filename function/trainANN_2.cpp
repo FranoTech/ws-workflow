@@ -18,12 +18,13 @@ int readMat( const char *filename, Mat& M);
 
 int main (int argc, char** argv){
     
-    Mat src; //must be 3ch image
-    if(!readMat(argv[1], src))
-    {
-        cerr << "trainANN :: can not read bin file" << endl;
-    }
+    //Mat src; //must be 3ch image
+    //if(!readMat(argv[1], src))
+    //{
+        //cerr << "trainANN :: can not read bin file" << endl;
+    //}
     
+    Mat src  = imread(argv[1],1);
     CvANN_MLP* neuron = NULL ;
     
     // convert src to CvMat to use an old-school function
@@ -54,10 +55,19 @@ int main (int argc, char** argv){
     
     Mat resultNN(output1Ch); 
     
-    if(!saveMat("cppANN_result", resultNN))
-    {
-        cerr << "trainANN :: save mat to binary file" << endl;
-    }
+    //~ if(!saveMat("cppANN_result", resultNN))
+    //~ {
+        //~ cerr << "trainANN :: save mat to binary file" << endl;
+    //~ }
+    
+    //~ if(!imwrite("ann.jpg", resultNN))
+    //~ {
+        //~ cerr<< "can not save mat to jpg file" << endl;
+    //~ }
+    
+    IplImage *tmp8UC1 = cvCreateImage(cvGetSize(output1Ch), IPL_DEPTH_8U, 1);
+    cvConvertScale(output1Ch, tmp8UC1);
+    cvSaveImage("ann.jpg", tmp8UC1);
     
     src.release();
     resultNN.release();
