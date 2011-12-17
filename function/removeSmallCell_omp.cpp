@@ -36,79 +36,80 @@ int main(int argc, char **argv)
     /* convert src type to 8UC1 */
     if( dst.type() != CV_8UC1)
     {   
-        int cols = dst.cols;
-            
-        #pragma omp parallel shared(dst, tmpSrc, cols) num_threads(2)
-        {
-            int numt = omp_get_num_threads();
-            int tid = omp_get_thread_num();
-            int start = tid*(cols/numt); 
-            int end = (tid+1)*(cols/numt);
-            if( tid == (numt-1) )
-            {
-                end = cols;
-            }
-            
-            tmpSrc = dst.colRange(start, end);
-            tmpSrc.convertTo(tmpSrc, CV_8UC1);
-            
-        }
+        //~ int cols = dst.cols;
+            //~ 
+        //~ #pragma omp parallel shared(dst, tmpSrc, cols) num_threads(2)
+        //~ {
+            //~ int numt = omp_get_num_threads();
+            //~ int tid = omp_get_thread_num();
+            //~ int start = tid*(cols/numt); 
+            //~ int end = (tid+1)*(cols/numt);
+            //~ if( tid == (numt-1) )
+            //~ {
+                //~ end = cols;
+            //~ }
+            //~ 
+            //~ tmpSrc = dst.colRange(start, end);
+            //~ tmpSrc.convertTo(tmpSrc, CV_8UC1);
+        //~ }
         
-        //~ dst.convertTo(dst, CV_8UC1);
+        dst.convertTo(dst, CV_8UC1);
     }
     
     
     cout<<"dst type"<<dst.type();
     
-    //~ Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
-    //~ Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
-    //~ vector<vector<Point> > contours;
-    //~ findContours(	dst, contours, CV_RETR_EXTERNAL,
-                    //~ CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-//~ /*        check this          */
-    //~ 
-    //~ int contourSize =  contours.size();
-    //~ #pragma omp parallel for shared(contours, outSingle, tmp)
-    //~ for(size_t i = 0; i < contourSize; i++)
-    //~ {
-        //~ const Point* p = &contours[i][0];
-        //~ int n = (int)contours[i].size();
-        //~ double area = contourArea(Mat(contours[i]));
-        //~ 
-        //~ int tid = omp_get_thread_num();
-        //~ if(tid == 0)
-                //~ cout<<".";
-        //~ 
-        //~ if(area < 1500.0) //lower bound
-        //~ {
-            //~ fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
-//~ 
-        //~ } else if (area < 7500.0) {
-            //~ fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
-            //~ fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
-//~ 
-        //~ } else {
-            //~ fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
-//~ 
-        //~ }
-    //~ }
-//~ 
-    //~ contours.clear();
-    //~ 
-    //~ /* save to bin */
-    //~ if(!saveMat("keepArea", outSingle))
-    //~ {
-        //~ cerr << "removeSmallCell:: save mat to binary file" << endl;
-    //~ }
-//~ 
-    //~ if(!saveMat("biggerArea", tmp))
-    //~ {
-        //~ cerr << "removeSmallCell:: save mat to binary file" << endl;
-    //~ }
+    Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
+    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
+    vector<vector<Point> > contours;
+    findContours(	dst, contours, CV_RETR_EXTERNAL,
+                    CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+/*        check this          */
+    
+    int contourSize =  contours.size();
+    #pragma omp parallel
+    {
+    #pragma omp for nowait //shared(contours, outSingle, tmp) num_threads(2) 
+        for(size_t i = 0; i < contourSize; i++)
+        {
+            const Point* p = &contours[i][0];
+            int n = (int)contours[i].size();
+            double area = contourArea(Mat(contours[i]));
+            
+            int tid = omp_get_thread_num();
+            if(tid == 0)
+                    cout<<".";
+            
+            if(area < 1500.0) //lower bound
+            {
+                fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
+        
+            } else if (area < 7500.0) {
+                fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
+                fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
+        
+            } else {
+                fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
+        
+            }
+        }
+    }
+    contours.clear();
+    
+    /* save to bin */
+    if(!saveMat("keepArea", outSingle))
+    {
+        cerr << "removeSmallCell:: save mat to binary file" << endl;
+    }
+
+    if(!saveMat("biggerArea", tmp))
+    {
+        cerr << "removeSmallCell:: save mat to binary file" << endl;
+    }
     dst.release();
     src.release();
-    //~ tmp.release();
-    //~ outSingle.release();
+    tmp.release();
+    outSingle.release();
 
     end = omp_get_wtime();
     cerr<<"ns__removeSmallCell"<<"time elapsed "<<end-start<<endl;
