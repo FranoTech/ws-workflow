@@ -150,22 +150,24 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
     
     if(src.type()!= MatType)
     {
-        #pragma omp parallel shared(src, cols, MatType)
-        {
-            int numt = omp_get_num_threads();
-            int tid = omp_get_thread_num();
-            int start;
-            if(tid == 0)
-            {
-                start = tid*(cols/numt);
-            } else {
-                start = (tid*(cols/numt))+1;
-            }
-            int end = (tid+1)*(cols/numt);
-            
-            Mat dummy = src.colRange(start, end);
-            dummy.convertTo(dummy, MatType);
-        }
+        //~ #pragma omp parallel shared(src, cols, MatType)
+        //~ {
+            //~ int numt = omp_get_num_threads();
+            //~ int tid = omp_get_thread_num();
+            //~ int start;
+            //~ if(tid == 0)
+            //~ {
+                //~ start = tid*(cols/numt);
+            //~ } else {
+                //~ start = (tid*(cols/numt))+1;
+            //~ }
+            //~ int end = (tid+1)*(cols/numt);
+            //~ 
+            //~ Mat dummy = src.colRange(start, end);
+            //~ dummy.convertTo(dummy, MatType);
+        //~ }
+        
+        src.convertTo(src, MatType);
     }
 
     /* generate output file name */
@@ -211,22 +213,20 @@ int ns__Threshold(struct soap *soap,
     }
     
     int threstype = getThresholdType (thresholdType);
-    int cols = src.cols ;
+    int rows = src.rows ;
     
     #pragma omp parallel shared(src, cols, thresholdValue, maxValue, threstype)
     {
         int numt = omp_get_num_threads();
         int tid = omp_get_thread_num();
-        int start;
-        if(tid == 0)
+        int start = tid*(rows/numt); 
+        int end = (tid+1)*(rows/numt);
+        if( tid == (numt-1))
         {
-            start = tid*(cols/numt);
-        } else {
-            start = (tid*(cols/numt))+1;
+            end = rows;
         }
-        int end = (tid+1)*(cols/numt);
         
-        Mat tmpSrc = src.colRange(start, end);
+        Mat tmpSrc = src.rowRange(start, end);
         threshold(tmpSrc, tmpSrc, thresholdValue, maxValue, threstype);
     }
     
