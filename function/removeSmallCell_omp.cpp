@@ -36,24 +36,28 @@ int main(int argc, char **argv)
     /* convert src type to 8UC1 */
     if( dst.type() != CV_8UC1)
     {   
-        //~ int cols = dst.cols;
-            //~ 
-        //~ #pragma omp parallel shared(dst, tmpSrc, cols) num_threads(2)
-        //~ {
-            //~ int numt = omp_get_num_threads();
-            //~ int tid = omp_get_thread_num();
-            //~ int start = tid*(cols/numt); 
-            //~ int end = (tid+1)*(cols/numt);
-            //~ if( tid == (numt-1) )
-            //~ {
-                //~ end = cols;
-            //~ }
-            //~ 
-            //~ tmpSrc = dst.colRange(start, end);
-            //~ tmpSrc.convertTo(tmpSrc, CV_8UC1);
-        //~ }
+        int rows = dst.rows;
+            
+        #pragma omp parallel num_threads(2)
+        {
+            int numt = omp_get_num_threads();
+            int tid = omp_get_thread_num();
+            int start = tid*(rows/numt); 
+            int end = (tid+1)*(rows/numt);
+            if( tid == (numt-1))
+            {
+                end = rows;
+            }
+            
+            //~ tmpSrc = dst.rowRange(start, end);
+            tmpSrc = dst(Range(start, end), Range::all());
+            //~ tmpSrc.convertTo(dst.rowRange(start, end),0);
+            tmpSrc.convertTo(tmpSrc,0);
+            //~ tmpSrc.convertTo(dst(Range(start, end), Range::all()),0);
+           
+        }
         
-        dst.convertTo(dst, CV_8UC1);
+        //~ dst.convertTo(dst, CV_8UC1);
     }
     
     
