@@ -240,7 +240,6 @@ int ns__Threshold(struct soap *soap,
     }
 
     src.release();
-
     end = omp_get_wtime();
     cerr<<"ns__Threshold time elapsed "<<end-start<<endl;
     return SOAP_OK;
