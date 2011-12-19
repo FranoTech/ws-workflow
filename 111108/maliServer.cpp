@@ -23,8 +23,8 @@
 
 
 //init variable
-#define BASE_DIR "/home/lluu/dir/"
-#define FILENAME_SIZE 60
+#define BASE_DIR "/home/lluu/thesis/RESULT/"
+#define FILENAME_SIZE 75
 #define int64 long long
 
 //namespace
@@ -91,7 +91,7 @@ int ns__loadMat (struct soap *soap,
 	/* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_LoadMat", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_LoadMat", localtime(&now));
 	
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, src))
@@ -693,8 +693,8 @@ int ns__removeSmallCell(struct soap *soap,
     out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
     
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
