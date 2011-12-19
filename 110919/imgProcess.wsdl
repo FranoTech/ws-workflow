@@ -24,117 +24,117 @@
   xmlns="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="unqualified"
   attributeFormDefault="unqualified">
-  <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
  </schema>
 
 </types>
 
 <message name="loadMatRequest">
- <part name="InputImageFilename" type="xsd:string"/>
- <part name="loadparam" type="xsd:int"/>
+ <part name="InputImageFilename" type="xsd:string"/><!-- ns__loadMat::InputImageFilename -->
+ <part name="loadparam" type="xsd:int"/><!-- ns__loadMat::loadparam -->
 </message>
 
 <message name="loadMatResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__loadMat::OutputMatFilename -->
 </message>
 
 <message name="binaryThresholdRequest">
- <part name="InputMatFilename" type="xsd:string"/>
- <part name="thresholdValue" type="xsd:double"/>
- <part name="maxValue" type="xsd:double"/>
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__binaryThreshold::InputMatFilename -->
+ <part name="thresholdValue" type="xsd:double"/><!-- ns__binaryThreshold::thresholdValue -->
+ <part name="maxValue" type="xsd:double"/><!-- ns__binaryThreshold::maxValue -->
 </message>
 
 <message name="binaryThresholdResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__binaryThreshold::OutputMatFilename -->
 </message>
 
 <message name="morphOpenRequest">
- <part name="InpuMattFilename" type="xsd:string"/>
+ <part name="InpuMattFilename" type="xsd:string"/><!-- ns__morphOpen::InpuMattFilename -->
 </message>
 
 <message name="morphOpenResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__morphOpen::OutputMatFilename -->
 </message>
 
 <message name="MatToJPGRequest">
- <part name="InputMatFilename" type="xsd:string"/>
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__MatToJPG::InputMatFilename -->
 </message>
 
 <message name="MatToJPGResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__MatToJPG::OutputMatFilename -->
 </message>
 
 <message name="findContoursAndFillpoly">
- <part name="InputMatFilename" type="xsd:string"/>
- <part name="lowerBound" type="xsd:int"/>
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__findContoursAndFillpoly::InputMatFilename -->
+ <part name="lowerBound" type="xsd:int"/><!-- ns__findContoursAndFillpoly::lowerBound -->
 </message>
 
 <message name="FindContours">
- <part name="smallerArea" type="xsd:string"/>
- <part name="biggerArea" type="xsd:string"/>
+ <part name="smallerArea" type="xsd:string"/><!-- ns__findContoursAndFillpoly::smallerArea -->
+ <part name="biggerArea" type="xsd:string"/><!-- ns__findContoursAndFillpoly::biggerArea -->
 </message>
 
 <message name="erodeRequest">
- <part name="src" type="xsd:string"/>
- <part name="element" type="xsd:string"/>
- <part name="iteration" type="xsd:int"/>
+ <part name="src" type="xsd:string"/><!-- ns__erode::src -->
+ <part name="element" type="xsd:string"/><!-- ns__erode::element -->
+ <part name="iteration" type="xsd:int"/><!-- ns__erode::iteration -->
 </message>
 
 <message name="erodeResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__erode::OutputMatFilename -->
 </message>
 
 <message name="dilateRequest">
- <part name="src" type="xsd:string"/>
- <part name="element" type="xsd:string"/>
- <part name="iteration" type="xsd:int"/>
+ <part name="src" type="xsd:string"/><!-- ns__dilate::src -->
+ <part name="element" type="xsd:string"/><!-- ns__dilate::element -->
+ <part name="iteration" type="xsd:int"/><!-- ns__dilate::iteration -->
 </message>
 
 <message name="dilateResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__dilate::OutputMatFilename -->
 </message>
 
 <message name="OrRequest">
- <part name="src1" type="xsd:string"/>
- <part name="src2" type="xsd:string"/>
+ <part name="src1" type="xsd:string"/><!-- ns__Or::src1 -->
+ <part name="src2" type="xsd:string"/><!-- ns__Or::src2 -->
 </message>
 
 <message name="OrResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Or::OutputMatFilename -->
 </message>
 
 <message name="AndRequest">
- <part name="src1" type="xsd:string"/>
- <part name="src2" type="xsd:string"/>
+ <part name="src1" type="xsd:string"/><!-- ns__And::src1 -->
+ <part name="src2" type="xsd:string"/><!-- ns__And::src2 -->
 </message>
 
 <message name="AndResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__And::OutputMatFilename -->
 </message>
 
 <message name="NotRequest">
- <part name="src" type="xsd:string"/>
+ <part name="src" type="xsd:string"/><!-- ns__Not::src -->
 </message>
 
 <message name="NotResponse">
- <part name="OutputMatFilename" type="xsd:string"/>
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Not::OutputMatFilename -->
 </message>
 
 <message name="removeSmallCell">
- <part name="inputMatFilename" type="xsd:string"/>
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__removeSmallCell::inputMatFilename -->
 </message>
 
 <message name="RemoveSmallCell">
- <part name="keepedArea" type="xsd:string"/>
- <part name="biggerArea" type="xsd:string"/>
+ <part name="keepedArea" type="xsd:string"/><!-- ns__removeSmallCell::keepedArea -->
+ <part name="biggerArea" type="xsd:string"/><!-- ns__removeSmallCell::biggerArea -->
 </message>
 
 <message name="scanningCellRequest">
- <part name="inputMatFilename" type="xsd:string"/>
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__scanningCell::inputMatFilename -->
 </message>
 
 <message name="scanningCellResponse">
- <part name="outputMatFilename" type="xsd:string"/>
+ <part name="outputMatFilename" type="xsd:string"/><!-- ns__scanningCell::outputMatFilename -->
 </message>
 
 <portType name="imgProcessPortType">
@@ -313,7 +313,7 @@
 </binding>
 
 <service name="imgProcess">
- <documentation>gSOAP 2.7.17 generated service definition</documentation>
+ <documentation>gSOAP 2.8.6 generated service definition</documentation>
  <port name="imgProcess" binding="tns:imgProcess">
   <SOAP:address location="http://localhost/cgi-bin/imgProcessServer"/>
  </port>

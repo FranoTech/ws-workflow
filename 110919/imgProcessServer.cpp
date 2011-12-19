@@ -21,8 +21,8 @@
 
 
 //init variable
-#define BASE_DIR "/home/lluu/dir/"
-#define LOGNAME_SIZE 60
+#define BASE_DIR "/home/lluu/thesis/RESULT/"
+#define LOGNAME_SIZE 85
 #define int64 long long
 #define none "none"
 
@@ -97,7 +97,7 @@ int ns__loadMat (struct soap *soap,
 	/* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_LoadMat", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_LoadMat", localtime(&now));
 	
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
@@ -137,7 +137,7 @@ int ns__binaryThreshold(struct soap *soap,
     /* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_BinaryThreshold", localtime(&now));
 	
 	/* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
@@ -191,7 +191,7 @@ int ns__morphOpen(  struct soap *soap, char *InputMatFilename, char **OutputMatF
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_MorphOpen", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_MorphOpen", localtime(&now));
     
     /* save to bin */
     if(!saveMat(*OutputMatFilename, src))
@@ -240,7 +240,7 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S.jpg", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S.jpg", localtime(&now));
     
     if(!imwrite(*OutputMatFilename, src))
     {
@@ -317,8 +317,8 @@ int ns__findContoursAndFillpoly (struct soap *soap,
     out.biggerArea = (char*)soap_malloc(soap, 60);
 
     time_t now = time(0);
-    strftime(out.smallerArea, sizeof(out.smallerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_smallerArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    strftime(out.smallerArea, sizeof(out.smallerArea)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_smallerArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
     
     /* save to bin */
     if(!saveMat(out.smallerArea, outSingle))
@@ -384,7 +384,7 @@ int ns__erode(  struct soap *soap, char *src,
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_erode", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_erode", localtime(&now));
     
     /* save to bin */
     if(!saveMat(*OutputMatFilename, matSrc))
@@ -443,7 +443,7 @@ int ns__dilate(  struct soap *soap, char *src,
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_dilate", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_dilate", localtime(&now));
     
     /* save to bin */
     if(!saveMat(*OutputMatFilename, matSrc))
@@ -494,7 +494,7 @@ int ns__Or(  struct soap *soap, char *src1,
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_or", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_or", localtime(&now));
     
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
@@ -546,7 +546,7 @@ int ns__And(  struct soap *soap, char *src1,
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_and", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_and", localtime(&now));
     
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
@@ -584,7 +584,7 @@ int ns__Not(  struct soap *soap, char *src,
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_not", localtime(&now));
+    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_not", localtime(&now));
     
     /* save to bin */
     if(!saveMat(*OutputMatFilename, dst))
@@ -665,8 +665,8 @@ int ns__removeSmallCell(struct soap *soap,
     out.biggerArea = (char*)soap_malloc(soap, 60);
 
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    strftime(out.keepedArea, sizeof(out.keepedArea)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
     
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
@@ -755,7 +755,7 @@ int ns__scanningCell(struct soap *soap,
     *outputMatFilename = (char*)soap_malloc(soap, 60);
 
     time_t now = time(0);
-    strftime(*outputMatFilename, sizeof(outputMatFilename)*60, "/home/lluu/dir/%Y%m%d_%H%M%S_scaningCell", localtime(&now));
+    strftime(*outputMatFilename, sizeof(outputMatFilename)*60, "/home/lluu/thesis/RESULT/%Y%m%d_%H%M%S_scaningCell", localtime(&now));
     
     /* save to bin */
     if(!saveMat(*outputMatFilename, output))
