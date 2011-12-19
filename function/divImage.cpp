@@ -8,11 +8,13 @@ using namespace cv;
 int main(int argc, char **argv)
 {
     Mat src = imread(argv[1],0);
-    Mat dst = Mat(src.rows, src.cols, src.type());
+    //~ Mat dst = Mat(src.rows, src.cols, src.type());
     
     //~ Mat divSrc[4];
     int cols = src.cols;
     int rows = src.rows;
+    Mat divSrc[2];
+    Mat tmp[2];
     
     #pragma omp parallel shared(src) num_threads(2)
     {
@@ -25,18 +27,20 @@ int main(int argc, char **argv)
             end = src.rows;
         }
             
-        Mat divSrc = src.rowRange(start, end);
-        //~ Mat d = dst.rowRange(start,end);
-        cout << "test"<<endl;
-        divSrc.convertTo(divSrc,CV_32FC1);
+        divSrc[tid] = src.rowRange(start, end);
+        tmp[tid] = src.rowRange(start, end);
+        divSrc[tid].convertTo(divSrc[tid],CV_32FC1);
+        tmp[tid] = divSrc[tid].clone();
+        cout<<"tmp ["<<tid<<"] = "<<tmp[tid].type()<<endl;
+        cout<<"divSrc ["<<tid<<"] = "<<divSrc[tid].type()<<endl;
         
         //~ threshold(divSrc[tid], divSrc[tid], 127.0, 255.0, THRESH_BINARY);
         //~ threshold(divSrc, divSrc, 127.0, 255.0, THRESH_BINARY);
         
     }
 
-    cout<<src.type();
-    cout<<dst.type();
+    cout<<"src = "<<src.type()<<endl;
+    //~ cout<<dst.type();
     //~ src.convertTo(src, CV_8UC1);
     //~ if(!imwrite("divomp.jpg", src))
     //~ {
