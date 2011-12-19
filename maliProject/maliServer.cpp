@@ -615,10 +615,8 @@ int ns__removeSmallCell(struct soap *soap,
 	/* generate output file name */
     out.keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
     out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
-
-    time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    getOutputFilename(OutputMatFilename,"_keepedArea");
+    getOutputFilename(OutputMatFilename,"_biggerArea");
 
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
@@ -707,9 +705,7 @@ int ns__scanningCell(struct soap *soap,
 
 	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_scaningCell", localtime(&now));
+    getOutputFilename(OutputMatFilename,"_scanningCell");
 
     /* save to bin */
     if(!saveMat(*OutputMatFilename, output))
@@ -779,8 +775,7 @@ int ns__trainANN(struct soap *soap,
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
 
-    time_t now = time(0);
-    strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_trainANN", localtime(&now));
+    getOutputFilename(OutputMatFilename,"_trainANN");
 
     /* save to bin */
     if(!saveMat(*OutputMatFilename, resultNN))
@@ -1055,3 +1050,14 @@ void getOutputFilename (char **filename, const char *toAppend)
 
 
 
+
+void getOutputFilename (char **filename, const char *toAppend)
+{
+
+    time_t now = time(0);
+    strftime(*filename, sizeof(filename)*60, BASE_DIR"%Y%m%d_%H%M%S", localtime(&now));
+    /* to do
+     * do check if there's no data in toAppend
+     */
+    strcat (*filename,toAppend);
+}
