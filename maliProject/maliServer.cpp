@@ -620,8 +620,8 @@ int ns__removeSmallCell(struct soap *soap,
     out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "BASE_DIR%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "BASE_DIR%Y%m%d_%H%M%S_biggerArea", localtime(&now));
 
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
@@ -656,23 +656,32 @@ int ns__removeSmallCell(struct soap *soap,
 //
 
 int ns__scanningCell(struct soap *soap,
-						char *inputMatFilename,
+						char *biggerArea,
+                        char *keepArea,
 						char **OutputMatFilename)
 {
     double start, end;
     start = omp_get_wtime();
 
-	Mat src;
-    if(!readMat(inputMatFilename, src))
+	Mat src; //input_morph
+    if(!readMat(biggerArea, src))
     {
         cerr << "scanningCell :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "scanningCell :: can not read bin file", NULL);
     }
-
+    
+    Mat out_single; //input_morph
+    if(!readMat(keepArea, out_single))
+    {
+        cerr << "scanningCell :: can not read bin file" << endl;
+        return soap_receiver_fault(soap, "scanningCell :: can not read bin file", NULL);
+    }
+    
+    
     Mat srcTmp;
     Mat src32FC1;
     src.convertTo(src32FC1, CV_32FC1);
-    Mat output = Mat::zeros(src.rows,src.cols, CV_32FC1);
+    //~ Mat output = Mat::zeros(src.rows,src.cols, CV_32FC1);
 
     int nContour = 1;
     int prevContour = 0;
@@ -682,7 +691,7 @@ int ns__scanningCell(struct soap *soap,
 
     while(nContour != 0)
     {
-        src32FC1.convertTo(srcTmp, CV_8UC1);
+        src32FC1.convertTo(srcTmp, CV_8UC1); //cvConvert(input_morph, tmp8UC1);
 
         findContours( srcTmp, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
         nContour = contours.size();
@@ -706,7 +715,7 @@ int ns__scanningCell(struct soap *soap,
             if((area < 3000.0) || (sameCount > 10))
             {
                 fillPoly( src32FC1, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
-                fillPoly( output, &p, &n, 1, Scalar(255, 255, 255));
+                fillPoly( out_single, &p, &n, 1, Scalar(255, 255, 255));
             }
         }
     }
@@ -716,7 +725,7 @@ int ns__scanningCell(struct soap *soap,
     getOutputFilename(OutputMatFilename,"_scanningCell");
 
     /* save to bin */
-    if(!saveMat(*OutputMatFilename, output))
+    if(!saveMat(*OutputMatFilename, out_single))
     {
         cerr << "scanningCell:: save mat to binary file" << endl;
         return soap_receiver_fault(soap, "scanningCell:: save mat to binary file", NULL);
@@ -725,7 +734,7 @@ int ns__scanningCell(struct soap *soap,
     src.release();
     srcTmp.release();
     src32FC1.release();
-    output.release();
+    out_single.release();
 
     end = omp_get_wtime();
     cerr<<"ns__scanningCell time elapsed "<<end-start<<endl;
@@ -749,7 +758,7 @@ int ns__separateCell(struct soap *soap,
     double start, end;
     start = omp_get_wtime();
 
-    Mat src;
+    Mat src; //out_single
     if(!readMat(input1, src))
     {
         cerr << "trainANN :: can not read bin file" << endl;
@@ -763,13 +772,12 @@ int ns__separateCell(struct soap *soap,
     
     CvMat *out_single = cvCreateMat(src.rows, src.cols, CV_32FC1);
     cvConvert(&tmp, out_single);
+ 
+    //************************//
     
     IplImage *tmp8UC1 = cvCreateImage(cvGetSize(out_single), IPL_DEPTH_8U, 1);
     cvConvert(out_single, tmp8UC1);
-    
-    CvMemStorage *storage = cvCreateMemStorage();
-	CvSeq *first_con = NULL;
-	CvSeq *cur = NULL;
+
     
     cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
     int count = 1;
@@ -783,8 +791,7 @@ int ns__separateCell(struct soap *soap,
         cur = cur->h_next;
     }
     
-    cerr<<"src2 findcontour"<<endl;
-
+//******** output_morph *******//
 
     Mat src2;
     if(!readMat(input2, src2))
@@ -798,18 +805,32 @@ int ns__separateCell(struct soap *soap,
     
     CvMat *output_morph = cvCreateMat(src2.rows, src2.cols, CV_32FC1);
     cvConvert(&tmp, output_morph);
+    
+//******************************//    
+    
     cvConvertScale(output_morph, tmp8UC1);
     
     CvMat *inwater = cvCreateMat(out_single->height, out_single->width, CV_8UC3);
     CvMat outwater = cvMat(out_single->height, out_single->width, CV_32SC1, out_single->data.fl);
 
     cvMerge(tmp8UC1, tmp8UC1, tmp8UC1, NULL, inwater);
+
     cvWatershed(inwater, &outwater);
-    
     cvErode(out_single, out_single, NULL, 2);
+    
     cvConvertScale(output_morph, tmp8UC1);
     cvSub(output_morph, out_single, output_morph, tmp8UC1);
 
+    cvReleaseMat(&inwater);
+
+    
+    Mat tmpmat = cvarrToMat(out_single, true);
+    tmpmat.convertTo(tmpmat, CV_8UC1);
+    if(!imwrite(BASE_DIR"sep.jpg", tmpmat))
+    {
+		cout<<"error writing c_out_single_sep.jpg"<<endl;
+    }
+    
     
     Mat result = cvarrToMat(output_morph, false);
     
@@ -828,7 +849,6 @@ int ns__separateCell(struct soap *soap,
     src2.release();
     cvReleaseMat(&out_single);
     cvReleaseMat(&output_morph);
-    cvReleaseMat(&inwater);
     cvReleaseImage(&tmp8UC1);
 
     end = omp_get_wtime();
