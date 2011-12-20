@@ -57,7 +57,7 @@ int main (int argc, char** argv){
         int npts = cur->total;
         CvPoint *p = new CvPoint[npts];
         cvCvtSeqToArray(cur, p);
-        cout<<area<<" ";
+        //~ cout<<area<<" ";
         if (area < 1500.0) // remove small area
             cvFillPoly(input_morph, &p, &npts, 1, cvScalar(0.0)); // remove from input
         else if (area < 7500.0) {
@@ -69,7 +69,7 @@ int main (int argc, char** argv){
         cur = cur->h_next;
     }
     
-    cout<<endl;
+    //~ cout<<endl;
     Mat tmpmat = cvarrToMat(out_single, true);
     tmpmat.convertTo(tmpmat, CV_8UC1);
     if(!imwrite("c_out_single.jpg", tmpmat))
@@ -89,6 +89,14 @@ int main (int argc, char** argv){
     CvMat *output_morph = cvCreateMat(input_morph->height, input_morph->width, CV_32FC1);
     cvOr(input_morph, out_single, output_morph);
     cvReleaseStructuringElement(&se1);
+    
+    tmpmat = cvarrToMat(output_morph, true);
+    tmpmat.convertTo(tmpmat, CV_8UC1);
+    if(!imwrite("c_output_morph_or.jpg", tmpmat))
+    {
+		cout<<"error writing image"<<endl;
+    }
+    
     
     //## Scanning Cells ##//
 	int ncell = 0, prev_ncontour = 0, same_count = 0, ncontour = 1;
