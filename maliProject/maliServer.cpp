@@ -758,55 +758,48 @@ int ns__separateCell(struct soap *soap,
     double start, end;
     start = omp_get_wtime();
 
-    Mat src; //out_single
+	Mat src; 
     if(!readMat(input1, src))
     {
-        cerr << "trainANN :: can not read bin file" << endl;
-        return soap_receiver_fault(soap, "trainANN :: can not read bin file", NULL);
+        cerr << "sepl :: can not read bin file" << endl;
+        return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
-
-    // convert src to CvMat to use an old-school function
     CvMat tmp = src;
-    CV_Assert(tmp.cols == src.cols && tmp.rows == src.rows &&
-        tmp.data.ptr == (uchar*)src.data && tmp.step == src.step);
+    CV_Assert(tmp.cols == src.cols && tmp.rows == src.rows && tmp.data.ptr == (uchar*)src.data && tmp.step == src.step);
     
     CvMat *out_single = cvCreateMat(src.rows, src.cols, CV_32FC1);
     cvConvert(&tmp, out_single);
- 
-    //************************//
     
+    CvMemStorage *storage = cvCreateMemStorage();
+	CvSeq *first_con = NULL;
+	CvSeq *cur = NULL;
+    int count = 1;
     IplImage *tmp8UC1 = cvCreateImage(cvGetSize(out_single), IPL_DEPTH_8U, 1);
     cvConvert(out_single, tmp8UC1);
-
     
     cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
-    int count = 1;
     cur = first_con;
+    
     while (cur != NULL) {
         int npts = cur->total;
         CvPoint *p = new CvPoint[npts];
         cvCvtSeqToArray(cur, p);
-        cvFillPoly(out_single, &p, &npts, 1, cvScalar((count++%254)+1)); // fill label, must be 1-255
+        cvFillPoly(out_single, &p, &npts, 1, cvScalar((count++%254)+1));
         delete[] p;
         cur = cur->h_next;
     }
-    
-//******** output_morph *******//
 
-    Mat src2;
+    // ******* read output_morph ******* //
+    Mat src2; 
     if(!readMat(input2, src2))
     {
-        cerr << "sep :: can not read bin file" << endl;
+        cerr << "sepl :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
     CvMat tmp2 = src2;
-    CV_Assert(tmp2.cols == src2.cols && tmp2.rows == src2.rows &&
-        tmp2.data.ptr == (uchar*)src2.data && tmp2.step == src2.step);
-    
-    CvMat *output_morph = cvCreateMat(src2.rows, src2.cols, CV_32FC1);
+    CV_Assert(tmp2.cols == src2.cols && tmp2.rows == src2.rows && tmp2.data.ptr == (uchar*)src2.data && tmp2.step == src2.step);
+    CvMat *output_morph = cvCreateMat(src.rows, src.cols, CV_32FC1);
     cvConvert(&tmp, output_morph);
-    
-//******************************//    
     
     cvConvertScale(output_morph, tmp8UC1);
     
@@ -817,43 +810,43 @@ int ns__separateCell(struct soap *soap,
 
     cvWatershed(inwater, &outwater);
     cvErode(out_single, out_single, NULL, 2);
-    
     cvConvertScale(output_morph, tmp8UC1);
     cvSub(output_morph, out_single, output_morph, tmp8UC1);
-
-    cvReleaseMat(&inwater);
-
     
     Mat tmpmat = cvarrToMat(out_single, true);
     tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite(BASE_DIR"sep.jpg", tmpmat))
+    if(!imwrite(BASE_DIR"out_single.jpg", tmpmat))
     {
-		cout<<"error writing c_out_single_sep.jpg"<<endl;
+		cout<<"error writing out_single.jpg"<<endl;
     }
-    
+
+    tmpmat = cvarrToMat(output_morph, true);
+    tmpmat.convertTo(tmpmat, CV_8UC1);
+    if(!imwrite(BASE_DIR"output_morph.jpg", tmpmat))
+    {
+		cout<<"error writing out_single.jpg"<<endl;
+    }
+    cvReleaseMat(&inwater);
     
     Mat result = cvarrToMat(output_morph, false);
-    
+
 	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    getOutputFilename(OutputMatFilename,"_sep");
+    getOutputFilename(OutputMatFilename,"_result");
 
     /* save to bin */
     if(!saveMat(*OutputMatFilename, result))
     {
-        cerr << "sep:: save mat to binary file" << endl;
-        return soap_receiver_fault(soap, "sep:: save mat to binary file", NULL);
+        cerr << "result:: save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "result:: save mat to binary file", NULL);
     }
 
     src.release();
-    src2.release();
-    cvReleaseMat(&out_single);
-    cvReleaseMat(&output_morph);
-    cvReleaseImage(&tmp8UC1);
 
     end = omp_get_wtime();
-    cerr<<"ns__waterShed time elapsed "<<end-start<<endl;
+    cerr<<"ns__waterShed"<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
+    
 }
 
 
