@@ -24,7 +24,7 @@ int ns__Or(char *src1, char *src2, char **OutputMatFilename);
 int ns__And(char *src1, char *src2, char **OutputMatFilename);
 int ns__Not(char *src, char **OutputMatFilename);
 int ns__removeSmallCell(char *inputMatFilename, ns__RemoveSmallCell &out);
-int ns__scanningCell(char *inputMatFilename, char **OutputMatFilename);
+int ns__scanningCell(char *biggerArea, char *keepArea, char **OutputMatFilename);
 int ns__trainANN(char *inputMatFilename, char *neuralFile, char **OutputMatFilename);
 int ns__separateCell(char *input1, char *input2, char **OutputMatFilename);
 int ns__prepareResult(char *inputMatFilename, char *afterthresNN, char **OutputMatFilename);
