@@ -149,24 +149,7 @@ int ns__ConvertTo( struct soap *soap, char *InputMatFilename,
     int cols = src.cols ;
     
     if(src.type()!= MatType)
-    {
-        //~ #pragma omp parallel shared(src, cols, MatType)
-        //~ {
-            //~ int numt = omp_get_num_threads();
-            //~ int tid = omp_get_thread_num();
-            //~ int start;
-            //~ if(tid == 0)
-            //~ {
-                //~ start = tid*(cols/numt);
-            //~ } else {
-                //~ start = (tid*(cols/numt))+1;
-            //~ }
-            //~ int end = (tid+1)*(cols/numt);
-            //~ 
-            //~ Mat dummy = src.colRange(start, end);
-            //~ dummy.convertTo(dummy, MatType);
-        //~ }
-        
+    {        
         src.convertTo(src, MatType);
     }
 
