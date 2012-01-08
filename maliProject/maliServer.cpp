@@ -114,8 +114,6 @@ int ns__MatToJPG (struct soap *soap, char *InputMatFilename, char **OutputMatFil
        src.convertTo(src, CV_8UC(chan));
     }
 
-    //cerr<<"src.type = "<<src.type()<<endl;
-
     /* generate output file name */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,".jpg");
