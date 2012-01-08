@@ -3,7 +3,7 @@
 #include "mali.nsmap"
 //opencv
 #include <cv.h>
-#include <highgui.h>
+//#include <highgui.h>
 #include <ml.h>
 //STL
 #include <sstream>

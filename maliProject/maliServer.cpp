@@ -761,7 +761,7 @@ int ns__separateCell(struct soap *soap,
 	Mat src; 
     if(!readMat(input1, src))
     {
-        cerr << "sepl :: can not read bin file" << endl;
+        cerr << "sep :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
     CvMat tmp = src;
