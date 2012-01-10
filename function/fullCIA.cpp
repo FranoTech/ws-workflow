@@ -70,32 +70,32 @@ int main (int argc, char** argv){
     }
     
     //~ cout<<endl;
-    Mat tmpmat = cvarrToMat(out_single, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_out_single.jpg", tmpmat))
-    {
-		cout<<"error writing image"<<endl;
-    }
-    
-    tmpmat = cvarrToMat(input_morph, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_input_morph.jpg", tmpmat))
-    {
-		cout<<"error writing image"<<endl;
-    }
-    
-    cvSaveImage("c_tmp8UC1.jpg", tmp8UC1);
+    //~ Mat tmpmat = cvarrToMat(out_single, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_out_single.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing image"<<endl;
+    //~ }
+    //~ 
+    //~ tmpmat = cvarrToMat(input_morph, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_input_morph.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing image"<<endl;
+    //~ }
+    //~ 
+    //~ cvSaveImage("c_tmp8UC1.jpg", tmp8UC1);
     
     CvMat *output_morph = cvCreateMat(input_morph->height, input_morph->width, CV_32FC1);
     cvOr(input_morph, out_single, output_morph);
     cvReleaseStructuringElement(&se1);
     
-    tmpmat = cvarrToMat(output_morph, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_output_morph_or.jpg", tmpmat))
-    {
-		cout<<"error writing image"<<endl;
-    }
+    //~ tmpmat = cvarrToMat(output_morph, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_output_morph_or.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing image"<<endl;
+    //~ }
     
     
     //## Scanning Cells ##//
@@ -128,29 +128,29 @@ int main (int argc, char** argv){
         }
     }
     
-    tmpmat = cvarrToMat(out_single, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_out_single_scanningCell.jpg", tmpmat))
-    {
-		cout<<"error writing image"<<endl;
-    }
+    //~ tmpmat = cvarrToMat(out_single, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_out_single_scanningCell.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing image"<<endl;
+    //~ }
+    //~ 
+    //~ 
+    //~ tmpmat = cvarrToMat(input_morph, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_input_morph_scanningCell.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing c_out_single_scanningCell.jpg"<<endl;
+    //~ }
+    //~ 
+    //~ tmpmat = cvarrToMat(output_morph, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_output_morph_scanningCell.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing c_output_morph_scanningCell.jpg"<<endl;
+    //~ }
     
-    
-    tmpmat = cvarrToMat(input_morph, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_input_morph_scanningCell.jpg", tmpmat))
-    {
-		cout<<"error writing c_out_single_scanningCell.jpg"<<endl;
-    }
-    
-    tmpmat = cvarrToMat(output_morph, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_output_morph_scanningCell.jpg", tmpmat))
-    {
-		cout<<"error writing c_output_morph_scanningCell.jpg"<<endl;
-    }
-    
-    cvSaveImage("c_tmp8UC1_scanningCell.jpg", tmp8UC1);
+    //~ cvSaveImage("c_tmp8UC1_scanningCell.jpg", tmp8UC1);
     
     /* ### separate cells ### */
     cvConvert(out_single, tmp8UC1);
@@ -180,30 +180,30 @@ int main (int argc, char** argv){
     cvSub(output_morph, out_single, output_morph, tmp8UC1);
 
     cvReleaseMat(&inwater);
-    
-    tmpmat = cvarrToMat(out_single, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_out_single_sep.jpg", tmpmat))
-    {
-		cout<<"error writing c_out_single_sep.jpg"<<endl;
-    }
-    
-    
-    tmpmat = cvarrToMat(input_morph, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_input_morph_sep.jpg", tmpmat))
-    {
-		cout<<"error writing c_input_morph_sep.jpg"<<endl;
-    }
-    
-    cvSaveImage("c_tmp8UC1_sep.jpg", tmp8UC1);
-    
-    tmpmat = cvarrToMat(output_morph, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite("c_output_morph_sep.jpg", tmpmat))
-    {
-		cout<<"error writing c_output_morph_sep.jpg"<<endl;
-    }
+    //~ 
+    //~ tmpmat = cvarrToMat(out_single, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_out_single_sep.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing c_out_single_sep.jpg"<<endl;
+    //~ }
+    //~ 
+    //~ 
+    //~ tmpmat = cvarrToMat(input_morph, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_input_morph_sep.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing c_input_morph_sep.jpg"<<endl;
+    //~ }
+    //~ 
+    //~ cvSaveImage("c_tmp8UC1_sep.jpg", tmp8UC1);
+    //~ 
+    //~ tmpmat = cvarrToMat(output_morph, true);
+    //~ tmpmat.convertTo(tmpmat, CV_8UC1);
+    //~ if(!imwrite("c_output_morph_sep.jpg", tmpmat))
+    //~ {
+		//~ cout<<"error writing c_output_morph_sep.jpg"<<endl;
+    //~ }
     
     /* ### prepare result ### */
     
