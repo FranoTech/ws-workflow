@@ -569,13 +569,11 @@ int ns__removeSmallCell(struct soap *soap,
     double start, end;
     start = omp_get_wtime();
 
-	Mat src;
+	Mat src; //input_morph
     if(!readMat(inputMatFilename, src))
     {
-        soap_fault(soap);
         cerr << "removeSmallCell :: can not read bin file" << endl;
-        soap->fault->faultstring = "removeSmallCell :: can not read bin file";
-        return SOAP_FAULT;
+        return soap_receiver_fault(soap, "removeSmallCell :: can not read bin file", NULL);
     }
 
     Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
@@ -586,16 +584,18 @@ int ns__removeSmallCell(struct soap *soap,
     }
 
     Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
+    
 	vector<vector<Point> > contours;
     double area = 0;
     findContours(	src, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
 
+    
     for(size_t i = 0; i< contours.size(); i++)
     {
 		const Point* p = &contours[i][0];
         int n = (int)contours[i].size();
-		area = contourArea(Mat(contours[i]));
+		area = fabs(contourArea(Mat(contours[i])));
 
 		if(area < 1500.0) //lower bound
 		{
@@ -624,18 +624,14 @@ int ns__removeSmallCell(struct soap *soap,
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
     {
-        soap_fault(soap);
         cerr << "removeSmallCell:: save mat to binary file" << endl;
-        soap->fault->faultstring = "error:: save mat to binary file";
-        return SOAP_FAULT;
+        return soap_receiver_fault(soap, "removeSmallCell:: save mat to binary file", NULL);
     }
 
     if(!saveMat(out.biggerArea, tmp))
     {
-        soap_fault(soap);
         cerr << "removeSmallCell:: save mat to binary file" << endl;
-        soap->fault->faultstring = "error:: save mat to binary file";
-        return SOAP_FAULT;
+        return soap_receiver_fault(soap, "removeSmallCell:: save mat to binary file", NULL);
     }
 
     src.release();
@@ -668,7 +664,7 @@ int ns__scanningCell(struct soap *soap,
         return soap_receiver_fault(soap, "scanningCell :: can not read bin file", NULL);
     }
     
-    Mat out_single; //input_morph
+    Mat out_single;
     if(!readMat(keepArea, out_single))
     {
         cerr << "scanningCell :: can not read bin file" << endl;
@@ -708,7 +704,7 @@ int ns__scanningCell(struct soap *soap,
         {
             const Point* p = &contours[i][0];
             int n = (int)contours[i].size();
-            area = contourArea(Mat(contours[i]));
+            area = fabs(contourArea(Mat(contours[i])));
 
             if((area < 3000.0) || (sameCount > 10))
             {
@@ -756,48 +752,50 @@ int ns__separateCell(struct soap *soap,
     double start, end;
     start = omp_get_wtime();
 
-	Mat src; 
+	Mat src; //out_single
     if(!readMat(input1, src))
     {
         cerr << "sep :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
-    CvMat tmp = src;
-    CV_Assert(tmp.cols == src.cols && tmp.rows == src.rows && tmp.data.ptr == (uchar*)src.data && tmp.step == src.step);
     
-    CvMat *out_single = cvCreateMat(src.rows, src.cols, CV_32FC1);
-    cvConvert(&tmp, out_single);
-    
-    CvMemStorage *storage = cvCreateMemStorage();
-	CvSeq *first_con = NULL;
-	CvSeq *cur = NULL;
-    int count = 1;
-    IplImage *tmp8UC1 = cvCreateImage(cvGetSize(out_single), IPL_DEPTH_8U, 1);
-    cvConvert(out_single, tmp8UC1);
-    
-    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
-    cur = first_con;
-    
-    while (cur != NULL) {
-        int npts = cur->total;
-        CvPoint *p = new CvPoint[npts];
-        cvCvtSeqToArray(cur, p);
-        cvFillPoly(out_single, &p, &npts, 1, cvScalar((count++%254)+1));
-        delete[] p;
-        cur = cur->h_next;
+    if( src.type() != CV_8UC1)
+    {
+        src.convertTo(src, CV_8UC1);
     }
+    
+    Mat tmp;
+    int count = 1;
+	vector<vector<Point> > contours;
+    findContours(	src, contours, CV_RETR_EXTERNAL,
+					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    
+    for(size_t i = 0; i< contours.size(); i++)
+    {
+		const Point* p = &contours[i][0];
+        int n = (int)contours[i].size();
 
-    // ******* read output_morph ******* //
-    Mat src2; 
+        fillPoly( tmp, &p, &n, 1, Scalar::all(count++%254)+1); // remove from src (put black area instead the old one)
+
+	}
+	contours.clear();
+
+    Mat src2; //output_morph
     if(!readMat(input2, src2))
     {
         cerr << "sepl :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
-    CvMat tmp2 = src2;
-    CV_Assert(tmp2.cols == src2.cols && tmp2.rows == src2.rows && tmp2.data.ptr == (uchar*)src2.data && tmp2.step == src2.step);
-    CvMat *output_morph = cvCreateMat(src.rows, src.cols, CV_32FC1);
-    cvConvert(&tmp, output_morph);
+    
+    if( src2.type() != CV_8UC1)
+    {
+        src2.convertTo(src, CV_8UC1);
+    }
+    
+    Mat inwater = Mat(src.rows, src.cols, CV_8UC1);
+    Mat outwater = Mat(src.rows, src.cols, CV_8UC1);
+    
+    
     
     cvConvertScale(output_morph, tmp8UC1);
     
