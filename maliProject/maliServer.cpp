@@ -745,29 +745,29 @@ int ns__scanningCell(struct soap *soap,
 //
 
 int ns__separateCell(struct soap *soap,
-						char *input1,
-                        char *input2,
+						char *out_single,
+                        char *output_morph,
 						char **OutputMatFilename)
 {
     double start, end;
     start = omp_get_wtime();
 
-	Mat src; //out_single
-    if(!readMat(input1, src))
+	Mat outSingle; //out_single
+    if(!readMat(out_single, outSingle))
     {
         cerr << "sep :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
     
-    if( src.type() != CV_8UC1)
+    if( outSingle.type() != CV_8UC1)
     {
-        src.convertTo(src, CV_8UC1);
+        outSingle.convertTo(outSingle, CV_8UC1);
     }
     
     Mat tmp;
     int count = 1;
 	vector<vector<Point> > contours;
-    findContours(	src, contours, CV_RETR_EXTERNAL,
+    findContours(	outSingle, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
     
     for(size_t i = 0; i< contours.size(); i++)
@@ -780,34 +780,29 @@ int ns__separateCell(struct soap *soap,
 	}
 	contours.clear();
 
-    Mat src2; //output_morph
-    if(!readMat(input2, src2))
+    Mat cell; //output_morph
+    if(!readMat(output_morph, cell))
     {
         cerr << "sepl :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
     
-    if( src2.type() != CV_8UC1)
-    {
-        src2.convertTo(src, CV_8UC1);
-    }
+    Mat inwater = Mat(outSingle.rows, outSingle.cols, CV_8UC3);
+    Mat outwater(outSingle.size(),CV_32SC1,outSingle.data);  //Is it correct?
     
-    Mat inwater = Mat(src.rows, src.cols, CV_8UC1);
-    Mat outwater = Mat(src.rows, src.cols, CV_8UC1);
-    
-    
-    
-    cvConvertScale(output_morph, tmp8UC1);
-    
-    CvMat *inwater = cvCreateMat(out_single->height, out_single->width, CV_8UC3);
-    CvMat outwater = cvMat(out_single->height, out_single->width, CV_32SC1, out_single->data.fl);
+    Mat tmp8UC1;
+    cell.convertTo(tmp8UC1,CV_8UC1);
 
-    cvMerge(tmp8UC1, tmp8UC1, tmp8UC1, NULL, inwater);
-
-    cvWatershed(inwater, &outwater);
-    cvErode(out_single, out_single, NULL, 2);
-    cvConvertScale(output_morph, tmp8UC1);
-    cvSub(output_morph, out_single, output_morph, tmp8UC1);
+    vector<Mat> water;
+    tmp8UC1.copyTo(water[0]);
+    tmp8UC1.copyTo(water[1]);
+    tmp8UC1.copyTo(water[2]);
+    
+    merge(water, inwater);
+    watershed(inwater, outwater);
+    erode(outSingle, outSingle, NULL, 2);
+    cell.convertTo(tmp8UC1,CV_8UC1);
+    subtract(cell, outSingle, cell, tmp8UC1);
     
     Mat tmpmat = cvarrToMat(out_single, true);
     tmpmat.convertTo(tmpmat, CV_8UC1);
