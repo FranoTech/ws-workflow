@@ -32,7 +32,8 @@ int main (int argc, char** argv){
     {
 		const Point* p = &contours[i][0];
         int n = (int)contours[i].size();
-        fillPoly( tmp, &p, &n, 1, Scalar::all(count++%254)+1); 
+        int c = ((count+1)%254)+1;
+        fillPoly( tmp, &p, &n, 1, Scalar::all(((count+1)%254)+1)); 
 	}
 	contours.clear();
 
