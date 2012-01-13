@@ -745,88 +745,80 @@ int ns__scanningCell(struct soap *soap,
 //
 
 int ns__separateCell(struct soap *soap,
-						char *out_single,
-                        char *output_morph,
+						char *input1, //outSingle
+                        char *input2, //outMorph
 						char **OutputMatFilename)
 {
     double start, end;
     start = omp_get_wtime();
 
-	Mat outSingle; //out_single
-    if(!readMat(out_single, outSingle))
+	Mat outSingle;
+    if(!readMat(input1, outSingle))
     {
         cerr << "sep :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
-    
-    if( outSingle.type() != CV_8UC1)
-    {
-        outSingle.convertTo(outSingle, CV_8UC1);
-    }
-    
+
     Mat tmp;
+    outSingle.convertTo(tmp, CV_8UC1);
+    
     int count = 1;
 	vector<vector<Point> > contours;
-    findContours(	outSingle, contours, CV_RETR_EXTERNAL,
+    findContours(	tmp, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
     
     for(size_t i = 0; i< contours.size(); i++)
     {
-		const Point* p = &contours[i][0];
+		const Point* p = &contours[i][0]; 
         int n = (int)contours[i].size();
-
-        fillPoly( tmp, &p, &n, 1, Scalar::all(count++%254)+1); // remove from src (put black area instead the old one)
-
+        int c = ((count+1)%254)+1;
+        fillPoly( outSingle, &p, &n, 1, Scalar::all(c)); 
 	}
 	contours.clear();
-
+    
+    Mat inwater = Mat(outSingle.rows, outSingle.cols, CV_8UC3);
+    Mat outwater;
+    outSingle.convertTo(outwater,CV_32SC1);
+    
     Mat cell; //output_morph
-    if(!readMat(output_morph, cell))
+    if(!readMat(input2, cell))
     {
         cerr << "sepl :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
     
-    Mat inwater = Mat(outSingle.rows, outSingle.cols, CV_8UC3);
-    Mat outwater(outSingle.size(),CV_32SC1,outSingle.data);  //Is it correct?
-    
     Mat tmp8UC1;
     cell.convertTo(tmp8UC1,CV_8UC1);
-
-    vector<Mat> water;
-    tmp8UC1.copyTo(water[0]);
-    tmp8UC1.copyTo(water[1]);
-    tmp8UC1.copyTo(water[2]);
     
-    merge(water, inwater);
+    vector<Mat> wt;
+    wt.push_back(tmp8UC1);
+    wt.push_back(tmp8UC1);
+    wt.push_back(tmp8UC1);
+    merge(wt, inwater);  
+    
     watershed(inwater, outwater);
-    erode(outSingle, outSingle, NULL, 2);
+    erode(outSingle, outSingle, Mat(), Point(-1, -1), 2); 
+    
     cell.convertTo(tmp8UC1,CV_8UC1);
     subtract(cell, outSingle, cell, tmp8UC1);
-    
-    Mat tmpmat = cvarrToMat(out_single, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite(BASE_DIR"out_single.jpg", tmpmat))
-    {
-		cout<<"error writing out_single.jpg"<<endl;
-    }
 
-    tmpmat = cvarrToMat(output_morph, true);
-    tmpmat.convertTo(tmpmat, CV_8UC1);
-    if(!imwrite(BASE_DIR"output_morph.jpg", tmpmat))
-    {
-		cout<<"error writing out_single.jpg"<<endl;
-    }
-    cvReleaseMat(&inwater);
+    //~ if(!imwrite("result_sepCell.jpg", cell))
+    //~ {
+        //~ cerr<< "can not save mat to jpg file" << endl;
+    //~ }
     
-    Mat result = cvarrToMat(output_morph, false);
+    tmp8UC1.release();
+    cell.release();
+    outSingle.release();
+    wt.clear();
+    
 
 	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    getOutputFilename(OutputMatFilename,"_result");
+    getOutputFilename(OutputMatFilename,"_sep");
 
     /* save to bin */
-    if(!saveMat(*OutputMatFilename, result))
+    if(!saveMat(*OutputMatFilename, cell))
     {
         cerr << "result:: save mat to binary file" << endl;
         return soap_receiver_fault(soap, "result:: save mat to binary file", NULL);
@@ -835,7 +827,7 @@ int ns__separateCell(struct soap *soap,
     src.release();
 
     end = omp_get_wtime();
-    cerr<<"ns__waterShed"<<"time elapsed "<<end-start<<endl;
+    cerr<<"ns__sep"<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
     
 }
