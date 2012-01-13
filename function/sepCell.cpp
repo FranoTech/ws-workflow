@@ -16,27 +16,28 @@ int main (int argc, char** argv){
     {
         cerr << "sep :: can not read bin file" << endl;
     }
-    
-    if( outSingle.type() != CV_8UC1)
-    {
-        outSingle.convertTo(outSingle, CV_8UC1);
-    }
+    //~ if( outSingle.type() != CV_8UC1)
+    //~ {
+        //~ outSingle.convertTo(outSingle, CV_8UC1);
+    //~ }
     
     Mat tmp;
+    outSingle.convertTo(tmp, CV_8UC1);
+    
     int count = 1;
 	vector<vector<Point> > contours;
-    findContours(	outSingle, contours, CV_RETR_EXTERNAL,
+    findContours(	tmp, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
     
     for(size_t i = 0; i< contours.size(); i++)
     {
-		const Point* p = &contours[i][0];
+		const Point* p = &contours[i][0]; 
         int n = (int)contours[i].size();
         int c = ((count+1)%254)+1;
-        fillPoly( tmp, &p, &n, 1, Scalar::all(((count+1)%254)+1)); 
+        fillPoly( outSingle, &p, &n, 1, Scalar::all(c)); 
 	}
 	contours.clear();
-
+    
     Mat cell; //output_morph
     if(!readMat("outputMorph", cell))
     {
@@ -44,27 +45,29 @@ int main (int argc, char** argv){
     }
     
     Mat inwater = Mat(outSingle.rows, outSingle.cols, CV_8UC3);
-    Mat outwater(outSingle.size(),CV_32SC1,outSingle.data);  //Is it correct?
+    //~ Mat outwater = Mat(outSingle.size(),CV_32SC1,outSingle.data);  //Is it correct?
+    Mat outwater;
+    outSingle.convertTo(outwater,CV_32SC1);
     
     Mat tmp8UC1;
     cell.convertTo(tmp8UC1,CV_8UC1);
-
-    vector<Mat> water;
-    tmp8UC1.copyTo(water[0]);
-    tmp8UC1.copyTo(water[1]);
-    tmp8UC1.copyTo(water[2]);
     
-    merge(water, inwater);
+    vector<Mat> wt;
+    wt.push_back(tmp8UC1);
+    wt.push_back(tmp8UC1);
+    wt.push_back(tmp8UC1);
+
+    merge(wt, inwater);  
     watershed(inwater, outwater);
-    erode(outSingle, outSingle, NULL, 2);
+    erode(outSingle, outSingle, Mat(), Point(-1, -1), 2); 
+    
     cell.convertTo(tmp8UC1,CV_8UC1);
     subtract(cell, outSingle, cell, tmp8UC1);
-    
+
     if(!imwrite("result_sepCell.jpg", cell))
     {
         cerr<< "can not save mat to jpg file" << endl;
     }
-    
     
     tmp8UC1.release();
     cell.release();
