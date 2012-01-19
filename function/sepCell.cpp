@@ -1,9 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cv.h>
-/*
 #include <highgui.h>
-*/
 #include <time.h>   
 
 using namespace std;
