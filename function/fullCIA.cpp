@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cv.h>
-#include <highgui.h>
+//#include <highgui.h>
 #include <ml.h>
 using namespace std;
 using namespace cv;
