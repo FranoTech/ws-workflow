@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <cv.h>
+/*
 #include <highgui.h>
+*/
 #include <time.h>   
 
 using namespace std;
@@ -28,10 +30,10 @@ int main (int argc, char** argv){
 	vector<vector<Point> > contours;
     findContours(	tmp, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-    
+    const Point *p;
     for(size_t i = 0; i< contours.size(); i++)
     {
-		const Point* p = &contours[i][0]; 
+		p = &contours[i][0]; 
         int n = (int)contours[i].size();
         int c = ((count+1)%254)+1;
         fillPoly( outSingle, &p, &n, 1, Scalar::all(c)); 
@@ -64,7 +66,7 @@ int main (int argc, char** argv){
     cell.convertTo(tmp8UC1,CV_8UC1);
     subtract(cell, outSingle, cell, tmp8UC1);
 
-    if(!imwrite("result_sepCell.jpg", cell))
+    if(!imwrite("result_sepCell_2.jpg", cell))
     {
         cerr<< "can not save mat to jpg file" << endl;
     }
