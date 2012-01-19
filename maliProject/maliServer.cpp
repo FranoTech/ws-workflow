@@ -763,16 +763,19 @@ int ns__separateCell(struct soap *soap,
     outSingle.convertTo(tmp, CV_8UC1);
     
     int count = 1;
+    int c = 0;
+    int n = 0;
+    const Point *p;
 	vector<vector<Point> > contours;
     findContours(	tmp, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-    
+
     for(size_t i = 0; i< contours.size(); i++)
     {
-		const Point* p = &contours[i][0]; 
-        int n = (int)contours[i].size();
-        int c = ((count+1)%254)+1;
-        fillPoly( outSingle, &p, &n, 1, Scalar::all(c)); 
+		p = &contours[i][0]; 
+        n = (int)contours[i].size();
+        c = ((count++)%254)+1;
+        fillPoly( outSingle, &p, &n, 1, Scalar(c, c, c); 
 	}
 	contours.clear();
     
