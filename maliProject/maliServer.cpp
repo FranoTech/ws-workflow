@@ -780,14 +780,15 @@ int ns__separateCell(struct soap *soap,
 	contours.clear();
     
     Mat inwater = Mat(outSingle.rows, outSingle.cols, CV_8UC3);
-    Mat outwater;
-    outSingle.convertTo(outwater,CV_32SC1);
+    //~ Mat outwater = Mat(outSingle.size(),CV_32SC1,outSingle.data);  //Is it correct?
+    //Mat outwater;
+    //outSingle.convertTo(outwater,CV_32SC1);
+    outSingle.convertTo(outSingle,CV_32SC1);
     
     Mat cell; //output_morph
     if(!readMat(input2, cell))
     {
         cerr << "sepl :: can not read bin file" << endl;
-        return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
     
     Mat tmp8UC1;
@@ -797,23 +798,24 @@ int ns__separateCell(struct soap *soap,
     wt.push_back(tmp8UC1);
     wt.push_back(tmp8UC1);
     wt.push_back(tmp8UC1);
+
     merge(wt, inwater);  
+    watershed(inwater, outSingle);
     
-    watershed(inwater, outwater);
+    outSingle.convertTo(outSingle,CV_32FC1);
     erode(outSingle, outSingle, Mat(), Point(-1, -1), 2); 
     
     cell.convertTo(tmp8UC1,CV_8UC1);
     subtract(cell, outSingle, cell, tmp8UC1);
 
-    //~ if(!imwrite("result_sepCell.jpg", cell))
-    //~ {
-        //~ cerr<< "can not save mat to jpg file" << endl;
-    //~ }
+    if(!imwrite("result_sepCell_3.jpg", cell))
+    {
+        cerr<< "can not save mat to jpg file" << endl;
+    }
     
     tmp8UC1.release();
     cell.release();
     outSingle.release();
-    wt.clear();
     
 
 	/* generate output file name */
