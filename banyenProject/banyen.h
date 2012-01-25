@@ -1,10 +1,10 @@
-//gsoap ns service name: mali
+//gsoap ns service name: banyen
 //gsoap ns service style: rpc
 //gsoap ns service encoding: encoded
-//gsoap ns service namespace: http://localhost/mali.wsdl
-//gsoap ns service location: http://localhost/cgi-bin/maliServer
+//gsoap ns service namespace: http://localhost/banyen.wsdl
+//gsoap ns service location: http://localhost/cgi-bin/banyenServer
 
-//gsoap ns schema namespace: urn:mali
+//gsoap ns schema namespace: urn:banyen
 
 
 class ns__RemoveSmallCell
@@ -31,4 +31,3 @@ int ns__prepareResult(char *inputMatFilename, char *afterthresNN, char **OutputM
 
 
 
-//~ int ns__colorRatioMethod(char *inputMatFilename, char **OutputMatFilename);

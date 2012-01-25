@@ -56,7 +56,7 @@ int ns__loadMat (struct soap *soap,
     start = omp_get_wtime();
 
     Mat src;
-
+    
     /* load image data */
     src = imread(InputImageFilename,getColorFlag(colorflag));
     if(src.empty()) {
@@ -202,9 +202,24 @@ int ns__Threshold(struct soap *soap,
         cerr<< "Threshold:: can not read bin file" << endl;
         return soap_receiver_fault(soap, "Threshold:: can not read bin file", NULL);
     }
-
+    
     int threstype = getThresholdType (thresholdType);
-    threshold(src, src, thresholdValue, maxValue, threstype);
+    int rows = src.cols;
+    
+    #pragma omp parallel shared(src, cols, thresholdValue, maxValue, threstype)
+    {
+        int numt = omp_get_num_threads();
+        int tid = omp_get_thread_num();
+        int start = tid*(cols/numt); 
+        int end = (tid+1)*(cols/numt);
+        if( tid == (numt-1))
+        {
+            end = cols;
+        }
+        
+        Mat tmpSrc = src.colRange(start, end);
+        threshold(tmpSrc, tmpSrc, thresholdValue, maxValue, threstype);
+    }
 
     /* generate output file name and save to binary file */
 	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
@@ -431,9 +446,24 @@ int ns__Or(  struct soap *soap, char *src1,
 	}
 
     Mat dst;
-    bitwise_or(matSrc1, matSrc2, dst);
-
-
+    int cols = matSrc1.cols;
+    
+    #pragma omp parallel shared(src, cols, dst)
+    {
+        int numt = omp_get_num_threads();
+        int tid = omp_get_thread_num();
+        int start = tid*(cols/numt); 
+        int end = (tid+1)*(cols/numt);
+        if( tid == (numt-1))
+        {
+            end = cols;
+        }
+        
+        Mat tmpSrc1 = matSrc2.colRange(start, end);
+        Mat tmpSrc2 = src2.colRange(start, end);
+        bitwise_or(tmpSrc1, tmpSrc2, dst);
+    }
+    
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
     getOutputFilename(OutputMatFilename,"_bitwiseOr");
@@ -577,7 +607,6 @@ int ns__removeSmallCell(struct soap *soap,
     }
 
     Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
-
     if( src.type() != CV_8UC1)
     {
         src.convertTo(src, CV_8UC1);
@@ -591,26 +620,27 @@ int ns__removeSmallCell(struct soap *soap,
     int n = 0;
     findContours(	src, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-
+    
+    #pragma omp parallel for
     for(size_t i = 0; i< contours.size(); i++)
     {
-		p = &contours[i][0];
+        p = &contours[i][0];
         n = (int)contours[i].size();
-		area = fabs(contourArea(Mat(contours[i])));
+        area = fabs(contourArea(Mat(contours[i])));
 
-		if(area < 1500.0) //lower bound
-		{
-			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
+        if(area < 1500.0) //lower bound
+        {
+            fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
 
-		} else if (area < 7500.0) {
-			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
-			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
+        } else if (area < 7500.0) {
+            fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
+            fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
 
-		} else {
-			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
+        } else {
+            fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
 
-		}
-	}
+        }
+    }
 
 	contours.clear();
 
