@@ -587,14 +587,15 @@ int ns__removeSmallCell(struct soap *soap,
     
 	vector<vector<Point> > contours;
     double area = 0;
+    const Point* p;
+    int n = 0;
     findContours(	src, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
 
-    
     for(size_t i = 0; i< contours.size(); i++)
     {
-		const Point* p = &contours[i][0];
-        int n = (int)contours[i].size();
+		p = &contours[i][0];
+        n = (int)contours[i].size();
 		area = fabs(contourArea(Mat(contours[i])));
 
 		if(area < 1500.0) //lower bound
@@ -681,6 +682,8 @@ int ns__scanningCell(struct soap *soap,
     int prevContour = 0;
     int sameCount = 0;
     double area = 0;
+    const Point* p;
+    int n = 0;
     vector<vector<Point> > contours;
 
     while(nContour != 0)
@@ -702,8 +705,8 @@ int ns__scanningCell(struct soap *soap,
 
         for(size_t i = 0; i< contours.size(); i++)
         {
-            const Point* p = &contours[i][0];
-            int n = (int)contours[i].size();
+            p = &contours[i][0];
+            n = (int)contours[i].size();
             area = fabs(contourArea(Mat(contours[i])));
 
             if((area < 3000.0) || (sameCount > 10))
@@ -812,11 +815,6 @@ int ns__separateCell(struct soap *soap,
     {
         cerr<< "can not save mat to jpg file" << endl;
     }
-    
-    tmp8UC1.release();
-    cell.release();
-    outSingle.release();
-    
 
 	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
@@ -828,6 +826,10 @@ int ns__separateCell(struct soap *soap,
         cerr << "result:: save mat to binary file" << endl;
         return soap_receiver_fault(soap, "result:: save mat to binary file", NULL);
     }
+
+    tmp8UC1.release();
+    cell.release();
+    outSingle.release();
 
     end = omp_get_wtime();
     cerr<<"ns__sep"<<"time elapsed "<<end-start<<endl;
