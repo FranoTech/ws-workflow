@@ -775,7 +775,7 @@ int ns__separateCell(struct soap *soap,
 		p = &contours[i][0]; 
         n = (int)contours[i].size();
         c = ((count++)%254)+1;
-        fillPoly( outSingle, &p, &n, 1, Scalar(c, c, c); 
+        fillPoly( outSingle, &p, &n, 1, Scalar(c, c, c)); 
 	}
 	contours.clear();
     
@@ -828,8 +828,6 @@ int ns__separateCell(struct soap *soap,
         cerr << "result:: save mat to binary file" << endl;
         return soap_receiver_fault(soap, "result:: save mat to binary file", NULL);
     }
-
-    src.release();
 
     end = omp_get_wtime();
     cerr<<"ns__sep"<<"time elapsed "<<end-start<<endl;
