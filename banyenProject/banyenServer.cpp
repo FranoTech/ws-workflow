@@ -621,8 +621,8 @@ int ns__removeSmallCell(struct soap *soap,
     findContours(	src, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
     
-    #pragma omp parallel for
-    for(size_t i = 0; i< contours.size(); i++)
+    #pragma omp parallel for private(i, n, p, area) shared (contours, tmp)
+    for(size_t i = 0; i< contours.size(); i++)  
     {
         p = &contours[i][0];
         n = (int)contours[i].size();
