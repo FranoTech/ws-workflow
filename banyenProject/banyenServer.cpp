@@ -621,13 +621,15 @@ int ns__removeSmallCell(struct soap *soap,
     findContours(	src, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
     
-    #pragma omp parallel for private(i, n, p, area) shared (contours, tmp)
-    for(size_t i = 0; i< contours.size(); i++)  
+    #pragma omp parallel for private(i, n, p, area) shared(contours, tmp)
+    for(i = 0; i< contours.size(); i++)  
     {
         p = &contours[i][0];
         n = (int)contours[i].size();
         area = fabs(contourArea(Mat(contours[i])));
-
+/*
+        cout<<"tid = "<<omp_get_thread_nume()<<endl;
+*/
         if(area < 1500.0) //lower bound
         {
             fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
@@ -638,10 +640,8 @@ int ns__removeSmallCell(struct soap *soap,
 
         } else {
             fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
-
         }
     }
-
 	contours.clear();
 
 	/* generate output file name */
