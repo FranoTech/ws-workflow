@@ -1,5 +1,5 @@
 #include <cv.h>
-#include <highgui.h>
+//#include <highgui.h>
 #include <omp.h>
 #include <fstream>
 
@@ -16,88 +16,54 @@ int main(int argc, char **argv)
     start = omp_get_wtime();
 
     //~ Mat src = imread(argv[1],0);
-    Mat src;
-    if(!readMat(argv[1], src))
-    {
-        cerr << "removeSmallCell :: can not read bin file" << endl;
-    }
-    
-    threshold(src, src, -0.5, 255.0, CV_THRESH_BINARY);
+    Mat src = imread(argv[1],0);
+
+    cout<<"1"<<endl;
+    threshold(src, src, 127.0, 255.0, CV_THRESH_BINARY);
     Mat se;
-    Mat dst(src.rows, src.cols, src.depth());
-    Mat tmpdst;
+    Mat dst = Mat(src.rows, src.cols, src.type());
+    //Mat tmpdst;
     Size seSize(3, 3);
     Point seAnc(1, 1);
 
     se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
     morphologyEx(src, dst,MORPH_OPEN, se, seAnc);
-    Mat tmpSrc;
-    
+        
     /* convert src type to 8UC1 */
-    if( dst.type() != CV_8UC1)
-    {   
-        int rows = dst.rows;
-            
-        #pragma omp parallel num_threads(2)
-        {
-            int numt = omp_get_num_threads();
-            int tid = omp_get_thread_num();
-            int start = tid*(rows/numt); 
-            int end = (tid+1)*(rows/numt);
-            if( tid == (numt-1))
-            {
-                end = rows;
-            }
-            
-            //~ tmpSrc = dst.rowRange(start, end);
-            tmpSrc = dst(Range(start, end), Range::all());
-            //~ tmpSrc.convertTo(dst.rowRange(start, end),0);
-            tmpSrc.convertTo(tmpSrc,0);
-            //~ tmpSrc.convertTo(dst(Range(start, end), Range::all()),0);
-           
-        }
-        
-        //~ dst.convertTo(dst, CV_8UC1);
-    }
-    
-    
-    cout<<"dst type"<<dst.type();
-    
-    Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
-    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
+
+    dst.convertTo(dst, CV_8UC1);
+    cout<<"dst.type = "<<dst.type()<<endl;
+    Mat tmp = Mat(dst.rows, dst.cols, CV_32FC1);
+    Mat outSingle = Mat::zeros(dst.rows, dst.cols, CV_32FC1);
     vector<vector<Point> > contours;
-    findContours(	dst, contours, CV_RETR_EXTERNAL,
+    double area = 0;
+    const Point* p;
+    int n = 0;
+    size_t i = 0;
+    findContours(dst, contours, CV_RETR_EXTERNAL,
                     CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-/*        check this          */
-    
-    int contourSize =  contours.size();
-    #pragma omp parallel
+    cout<<"2"<<endl;
+    #pragma omp parallel for private(i, n, p, area) shared(contours, tmp)
+    for(i = 0; i< contours.size(); i++)  
     {
-    #pragma omp for nowait //shared(contours, outSingle, tmp) num_threads(2) 
-        for(size_t i = 0; i < contourSize; i++)
+        p = &contours[i][0];
+        n = (int)contours[i].size();
+        area = fabs(contourArea(Mat(contours[i])));
+        cout<<"tid = "<<omp_get_thread_num()<<endl;
+        if(area < 1500.0) //lower bound
         {
-            const Point* p = &contours[i][0];
-            int n = (int)contours[i].size();
-            double area = contourArea(Mat(contours[i]));
-            
-            int tid = omp_get_thread_num();
-            if(tid == 0)
-                    cout<<".";
-            
-            if(area < 1500.0) //lower bound
-            {
-                fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
-        
-            } else if (area < 7500.0) {
-                fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
-                fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
-        
-            } else {
-                fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
-        
-            }
+            fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
+
+        } else if (area < 7500.0) {
+            fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
+            fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
+
+        } else {
+            fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
+
         }
     }
+    cout<<"3"<<endl;
     contours.clear();
     
     /* save to bin */
