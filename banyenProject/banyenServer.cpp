@@ -204,7 +204,7 @@ int ns__Threshold(struct soap *soap,
     }
     
     int threstype = getThresholdType (thresholdType);
-    int rows = src.cols;
+    int cols = src.cols;
     
     #pragma omp parallel shared(src, cols, thresholdValue, maxValue, threstype)
     {
@@ -448,7 +448,7 @@ int ns__Or(  struct soap *soap, char *src1,
     Mat dst;
     int cols = matSrc1.cols;
     
-    #pragma omp parallel shared(src, cols, dst)
+    #pragma omp parallel shared(matSrc1, matSrc2, cols, dst)
     {
         int numt = omp_get_num_threads();
         int tid = omp_get_thread_num();
@@ -459,9 +459,10 @@ int ns__Or(  struct soap *soap, char *src1,
             end = cols;
         }
         
-        Mat tmpSrc1 = matSrc2.colRange(start, end);
-        Mat tmpSrc2 = src2.colRange(start, end);
-        bitwise_or(tmpSrc1, tmpSrc2, dst);
+        Mat tmpSrc1 = matSrc1.colRange(start, end);
+        Mat tmpSrc2 = matSrc2.colRange(start, end);
+        Mat tmpDst = dst.colRange(start, end);
+        bitwise_or(tmpSrc1, tmpSrc2, tmpDst);
     }
     
     /* generate output file name */
@@ -617,6 +618,7 @@ int ns__removeSmallCell(struct soap *soap,
     double area = 0;
     const Point* p;
     int n = 0;
+    size_t i = 0;
     findContours(	src, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
     
