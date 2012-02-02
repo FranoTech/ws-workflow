@@ -795,16 +795,18 @@ int ns__separateCell(struct soap *soap,
     int count = 1;
     int c = 0;
     int n = 0;
+    size_t i = 0;
     const Point *p;
 	vector<vector<Point> > contours;
     findContours(	tmp, contours, CV_RETR_EXTERNAL,
 					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-
-    for(size_t i = 0; i< contours.size(); i++)
+    
+    #pragma omp parallel for private(i, n, p, c) shared(contours, outSingle, count)
+    for(i = 0; i< contours.size(); i++)
     {
 		p = &contours[i][0]; 
         n = (int)contours[i].size();
-        c = ((count++)%254)+1;
+        c = ((count++)%254)+1; //aware!!
         fillPoly( outSingle, &p, &n, 1, Scalar(c, c, c)); 
 	}
 	contours.clear();
@@ -838,10 +840,12 @@ int ns__separateCell(struct soap *soap,
     cell.convertTo(tmp8UC1,CV_8UC1);
     subtract(cell, outSingle, cell, tmp8UC1);
 
+/*
     if(!imwrite("result_sepCell_3.jpg", cell))
     {
         cerr<< "can not save mat to jpg file" << endl;
     }
+*/
 
 	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
