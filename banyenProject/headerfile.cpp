@@ -1,6 +1,6 @@
 //gsoap
 #include "soapH.h"
-#include "mali.nsmap"
+#include "banyen.nsmap"
 //opencv
 #include <cv.h>
 //#include <highgui.h>
