@@ -606,13 +606,12 @@ int ns__removeSmallCell(struct soap *soap,
         return soap_receiver_fault(soap, "removeSmallCell :: can not read bin file", NULL);
     }
 
+    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
     Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
     if( src.type() != CV_8UC1)
     {
         src.convertTo(src, CV_8UC1);
     }
-
-    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
     
 	vector<vector<Point> > contours;
     double area = 0;
@@ -627,9 +626,6 @@ int ns__removeSmallCell(struct soap *soap,
         p = &contours[i][0];
         n = (int)contours[i].size();
         area = fabs(contourArea(Mat(contours[i])));
-/*
-        cout<<"tid = "<<omp_get_thread_nume()<<endl;
-*/
         if(area < 1500.0) //lower bound
         {
             fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
@@ -642,6 +638,7 @@ int ns__removeSmallCell(struct soap *soap,
             fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
         }
     }
+    
 	contours.clear();
 
 	/* generate output file name */
