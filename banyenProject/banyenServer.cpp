@@ -4,7 +4,7 @@
  * num thread variablle
  *
  */
-
+//sudo mount -t tmpfs -o size=1024M,mode=0777 tmpfs
 //home/lluu/thesis/CIA/T51-1549A23.jpg
 //home/lluu/thesis/cancer_image/T51-1549A23.jpg
 
@@ -448,22 +448,25 @@ int ns__Or(  struct soap *soap, char *src1,
     Mat dst;
     int cols = matSrc1.cols;
     
-    #pragma omp parallel shared(matSrc1, matSrc2, cols, dst)
-    {
-        int numt = omp_get_num_threads();
-        int tid = omp_get_thread_num();
-        int start = tid*(cols/numt); 
-        int end = (tid+1)*(cols/numt);
-        if( tid == (numt-1))
-        {
-            end = cols;
-        }
-        
-        Mat tmpSrc1 = matSrc1.colRange(start, end);
-        Mat tmpSrc2 = matSrc2.colRange(start, end);
-        Mat tmpDst = dst.colRange(start, end);
-        bitwise_or(tmpSrc1, tmpSrc2, tmpDst);
-    }
+    //~ #pragma omp parallel shared(matSrc1, matSrc2, cols, dst)
+    //~ {
+        //~ int numt = omp_get_num_threads();
+        //~ int tid = omp_get_thread_num();
+        //~ int start = tid*(cols/numt); 
+        //~ int end = (tid+1)*(cols/numt);
+        //~ if( tid == (numt-1))
+        //~ {
+            //~ end = cols;
+        //~ }
+        //~ 
+        //~ Mat tmpSrc1 = matSrc1.colRange(start, end);
+        //~ Mat tmpSrc2 = matSrc2.colRange(start, end);
+        //~ Mat tmpDst = dst.colRange(start, end);
+        //~ bitwise_or(tmpSrc1, tmpSrc2, tmpDst);
+    //~ }
+    
+    bitwise_or(matSrc1, matSrc2, dst);
+    
     
     /* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, 60);
@@ -648,8 +651,8 @@ int ns__removeSmallCell(struct soap *soap,
     out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "BASE_DIR%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "BASE_DIR%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, BASE_DIR"%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, BASE_DIR"%Y%m%d_%H%M%S_biggerArea", localtime(&now));
 
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
