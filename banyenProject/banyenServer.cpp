@@ -1,9 +1,3 @@
-/* * to do list * *
- * initial service => ตั้งค่า environment ทั้งหมด เรียกก่อนจะรัน workflow
- *      - ตั้งค่า tmpfs , กำหนดจำนวน thread, base directory
- * num thread variablle
- *
- */
 //sudo mount -t tmpfs -o size=1024M,mode=0777 tmpfs
 //home/lluu/thesis/CIA/T51-1549A23.jpg
 //home/lluu/thesis/cancer_image/T51-1549A23.jpg
