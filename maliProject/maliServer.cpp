@@ -9,6 +9,7 @@
 //home/lluu/thesis/cancer_image/T51-1549A23.jpg
 
 #include "headerfile.cpp"
+#include <exception>
 
 //init variable
 #define BASE_DIR "/home/lluu/thesis/RESULT/"
@@ -584,13 +585,17 @@ int ns__removeSmallCell(struct soap *soap,
     }
 
     Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
-    
-	vector<vector<Point> > contours;
+	vector<vector<cv::Point> > contours;
     double area = 0;
-    const Point* p;
+    const cv::Point* p;
     int n = 0;
-    findContours(	src, contours, CV_RETR_EXTERNAL,
-					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+    
+    
+    try{
+    findContours(src, contours, CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+	} catch (std::exception& e) { 
+		cerr<<"error "<<e.what()<<endl; 
+	}
 
     for(size_t i = 0; i< contours.size(); i++)
     {
@@ -610,6 +615,7 @@ int ns__removeSmallCell(struct soap *soap,
 			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
 
 		}
+		
 	}
 
 	contours.clear();
@@ -619,9 +625,10 @@ int ns__removeSmallCell(struct soap *soap,
     out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "BASE_DIR%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "BASE_DIR%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, BASE_DIR"%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, BASE_DIR"%Y%m%d_%H%M%S_biggerArea", localtime(&now));
 
+	
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
     {

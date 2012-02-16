@@ -20,13 +20,18 @@ int main (int argc, char** argv){
     Mat result = Mat::zeros(src.rows,src.cols, CV_32FC1);
     
     vector<vector<Point> > contours;
+    double area = 0;
+    const cv::Point* p;
+    int n = 0;
+    
     findContours(	gray, contours, CV_RETR_EXTERNAL, 
 					CV_CHAIN_APPROX_SIMPLE);
+    
     for(size_t i = 0; i< contours.size(); i++)
     {
-		const Point* p = &contours[i][0];
-        int n = (int)contours[i].size();
-		double area = contourArea(Mat(contours[i]));
+		p = &contours[i][0];
+        n = (int)contours[i].size();
+		area = contourArea(Mat(contours[i]));
         cout<<area<<" ";
 		
 		if(area < 1500.0) //lower bound
