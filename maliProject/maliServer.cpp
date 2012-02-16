@@ -7,6 +7,8 @@
 
 //home/lluu/thesis/CIA/T51-1549A23.jpg
 //home/lluu/thesis/cancer_image/T51-1549A23.jpg
+//sudo mount -t tmpfs -o size=1024M,mode=0777 tmpfs dir
+
 
 #include "headerfile.cpp"
 #include <exception>
