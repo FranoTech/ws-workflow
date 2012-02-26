@@ -13,6 +13,11 @@ class ns__RemoveSmallCell
 	char *biggerArea;
 };
 
+class ns__base64Binary
+{ unsigned char *__ptr;
+  int __size;
+};
+
 int ns__loadMat (char *InputImageFilename, int colorflag=0, char *types="CV_32FC1", char **OutputMatFilename=NULL);
 int ns__MatToJPG (char *InputMatFilename, char **OutputMatFilename);
 int ns__ConvertTo(char *InputMatFilename, char *types="CV_32FC1", char **OutputMatFilename=NULL);
@@ -28,6 +33,7 @@ int ns__scanningCell(char *biggerArea, char *keepArea, char **OutputMatFilename)
 int ns__trainANN(char *inputMatFilename, char *neuralFile, char **OutputMatFilename);
 int ns__separateCell(char *input1, char *input2, char **OutputMatFilename);
 int ns__prepareResult(char *inputMatFilename, char *afterthresNN, char **OutputMatFilename);
+int ns__viewImage(char *inputMatFilename, ns__base64Binary &image);
 
 
 
