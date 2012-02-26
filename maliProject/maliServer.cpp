@@ -820,6 +820,11 @@ int ns__separateCell(struct soap *soap,
     cell.convertTo(tmp8UC1,CV_8UC1);
     subtract(cell, outSingle, cell, tmp8UC1);
 
+    if(!imwrite("result_sepCell_3.jpg", cell))
+    {
+        cerr<< "can not save mat to jpg file" << endl;
+    }
+
 	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,"_sep");
@@ -1014,6 +1019,7 @@ int ns__trainANN(struct soap *soap,
     return SOAP_OK;
 }
 
+
 int ns__viewImage(  struct soap *soap, 
                     char *inputMatFilename, 
                     ns__base64Binary &image)
@@ -1028,22 +1034,18 @@ int ns__viewImage(  struct soap *soap,
         return soap_receiver_fault(soap, "viewImage:: can not read bin file", NULL);
     }
 
-    cerr<<"1"<<endl;
     /* check if it is not 8U then convert to 8UC(n) */
     int chan = src.channels();
     if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
     {
        src.convertTo(src, CV_8UC(chan));
     }
-    cerr<<"2"<<endl;
-    /* generate output file name */
-
 
     if(!imwrite( BASE_DIR"output.jpg", src))
     {
         cerr<< "viewImage:: can not save mat to jpg file" << endl;
     }
-    cerr<<3<<endl;
+
     FILE *fd = fopen( BASE_DIR"output.jpg", "r");
     if(fd){
         int i =0, c = 0;
@@ -1064,8 +1066,8 @@ int ns__viewImage(  struct soap *soap,
     
     return SOAP_OK;
 }
-    
-    
+
+
 //
 // name: colorRatioMethod
 // @param
