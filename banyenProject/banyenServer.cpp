@@ -83,6 +83,56 @@ int ns__loadMat (struct soap *soap,
 }
 
 
+int ns__loadMatX4 (struct soap *soap,
+                char *f1, char *f2, char *f3, char *f4,
+                int colorflag=0,
+                char *types="CV_32FC1",
+                char **OutputMatFilename=NULL)
+{
+    double start, end;
+    start = omp_get_wtime();
+    
+    /* load image data */
+    
+    Mat img_1 = imread(f1, getColorFlag(colorflag));
+    
+    Mat img_2 = imread(f2, getColorFlag(colorflag));
+
+    Mat img_3 = imread(f3, getColorFlag(colorflag));
+    
+    Mat img_4 = imread(f4, getColorFlag(colorflag));
+
+    int sum_rows = img_1.rows*2;
+    int sum_cols = img_1.cols*2;
+
+    Mat dst(sum_rows, sum_cols, img_1.type());
+
+    Mat roi1(dst,Rect(0, 0, img_1.cols, img_1.rows));
+    Mat roi2(dst,Rect(img_1.cols, 0, img_2.cols, img_2.rows));
+    Mat roi3(dst,Rect(0, img_1.rows, img_3.cols, img_3.rows));
+    Mat roi4(dst,Rect(img_3.cols, img_2.rows, img_4.cols, img_4.rows));
+    
+    img_1.copyTo(roi1);
+    img_2.copyTo(roi2);
+    img_3.copyTo(roi3);
+    img_4.copyTo(roi4);
+
+	/* generate output file name  and save to bin*/
+	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+    getOutputFilename(OutputMatFilename,"_loadMatX4");
+    if(!saveMat(*OutputMatFilename, dst))
+    {
+        cerr<<"loadMat:: can not save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
+    }
+
+    end = omp_get_wtime();
+    cerr<<"ns__loadMat "<<"time elapsed "<<end-start<<endl;
+
+    return SOAP_OK;
+}
+
+
 //
 // name: MatToJPG
 // - convert nat to 8U and save as JPG
