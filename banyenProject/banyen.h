@@ -29,5 +29,7 @@ int ns__trainANN(char *inputMatFilename, char *neuralFile, char **OutputMatFilen
 int ns__separateCell(char *input1, char *input2, char **OutputMatFilename);
 int ns__prepareResult(char *inputMatFilename, char *afterthresNN, char **OutputMatFilename);
 
+int ns__loadMatX4 (char *f1, char *f2, char *f3, char *f4, int colorflag=0, char *types="CV_32FC1",char **OutputMatFilename=NULL);
+
 
 
