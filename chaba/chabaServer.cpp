@@ -5,18 +5,13 @@
  *
  */
 
-//home/lluu/thesis/CIA/T51-1549A23.jpg
-//home/lluu/thesis/cancer_image/T51-1549A23.jpg
 //sudo mount -t tmpfs -o size=1024M,mode=0777 tmpfs dir
 
-
 #include "headerfile.cpp"
-//#include <exception>
 
 //init variable
 #define BASE_DIR "/home/lluu/thesis/RESULT/"
 #define FILENAME_SIZE 75
-#define int64 long long
 #define MAX_THREAD 4
 
 //namespace
@@ -47,12 +42,16 @@ int main(int argc, char **argv)
     return 0;
 }
 
+/* init parameters before start the workflow */
+//~ int ns__init (struct soap *soap)
+
 
 /* Load image data to Mat, save to binary file */
 int ns__loadMat (struct soap *soap,
                 char *InputImageFilename,
                 int colorflag=0,
-                char *types="CV_32FC1",
+                char *types="CV_8UC3", //set default image type to 8UC3
+                int getMem=0,
                 char **OutputMatFilename=NULL)
 {
     double start, end;
