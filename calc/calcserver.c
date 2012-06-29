@@ -39,6 +39,8 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 #include "calc.nsmap"
 #include "math.h"
 
+int global;
+
 int main(int argc, char **argv)
 { SOAP_SOCKET m, s; /* master and slave sockets */
   struct soap soap;
@@ -67,7 +69,8 @@ int main(int argc, char **argv)
 } 
 
 int ns__add(struct soap *soap, double a, double b, double *result)
-{ *result = a + b;
+{ *result = a + global;
+   global = *result; 
   return SOAP_OK;
 } 
 
