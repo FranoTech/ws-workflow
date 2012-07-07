@@ -9,14 +9,12 @@
 //home/lluu/thesis/cancer_image/T51-1549A23.jpg
 //sudo mount -t tmpfs -o size=1024M,mode=0777 tmpfs dir
 
-
 #include "headerfile.cpp"
-//#include <exception>
+//#include ""
 
 //init variable
-#define BASE_DIR "/home/lluu/thesis/RESULT/"
+//#define BASE_DIR "/home/lluu/thesis/RESULT/"
 #define FILENAME_SIZE 75
-#define int64 long long
 #define MAX_THREAD 4
 
 //namespace
@@ -32,6 +30,8 @@ int getColorFlag(int colorflag);
 int getMorphOperation ( const char *typeName);
 int ByteArrayToANN(char *annfile, CvANN_MLP* ann);
 void getOutputFilename (char **filename, const char *toAppend);
+
+const char* BASE_DIR = "/home/lluu/thesis/result/"
 
 
 int main(int argc, char **argv)
@@ -627,8 +627,9 @@ int ns__removeSmallCell(struct soap *soap,
     out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, BASE_DIR"%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, BASE_DIR"%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+     strcat(out.keepedArea
+    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "%Y%m%d_%H%M%S_biggerArea", localtime(&now));
 
 	
     /* save to bin */
@@ -1040,13 +1041,13 @@ int ns__viewImage(  struct soap *soap,
     {
        src.convertTo(src, CV_8UC(chan));
     }
-
-    if(!imwrite( BASE_DIR"output.jpg", src))
+////////////////////////////////////
+    if(!imwrite("output.jpg", src))
     {
         cerr<< "viewImage:: can not save mat to jpg file" << endl;
     }
 
-    FILE *fd = fopen( BASE_DIR"output.jpg", "r");
+    FILE *fd = fopen("output.jpg", "r");
     if(fd){
         int i =0, c = 0;
         fseek(fd,0,SEEK_END); // seek to end of file
@@ -1314,10 +1315,16 @@ void getOutputFilename (char **filename, const char *toAppend)
 {
 
     time_t now = time(0);
-    strftime(*filename, sizeof(filename)*60, BASE_DIR"%Y%m%d_%H%M%S", localtime(&now));
-    /* to do
-     * do check if there's no data in toAppend
-     */
-    strcat (*filename,toAppend);
+    strftime(*filename, sizeof(filename)*60,"%Y%m%d_%H%M%S", localtime(&now));
+     
+    strcat(*filename,toAppend);
+    
+    char* temp;
+    temp = malloc(strlen(*filename) +strlen(BASE_DIR) + 1);
+    
+    strcpy(temp, BASE_DIR);
+    strcat(temp, *filename);
+    strcpy(*filename, temp);
+    free(temp);
 }
 
