@@ -10,7 +10,6 @@
 //sudo mount -t tmpfs -o size=1024M,mode=0777 tmpfs dir
 
 #include "headerfile.cpp"
-//#include ""
 
 //init variable
 //#define BASE_DIR "/home/lluu/thesis/RESULT/"
