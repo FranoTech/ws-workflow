@@ -1,0 +1,4 @@
+#!/bin/bash
+g++ `pkg-config opencv --cflags` $1.cpp `pkg-config opencv --libs` -fopenmp -o $1 
+
+#g++ -I/usr/include/opencv -lml -lcvaux -lhighgui -lcv -lcxcore -o $1 $1.cpp

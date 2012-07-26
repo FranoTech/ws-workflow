@@ -1068,6 +1068,8 @@ int ns__viewImage(  struct soap *soap,
 }
 
 
+
+
 //
 // name: colorRatioMethod
 // @param
