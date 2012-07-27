@@ -30,7 +30,7 @@ int getMorphOperation ( const char *typeName);
 int ByteArrayToANN(char *annfile, CvANN_MLP* ann);
 void getOutputFilename (char **filename, const char *toAppend);
 
-const char* BASE_DIR = "/home/lluu/thesis/result/"
+const char* BASE_DIR = "/home/lluu/thesis/result/";
 
 
 int main(int argc, char **argv)
@@ -622,14 +622,14 @@ int ns__removeSmallCell(struct soap *soap,
 	contours.clear();
 
 	/* generate output file name */
-    out.keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
-    out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
+    out->keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
+    out->biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
-    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "%Y%m%d_%H%M%S_keepedArea", localtime(&now));
-     strcat(out.keepedArea
-    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "%Y%m%d_%H%M%S_biggerArea", localtime(&now));
-
+    strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/thesis/result/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
+    strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/thesis/result/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
+	
+	
 	
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
@@ -1041,12 +1041,12 @@ int ns__viewImage(  struct soap *soap,
        src.convertTo(src, CV_8UC(chan));
     }
 ////////////////////////////////////
-    if(!imwrite("output.jpg", src))
+    if(!imwrite("/home/lluu/thesis/result/output.jpg", src))
     {
         cerr<< "viewImage:: can not save mat to jpg file" << endl;
     }
 
-    FILE *fd = fopen("output.jpg", "r");
+    FILE *fd = fopen("/home/lluu/thesis/result/output.jpg", "r");
     if(fd){
         int i =0, c = 0;
         fseek(fd,0,SEEK_END); // seek to end of file
@@ -1317,15 +1317,13 @@ void getOutputFilename (char **filename, const char *toAppend)
 
     time_t now = time(0);
     strftime(*filename, sizeof(filename)*60,"%Y%m%d_%H%M%S", localtime(&now));
-     
     strcat(*filename,toAppend);
     
     char* temp;
-    temp = malloc(strlen(*filename) +strlen(BASE_DIR) + 1);
+    temp = (char*)malloc(strlen(*filename) + strlen(BASE_DIR) + 1);
     
     strcpy(temp, BASE_DIR);
     strcat(temp, *filename);
     strcpy(*filename, temp);
     free(temp);
 }
-

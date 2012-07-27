@@ -2,12 +2,14 @@
 #g++ -o standAloneServer `pkg-config opencv --cflags` `pkg-config opencv --libs` -fopenmp standAloneServer.cpp soapC.cpp soapServer.cpp stdsoap2.cpp
 g++ -o $1Server $1Server.cpp soapC.cpp soapServer.cpp stdsoap2.cpp  `pkg-config opencv --cflags` `pkg-config opencv --libs` -fopenmp
 
-echo "***compiled***"
-sudo chmod a+x $1Server
-#echo "***gived a+x***"
-sudo cp $1Server /var/www/cgi-bin/
-#echo "***copied maliServer***"
-sudo cp $1.wsdl /var/www/
-echo "***copied mali.wsdl***"
-
+if [ -a $1Server ]
+	then
+		echo "***compiled***"
+		sudo chmod a+x $1Server
+		echo "***gived a+x***"
+		sudo cp $1Server /var/www/cgi-bin/
+		echo "***copied maliServer***"
+		sudo cp $1.wsdl /var/www/
+		echo "***copied mali.wsdl***"
+fi
 #g++ cv_example.cpp -o cvex `pkg-config opencv --cflags` `pkg-config opencv --libs`
