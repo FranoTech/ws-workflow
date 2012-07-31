@@ -7,7 +7,7 @@
 //STL
 #include <sstream>
 #include <iostream>
-#include <string.h>
+#include <string>
 #include <cstring>
 #include <fstream>
 //system

@@ -8,19 +8,21 @@
 //namespace
 //~ using namespace std;
 using namespace cv;
-using namespace boost::gregorian;
+//~ using namespace boost::gregorian;
 
 //helper function
-int saveMat( std::string filename, const Mat& M);
-int readMat( const std::string filename, Mat& M);
-int getMatType (std::string typeName);
-int getThresholdType ( std::string typeName);
+int saveMat( const std::string& filename, const Mat& M);
+int readMat( const std::string& filename, Mat& M);
+int getMatType (const std::string& typeName);
+int getThresholdType (const std::string& typeName);
 int getColorFlag(int colorflag);
-int getMorphOperation ( std::string typeName);
-int ByteArrayToANN( std::string annfile, CvANN_MLP* ann);
-void getOutputFilename (std::string filename, std::string toAppend);
+int getMorphOperation ( const std::string& typeName);
+int ByteArrayToANN( std::string& annfile, CvANN_MLP* ann);
+void getOutputFilename (std::string& filename, std::string& toAppend);
+
 
 std::string BASE_DIR = "/home/lluu/thesis/result/";
+std::string ERROR_FILENAME = "";
 
 
 int main(int argc, char **argv)
@@ -41,18 +43,19 @@ int ns__loadMat (struct soap *soap,
                 std::string InputImageFilename,
                 int colorflag=0,
                 std::string types="CV_32FC1",
-                std::string &OutputMatFilename="")
+                std::string &OutputMatFilename=ERROR_FILENAME)
 {
+	/* should add IFDEF */
     double start, end;
     start = omp_get_wtime();
 
     Mat src;
 
     /* load image data */
-    src = imread(InputImageFilename,getColorFlag(colorflag));
+    src = imread(InputImageFilename.c_str(),getColorFlag(colorflag));
     if(src.empty()) {
-        cerr<<"loadMat:: can not load image" << endl;
-        return soap_receiver_fault(soap, "loadMat:: can not load image", NULL);
+        std::cerr << "loadMat:: can not load image" << std::endl;
+        return soap_receiver_fault(soap, "loadMat :: can not load image", NULL);
     }
 
     /* convert Mat to required type */
@@ -62,23 +65,19 @@ int ns__loadMat (struct soap *soap,
     }
 
 	/* generate output file name  and save to bin*/
-	
-	
-	
-	
-	
-	*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
-    getOutputFilename(OutputMatFilename,"_loadMat");
-    if(!saveMat(*OutputMatFilename, src))
+	std::string toAppend = "_loadMat";
+	getOutputFilename(OutputMatFilename,toAppend);
+
+    if(!saveMat(OutputMatFilename, src))
     {
-        cerr<<"loadMat:: can not save mat to binary file" << endl;
+        std::cerr<<"loadMat:: can not save mat to binary file" << std::endl;
         return soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
     }
 
     src.release();
-
+	
     end = omp_get_wtime();
-    cerr<<"ns__loadMat "<<"time elapsed "<<end-start<<endl;
+    std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
 
     return SOAP_OK;
 }
@@ -86,11 +85,11 @@ int ns__loadMat (struct soap *soap,
 
 /* helper function */
 /* Save matrix to binary file */
-int saveMat( std::string& filename, const Mat& M){
+int saveMat( const std::string& filename, const Mat& M){
     if (M.empty()){
        return 0;
     }
-    ofstream out(filename.c_str(), ios::out|ios::binary);
+    std::ofstream out(filename.c_str(), std::ios::out|std::ios::binary);
     if (!out)
        return 0;
 
@@ -119,7 +118,7 @@ int saveMat( std::string& filename, const Mat& M){
 /* Read matrix from binary file */
 int readMat( const std::string& filename, Mat& M)
 {
-    ifstream in(filename.c_str(), ios::in|ios::binary);
+    std::ifstream in(filename.c_str(), std::ios::in|std::ios::binary);
     if (!in){
        M.data = NULL;
        return 0;
@@ -169,13 +168,13 @@ int getMatType ( const std::string& typeName)
         return 0;
     else if(typeName.compare("CV_8UC2") == 0)
         return 8;
-    else if((typeName.compare("CV_8UC3") == 0)
+    else if(typeName.compare("CV_8UC3") == 0)
         return 16;
-    else (typeName.compare("CV_32FC1") == 0)
+    else if(typeName.compare("CV_32FC1") == 0)
         return 5;
-    else (typeName.compare("CV_32FC2") == 0)
+    else if(typeName.compare("CV_32FC2") == 0)
         return 13;
-    else (typeName.compare("CV_32FC3") == 0)
+    else if(typeName.compare("CV_32FC3") == 0)
         return 21;
 }
 
@@ -224,15 +223,15 @@ int getMorphOperation ( const std::string& typeName)
         return MORPH_BLACKHAT;
 }
 
-int ByteArrayToANN(const std::string& annfile, CvANN_MLP* ann)
+int ByteArrayToANN(std::string& annfile, CvANN_MLP* ann)
 {
     char *buffer;
     long size;
-	ifstream file (annfile.c_str(), ios::in|ios::binary|ios::ate);
+	std::ifstream file (annfile.c_str(), std::ios::in|std::ios::binary|std::ios::ate);
     if(!file){ return 0; }
 
     size = file.tellg();
-    file.seekg (0, ios::beg);
+    file.seekg (0, std::ios::beg);
     buffer = new char [size];
     file.read (buffer, size);
     file.close();
@@ -247,10 +246,10 @@ int ByteArrayToANN(const std::string& annfile, CvANN_MLP* ann)
 }
 
 /* cleared */
-void getOutputFilename (std::string& filename, const std::string& toAppend)
+void getOutputFilename (std::string& filename, std::string& toAppend)
 {
 	char tmp[60] = {0};
     time_t now = time(0);
     strftime(tmp, sizeof(tmp),"%Y%m%d_%H%M%S", localtime(&now));
-	filename = BASE_DIR + tmp.c_str() + toAppend;
+	filename = BASE_DIR + tmp + toAppend;
 }
