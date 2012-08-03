@@ -1,16 +1,23 @@
+/* *** TO-DO *** */
+//~ use pthree to set config file
+//~ http://www.boost.org/doc/libs/1_50_0/doc/html/property_tree.html#boost_propertytree.intro
+
+//~ *** redirect cerr to file -> macro
+//~ *** defind config in main, so every services can get the attributes.
+
+/* *** NOTE *** */
+//~ omg is  a bit faster than mali (loadMat) 
+
 #include "headerfile.cpp"
 #include "omg.nsmap"
 
-//init variable
+/* init variable */
 #define FILENAME_SIZE 75
 #define MAX_THREAD 4
 
-//namespace
-//~ using namespace std;
 using namespace cv;
-//~ using namespace boost::gregorian;
 
-//helper function
+/* helper function */
 int saveMat( const std::string& filename, const Mat& M);
 int readMat( const std::string& filename, Mat& M);
 int getMatType (const std::string& typeName);
@@ -20,9 +27,10 @@ int getMorphOperation ( const std::string& typeName);
 int ByteArrayToANN( std::string& annfile, CvANN_MLP* ann);
 void getOutputFilename (std::string& filename, std::string& toAppend);
 
-
+/* Global Configuration */
 std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
+std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
 
 
 int main(int argc, char **argv)
@@ -37,6 +45,13 @@ int main(int argc, char **argv)
     }
     return 0;
 }
+
+
+//~ int ns__initService (struct soap *soap, int execution_time, int memory_check)
+//~ {
+	//~ std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
+	
+//~ }
 
 /* Load image data to Mat, save to binary file */
 int ns__loadMat (struct soap *soap,
@@ -81,6 +96,10 @@ int ns__loadMat (struct soap *soap,
 
     return SOAP_OK;
 }
+
+
+
+
 
 
 /* helper function */
