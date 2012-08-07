@@ -6,13 +6,5 @@
 
 //gsoap ns schema namespace: urn:omg
 
-class ns__ServiceData 
-{
-	public:
-		std::string InputFilename;
-		std::string OutputMatFilename;
-		bool timeChecking;
-		bool memoryChecking;
-};
-
-int ns__loadMat (int colorflag=0, std::string types="CV_32FC1", ns__ServiceData& data);
+int ns__loadMat (std::string InputImageFilename, int colorflag=0, std::string types="CV_32FC1", std::string &OutputMatFilename);
+int ns__initialService (bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *noResponse=NULL)
