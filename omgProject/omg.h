@@ -6,25 +6,13 @@
 
 //gsoap ns schema namespace: urn:omg
 
-
-class Configure {
+class ns__ServiceData 
+{
 	public:
+		std::string InputFilename;
+		std::string OutputMatFilename;
 		bool timeChecking;
 		bool memoryChecking;
-		bool keepLoging;
-		
-		friend std::ostream& operator<<(std::ostream& os, const Configure& c)
-		{
-			os << c.timeChecking << '\n';
-			os << c.memoryChecking << '\n';
-			os << c.keepLoging;
-			return os;
-		}
-		
-		friend std:: istream& operator>>(std::istream& is, Configure& c)
-		{
-			is >> c.timeChecking >> c.memoryChecking >> c.keepLoging;
-			return is;
-		}
- }
-int ns__loadMat (std::string InputImageFilename, int colorflag=0, std::string types="CV_32FC1", std::string &OutputMatFilename);
+};
+
+int ns__loadMat (int colorflag=0, std::string types="CV_32FC1", ns__ServiceData& data);
