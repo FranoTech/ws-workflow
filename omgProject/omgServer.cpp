@@ -31,21 +31,9 @@ std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
 
 
 int main(int argc, char **argv)
-{
-	Configure config;
-	std::ifstream inConfig(CONFIG_FILE.c_str(), std::ios::in | std::ios::binary);
-	if(!inConfig)
-	{
-		std::cerr << "Config File could not be opened. Please run InitialService first." << std::endl;
-		exit(1);
-	}
-	//~ inConfig.read(reinterpret_cast< char* >(&config), sizeof(Configure));
-	inConfig >> config;
-	
+{	
     struct soap soap;
-    soap_init(&soap);
-	soap.user = (void*)config; 
-	
+    soap_init(&soap);	
     if (argc < 2)		// no args: assume this is a CGI application
     {
         soap_serve(&soap);	// serve request
@@ -56,31 +44,31 @@ int main(int argc, char **argv)
 }
 
 
-int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *out)
-{
-	Configure config;
-	config.timeChecking = executionTimeChecking;
-	config.memoryChecking = memoryChecking;
-	//~ config.keepLogging = keepLogging;
+//~ int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *out)
+//~ {
+	//~ Configure config;
+	//~ config.timeChecking = executionTimeChecking;
+	//~ config.memoryChecking = memoryChecking;
 	
-	std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
-	out << config;
-	out.close();
-	return SOAP_OK;
-}
+	//~ std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
+	//~ out << config;
+	//~ out.close();
+	//~ return SOAP_OK;
+//~ }
 
 /* Load image data to Mat, save to binary file */
 int ns__loadMat (struct soap *soap,
-                std::string InputImageFilename,
+                //~ std::string InputImageFilename,
                 int colorflag=0,
                 std::string types="CV_32FC1",
-                std::string &OutputMatFilename=ERROR_FILENAME)
+				ns__ServiceData &data=NULL)
+                //~ std::string &OutputMatFilename=ERROR_FILENAME)
 {
-	fetch((Configure*)soap->user);
-	if(timeChecking){
+
+	//~ if(timeChecking){
 		double start, end;
 		start = omp_get_wtime();
-	}
+	//~ }
 	
     Mat src;
 
