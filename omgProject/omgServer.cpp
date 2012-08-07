@@ -1,7 +1,4 @@
 /* *** TO-DO *** */
-//~ use pthree to set config file
-//~ http://www.boost.org/doc/libs/1_50_0/doc/html/property_tree.html#boost_propertytree.intro
-
 //~ *** redirect cerr to file -> macro
 //~ *** defind config in main, so every services can get the attributes.
 
@@ -35,8 +32,20 @@ std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
 
 int main(int argc, char **argv)
 {
+	Configure config;
+	std::ifstream inConfig(CONFIG_FILE.c_str(), std::ios::in | std::ios::binary);
+	if(!inConfig)
+	{
+		std::cerr << "Config File could not be opened. Please run InitialService first." << std::endl;
+		exit(1);
+	}
+	//~ inConfig.read(reinterpret_cast< char* >(&config), sizeof(Configure));
+	inConfig >> config;
+	
     struct soap soap;
     soap_init(&soap);
+	soap.user = (void*)config; 
+	
     if (argc < 2)		// no args: assume this is a CGI application
     {
         soap_serve(&soap);	// serve request
@@ -47,11 +56,18 @@ int main(int argc, char **argv)
 }
 
 
-//~ int ns__initService (struct soap *soap, int execution_time, int memory_check)
-//~ {
-	//~ std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
+int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, bool keepLogging=true, struct ns__signalResponse { } *out)
+{
+	Configure config;
+	config.timeChecking = executionTimeChecking;
+	config.memoryChecking = memoryChecking;
+	config.keepLogging = keepLogging;
 	
-//~ }
+	std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
+	out << config;
+	out.close();
+	return SOAP_OK;
+}
 
 /* Load image data to Mat, save to binary file */
 int ns__loadMat (struct soap *soap,
@@ -60,10 +76,19 @@ int ns__loadMat (struct soap *soap,
                 std::string types="CV_32FC1",
                 std::string &OutputMatFilename=ERROR_FILENAME)
 {
-	/* should add IFDEF */
-    double start, end;
-    start = omp_get_wtime();
-
+	fetch((*)soap->user); 
+	if(timeChecking)
+	{
+		double start, end;
+		start = omp_get_wtime();
+	}
+	
+	if(memChecking)
+	{
+	
+	}
+	
+	
     Mat src;
 
     /* load image data */
@@ -91,9 +116,12 @@ int ns__loadMat (struct soap *soap,
 
     src.release();
 	
-    end = omp_get_wtime();
-    std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
-
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
+	}
+	
     return SOAP_OK;
 }
 
@@ -137,7 +165,7 @@ int saveMat( const std::string& filename, const Mat& M){
 /* Read matrix from binary file */
 int readMat( const std::string& filename, Mat& M)
 {
-    std::ifstream in(filename.c_str(), std::ios::in|std::ios::binary);
+    std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
     if (!in){
        M.data = NULL;
        return 0;
