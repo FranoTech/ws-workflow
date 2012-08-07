@@ -56,12 +56,12 @@ int main(int argc, char **argv)
 }
 
 
-int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, bool keepLogging=true, struct ns__signalResponse { } *out)
+int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *out)
 {
 	Configure config;
 	config.timeChecking = executionTimeChecking;
 	config.memoryChecking = memoryChecking;
-	config.keepLogging = keepLogging;
+	//~ config.keepLogging = keepLogging;
 	
 	std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
 	out << config;
@@ -76,18 +76,11 @@ int ns__loadMat (struct soap *soap,
                 std::string types="CV_32FC1",
                 std::string &OutputMatFilename=ERROR_FILENAME)
 {
-	fetch((*)soap->user); 
-	if(timeChecking)
-	{
+	fetch((Configure*)soap->user);
+	if(timeChecking){
 		double start, end;
 		start = omp_get_wtime();
 	}
-	
-	if(memChecking)
-	{
-	
-	}
-	
 	
     Mat src;
 
@@ -120,6 +113,12 @@ int ns__loadMat (struct soap *soap,
 	{ 
 		end = omp_get_wtime();
 		std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{
+		process_mem_usage(vm, rss);
+		std::cerr << "VM usage :" << vm << endl << "Resident set size :" << rss << endl;
 	}
 	
     return SOAP_OK;
@@ -299,4 +298,32 @@ void getOutputFilename (std::string& filename, std::string& toAppend)
     time_t now = time(0);
     strftime(tmp, sizeof(tmp),"%Y%m%d_%H%M%S", localtime(&now));
 	filename = BASE_DIR + tmp + toAppend;
+}
+
+void getMemoryUsage (double& vm_usage, double& resident_set)
+{
+	/* virtual mamory usage */
+	vm_usage     = 0.0;
+	/* The resident set size is the portion of a process's memory that is held in RAM */
+	resident_set = 0.0;
+
+	std::ifstream stat_stream("/proc/self/stat",std::ios::in);
+	std::string pid, comm, state, ppid, pgrp, session, tty_nr;
+	std::string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+	std::string utime, stime, cutime, cstime, priority, nice;
+	std::string O, itrealvalue, starttime;
+
+	unsigned long vsize;
+	long rss;
+
+	stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+			   >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+			   >> utime >> stime >> cutime >> cstime >> priority >> nice
+			   >> O >> itrealvalue >> starttime >> vsize >> rss;
+
+	stat_stream.close();
+
+	long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
+	vm_usage     = vsize / 1024.0;
+	resident_set = rss * page_size_kb;
 }
