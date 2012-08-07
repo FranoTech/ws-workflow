@@ -7,7 +7,6 @@
 #include "headerfile.cpp"
 #include "omg.nsmap"
 
-/* init variable */
 #define FILENAME_SIZE 75
 #define MAX_THREAD 4
 
@@ -22,13 +21,12 @@ int getColorFlag(int colorflag);
 int getMorphOperation ( const std::string& typeName);
 int ByteArrayToANN( std::string& annfile, CvANN_MLP* ann);
 void getOutputFilename (std::string& filename, std::string& toAppend);
+void getConfig (bool &timeChecking, bool &memoryChecking);
 
 /* Global Configuration */
 std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
 std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
-//~ bool timeChecking = false;
-//~ bool memoryChecking = false;
 
 class Configure {
 	public:
@@ -64,12 +62,11 @@ int main(int argc, char **argv)
 }
 
 
-int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *out)
+int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *noResponse=NULL)
 {
 	Configure config;
 	config.timeChecking = executionTimeChecking;
 	config.memoryChecking = memoryChecking;
-	
 	std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
 	out << config;
 	out.close();
@@ -130,10 +127,6 @@ int ns__loadMat (struct soap *soap,
 	
     return SOAP_OK;
 }
-
-
-
-
 
 
 /* helper function */
