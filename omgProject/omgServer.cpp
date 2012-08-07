@@ -28,7 +28,8 @@ void getOutputFilename (std::string& filename, std::string& toAppend);
 std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
 std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
-
+//~ extern ns__ServiceData ServiceDataNull;
+static ns__ServiceData ServiceDataNull;
 
 int main(int argc, char **argv)
 {	
@@ -44,36 +45,21 @@ int main(int argc, char **argv)
 }
 
 
-//~ int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *out)
-//~ {
-	//~ Configure config;
-	//~ config.timeChecking = executionTimeChecking;
-	//~ config.memoryChecking = memoryChecking;
-	
-	//~ std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
-	//~ out << config;
-	//~ out.close();
-	//~ return SOAP_OK;
-//~ }
-
 /* Load image data to Mat, save to binary file */
 int ns__loadMat (struct soap *soap,
-                //~ std::string InputImageFilename,
                 int colorflag=0,
                 std::string types="CV_32FC1",
-				ns__ServiceData &data=NULL)
-                //~ std::string &OutputMatFilename=ERROR_FILENAME)
+				ns__ServiceData &data=ServiceDataNull)
+                
 {
 
-	//~ if(timeChecking){
-		double start, end;
-		start = omp_get_wtime();
-	//~ }
+	double start, end;
+	start = omp_get_wtime();
 	
     Mat src;
 
     /* load image data */
-    src = imread(InputImageFilename.c_str(),getColorFlag(colorflag));
+    src = imread(data.InputFilename.c_str(),getColorFlag(colorflag));
     if(src.empty()) {
         std::cerr << "loadMat:: can not load image" << std::endl;
         return soap_receiver_fault(soap, "loadMat :: can not load image", NULL);
@@ -87,9 +73,9 @@ int ns__loadMat (struct soap *soap,
 
 	/* generate output file name  and save to bin*/
 	std::string toAppend = "_loadMat";
-	getOutputFilename(OutputMatFilename,toAppend);
+	getOutputFilename(data.OutputMatFilename,toAppend);
 
-    if(!saveMat(OutputMatFilename, src))
+    if(!saveMat(data.OutputMatFilename, src))
     {
         std::cerr<<"loadMat:: can not save mat to binary file" << std::endl;
         return soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
@@ -97,24 +83,20 @@ int ns__loadMat (struct soap *soap,
 
     src.release();
 	
-	if(timeChecking) 
-	{ 
-		end = omp_get_wtime();
-		std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
-	}
+	//~ if(timeChecking) 
+	//~ { 
+		//~ end = omp_get_wtime();
+		//~ std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
+	//~ }
 	
-	if(memoryChecking)
-	{
-		process_mem_usage(vm, rss);
-		std::cerr << "VM usage :" << vm << endl << "Resident set size :" << rss << endl;
-	}
+	//~ if(memoryChecking)
+	//~ {
+		//~ process_mem_usage(vm, rss);
+		//~ std::cerr << "VM usage :" << vm << endl << "Resident set size :" << rss << endl;
+	//~ }
 	
     return SOAP_OK;
 }
-
-
-
-
 
 
 /* helper function */
