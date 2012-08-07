@@ -1,6 +1,5 @@
 /* *** TO-DO *** */
 //~ *** redirect cerr to file -> macro
-//~ *** defind config in main, so every services can get the attributes.
 
 /* *** NOTE *** */
 //~ omg is  a bit faster than mali (loadMat) 
@@ -28,13 +27,33 @@ void getOutputFilename (std::string& filename, std::string& toAppend);
 std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
 std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
-//~ extern ns__ServiceData ServiceDataNull;
-static ns__ServiceData ServiceDataNull;
+//~ bool timeChecking = false;
+//~ bool memoryChecking = false;
+
+class Configure {
+	public:
+		bool timeChecking;
+		bool memoryChecking;
+		
+		friend std::ostream& operator<<(std::ostream& os, const Configure& c)
+		{
+			os << c.timeChecking << '\n';
+			os << c.memoryChecking;
+			return os;
+		}
+		
+		friend std:: istream& operator>>(std::istream& is, Configure& c)
+		{
+			is >> c.timeChecking >> c.memoryChecking;
+			return is;
+		}
+ };
 
 int main(int argc, char **argv)
-{	
+{
     struct soap soap;
-    soap_init(&soap);	
+    soap_init(&soap);
+	
     if (argc < 2)		// no args: assume this is a CGI application
     {
         soap_serve(&soap);	// serve request
@@ -45,21 +64,35 @@ int main(int argc, char **argv)
 }
 
 
+int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *out)
+{
+	Configure config;
+	config.timeChecking = executionTimeChecking;
+	config.memoryChecking = memoryChecking;
+	
+	std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
+	out << config;
+	out.close();
+	return SOAP_OK;
+}
+
 /* Load image data to Mat, save to binary file */
 int ns__loadMat (struct soap *soap,
+                std::string InputImageFilename,
                 int colorflag=0,
                 std::string types="CV_32FC1",
-				ns__ServiceData &data=ServiceDataNull)
-                
-{
-
-	double start, end;
-	start = omp_get_wtime();
+                std::string &OutputMatFilename=ERROR_FILENAME)
+{	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		double start, end;
+		start = omp_get_wtime();
+	}
 	
     Mat src;
-
+	
     /* load image data */
-    src = imread(data.InputFilename.c_str(),getColorFlag(colorflag));
+    src = imread(InputImageFilename.c_str(),getColorFlag(colorflag));
     if(src.empty()) {
         std::cerr << "loadMat:: can not load image" << std::endl;
         return soap_receiver_fault(soap, "loadMat :: can not load image", NULL);
@@ -73,9 +106,9 @@ int ns__loadMat (struct soap *soap,
 
 	/* generate output file name  and save to bin*/
 	std::string toAppend = "_loadMat";
-	getOutputFilename(data.OutputMatFilename,toAppend);
+	getOutputFilename(OutputMatFilename,toAppend);
 
-    if(!saveMat(data.OutputMatFilename, src))
+    if(!saveMat(OutputMatFilename, src))
     {
         std::cerr<<"loadMat:: can not save mat to binary file" << std::endl;
         return soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
@@ -83,20 +116,24 @@ int ns__loadMat (struct soap *soap,
 
     src.release();
 	
-	//~ if(timeChecking) 
-	//~ { 
-		//~ end = omp_get_wtime();
-		//~ std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
-	//~ }
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
+	}
 	
-	//~ if(memoryChecking)
-	//~ {
-		//~ process_mem_usage(vm, rss);
-		//~ std::cerr << "VM usage :" << vm << endl << "Resident set size :" << rss << endl;
-	//~ }
+	if(memoryChecking)
+	{
+		process_mem_usage(vm, rss);
+		std::cerr << "ns__loadMat VM usage :" << vm << endl << "Resident set size :" << rss << endl;
+	}
 	
     return SOAP_OK;
 }
+
+
+
+
 
 
 /* helper function */
@@ -297,3 +334,21 @@ void getMemoryUsage (double& vm_usage, double& resident_set)
 	vm_usage     = vsize / 1024.0;
 	resident_set = rss * page_size_kb;
 }
+
+void getConfig (bool &timeChecking, bool &memoryChecking)
+{
+	Configure config;
+	std::ifstream inConfig(CONFIG_FILE.c_str(), std::ios::in | std::ios::binary);
+	if(!inConfig)
+	{
+		std::cerr << "Config File could not be opened. Please run InitialService first." << std::endl;
+		exit(1);
+	}
+	//~ inConfig.read(reinterpret_cast< char* >(&config), sizeof(Configure));
+	inConfig >> config;
+	
+	timeChecking = config.timeChecking;
+	memoryChecking = config.memoryChecking;
+	
+}
+	
