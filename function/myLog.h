@@ -9,24 +9,31 @@
 #endif
 
 enum LogLevel {logERROR, logWARNING, logINFO, logDEBUG};
+std::string LOG_FILENAME;
 
 inline std::string NowTime();
 
 class Log {
 	public:
 		Log();
+		Log(bool);
 		virtual ~Log();
 		std::ofstream& Get(LogLevel level = logINFO);
 		static std::string ToString(LogLevel level);
+		//~ inline void enableLog () { enabled = true; }
+		//~ inline void disableLog () { enabled = false; }
 	
 	private:
 		bool enabled;
 		std::ofstream out;
 };
 
+Log::Log(bool enable=false) {
+	enabled = enable; }
+	
 inline Log::Log()
 {
-	out.open("test", std::ios::out | std::ios::app);
+	out.open(LOG_FILENAME.c_str(), std::ios::out | std::ios::app);
 }
 
 inline std::ofstream& Log::Get(LogLevel level)
@@ -49,6 +56,7 @@ inline std::string Log::ToString(LogLevel level)
     return buffer[level];
 }
 
+#define LogEn Log(true);
 #define Log(level) Log().Get(level)
 
 inline std::string NowTime()

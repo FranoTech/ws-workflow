@@ -6,11 +6,14 @@
 
 #include "headerfile.cpp"
 #include "omg.nsmap"
+#include "simpleLog.h"
 
 #define FILENAME_SIZE 75
 #define MAX_THREAD 4
 
 using namespace cv;
+
+LOG_DECLARE;
 
 /* helper function */
 int saveMat( const std::string& filename, const Mat& M);
@@ -70,6 +73,7 @@ int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool
 	std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
 	out << config;
 	out.close();
+	
 	return SOAP_OK;
 }
 
