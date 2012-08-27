@@ -23,18 +23,20 @@ int getColorFlag(int colorflag);
 int getMorphOperation ( const std::string& typeName);
 int ByteArrayToANN( std::string& annfile, CvANN_MLP* ann);
 void getOutputFilename (std::string& filename, std::string& toAppend);
+void getMemoryUsage (double& vm_usage, double& resident_set);
 void getConfig (bool &timeChecking, bool &memoryChecking);
 
 /* Global Configuration */
 std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
-std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
-std::string LOG_FILE = "LOG"
+std::string CONFIG_FILE = "/home/lluu/thesis/result/config.cfg";
+
 
 
 
 int main(int argc, char **argv)
 {
+	LOG_FILENAME = "/home/lluu/thesis/result/SERVICE_LOG";
     struct soap soap;
     soap_init(&soap);
 	
@@ -56,15 +58,15 @@ int ns__loadMat (struct soap *soap,
 {	
 	bool timeChecking, memoryChecking;
 	getConfig(timeChecking, memoryChecking);
-	if(timeChecking){
+	//~ if(timeChecking){
 		double start, end;
 		start = omp_get_wtime();
-	}
+	//~ }
 	
     Mat src;
 	
     /* load image data */
-    src = imread(InputImageFilename.c_str(),getColorFlag(colorflag));
+    src = imread(InputImageFilename.c_str(), getColorFlag(colorflag));
     if(src.empty()) {
         Log(logERROR) << "loadMat:: can not load image" << std::endl;
         return soap_receiver_fault(soap, "loadMat :: can not load image", NULL);
@@ -88,15 +90,16 @@ int ns__loadMat (struct soap *soap,
 
     src.release();
 	
-	if(timeChecking) 
-	{ 
+	//~ if(timeChecking) 
+	//~ { 
 		end = omp_get_wtime();
 		Log(logINFO) << "ns__loadMat " << "time elapsed " << end-start << std::endl;
-	}
+	//~ }
 	
 	if(memoryChecking)
-	{
-		process_mem_usage(vm, rss);
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
 		Log(logINFO) << "ns__loadMat VM usage :" << vm << std::endl << "Resident set size :" << rss << std::endl;
 	}
 	
@@ -305,7 +308,7 @@ void getMemoryUsage (double& vm_usage, double& resident_set)
 
 void getConfig (bool &timeChecking, bool &memoryChecking)
 {
-	ConfigFile cfg("config.cfg");
+	ConfigFile cfg( CONFIG_FILE.c_str() );
 	timeChecking = cfg.getValueOfKey<bool>("timeChecking", false);
 	memoryChecking = cfg.getValueOfKey<bool>("memoryChecking", false);
 }
