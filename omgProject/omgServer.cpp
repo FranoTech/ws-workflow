@@ -29,6 +29,7 @@ void getConfig (bool &timeChecking, bool &memoryChecking);
 std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
 std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
+std::string LOG_FILE = "LOG"
 
 
 
@@ -44,19 +45,6 @@ int main(int argc, char **argv)
         soap_end(&soap);	// cleanup
     }
     return 0;
-}
-
-
-int ns__initialService (struct soap *soap, bool executionTimeChecking=true, bool memoryChecking=true, struct ns__signalResponse { } *noResponse=NULL)
-{
-	Configure config;
-	config.timeChecking = executionTimeChecking;
-	config.memoryChecking = memoryChecking;
-	std::ofstream out(CONFIG_FILE.c_str(), std::ios::out|std::ios::binary);
-	out << config;
-	out.close();
-	
-	return SOAP_OK;
 }
 
 /* Load image data to Mat, save to binary file */
@@ -78,7 +66,7 @@ int ns__loadMat (struct soap *soap,
     /* load image data */
     src = imread(InputImageFilename.c_str(),getColorFlag(colorflag));
     if(src.empty()) {
-        Log() << "loadMat:: can not load image" << std::endl;
+        Log(logERROR) << "loadMat:: can not load image" << std::endl;
         return soap_receiver_fault(soap, "loadMat :: can not load image", NULL);
     }
 
@@ -94,7 +82,7 @@ int ns__loadMat (struct soap *soap,
 
     if(!saveMat(OutputMatFilename, src))
     {
-        std::cerr<<"loadMat:: can not save mat to binary file" << std::endl;
+        Log(logERROR) << "loadMat:: can not save mat to binary file" << std::endl;
         return soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
     }
 
@@ -103,13 +91,13 @@ int ns__loadMat (struct soap *soap,
 	if(timeChecking) 
 	{ 
 		end = omp_get_wtime();
-		std::cerr << "ns__loadMat " << "time elapsed " << end-start << std::endl;
+		Log(logINFO) << "ns__loadMat " << "time elapsed " << end-start << std::endl;
 	}
 	
 	if(memoryChecking)
 	{
 		process_mem_usage(vm, rss);
-		std::cerr << "ns__loadMat VM usage :" << vm << endl << "Resident set size :" << rss << endl;
+		Log(logINFO) << "ns__loadMat VM usage :" << vm << std::endl << "Resident set size :" << rss << std::endl;
 	}
 	
     return SOAP_OK;
@@ -317,17 +305,8 @@ void getMemoryUsage (double& vm_usage, double& resident_set)
 
 void getConfig (bool &timeChecking, bool &memoryChecking)
 {
-	Configure config;
-	std::ifstream inConfig(CONFIG_FILE.c_str(), std::ios::in | std::ios::binary);
-	if(!inConfig)
-	{
-		std::cerr << "Config File could not be opened. Please run InitialService first." << std::endl;
-		exit(1);
-	}
-	inConfig >> config;
-	
-	timeChecking = config.timeChecking;
-	memoryChecking = config.memoryChecking;
-	
+	ConfigFile cfg("config.cfg");
+	timeChecking = cfg.getValueOfKey<bool>("timeChecking", false);
+	memoryChecking = cfg.getValueOfKey<bool>("memoryChecking", false);
 }
 	
