@@ -8,3 +8,7 @@
 - 10:48:49.733 DEBUG: 	the counter i = 0
 - 10:48:49.733 DEBUG: 	the counter i = 1
 - 10:48:49.733 DEBUG: 	the counter i = 2
+- 13:22:47.320 DEBUG: 	A loop with 3 iterations
+- 13:22:47.320 DEBUG: 	the counter i = 0
+- 13:22:47.320 DEBUG: 	the counter i = 1
+- 13:22:47.320 DEBUG: 	the counter i = 2
