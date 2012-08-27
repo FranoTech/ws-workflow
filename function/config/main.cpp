@@ -2,23 +2,23 @@
 #include <string>
 #include <typeinfo>
 
-#include "configfile.h"
+#include "config.h"
 
 int main()
 {
 	ConfigFile cfg("config.cfg");
 
-	bool exists = cfg.keyExists("car");
-	std::cout << "car key: " << std::boolalpha << exists << "\n";
-	exists = cfg.keyExists("fruits");
-	std::cout << "fruits key: " << exists << "\n";
-
-	std::string someValue = cfg.getValueOfKey<std::string>("mykey", "Unknown");
-	std::cout << "value of key mykey: " << someValue << "\n";
-	std::string carValue = cfg.getValueOfKey<std::string>("car");
-	std::cout << "value of key car: " << carValue << "\n";
-	double doubleVal = cfg.getValueOfKey<double>("double");
-	std::cout << "value of key double: " << doubleVal + 1<< "\n\n";
+	bool time = cfg.getValueOfKey<bool>("timeChecking", true);
+	std::cout << "value of time: " << time << "\n";
+	
+	int mem = cfg.getValueOfKey<int>("memoryChecking", 1);
+	std::cout << "value of mem: " << mem << "\n";
+	
+	if(mem){
+		std::cout<<"true\n";
+	} else {
+		std::cout<<"false\n";
+	}
 	
 	return 0;
 }
