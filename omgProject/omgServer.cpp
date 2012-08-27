@@ -6,14 +6,13 @@
 
 #include "headerfile.cpp"
 #include "omg.nsmap"
-#include "simpleLog.h"
+#include "myLog.h"
+#include "config.h"
 
 #define FILENAME_SIZE 75
 #define MAX_THREAD 4
 
 using namespace cv;
-
-LOG_DECLARE;
 
 /* helper function */
 int saveMat( const std::string& filename, const Mat& M);
@@ -31,24 +30,7 @@ std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
 std::string CONFIG_FILE = "/home/lluu/thesis/result/SERVICECONF";
 
-class Configure {
-	public:
-		bool timeChecking;
-		bool memoryChecking;
-		
-		friend std::ostream& operator<<(std::ostream& os, const Configure& c)
-		{
-			os << c.timeChecking << '\n';
-			os << c.memoryChecking;
-			return os;
-		}
-		
-		friend std:: istream& operator>>(std::istream& is, Configure& c)
-		{
-			is >> c.timeChecking >> c.memoryChecking;
-			return is;
-		}
- };
+
 
 int main(int argc, char **argv)
 {
@@ -83,7 +65,8 @@ int ns__loadMat (struct soap *soap,
                 int colorflag=0,
                 std::string types="CV_32FC1",
                 std::string &OutputMatFilename=ERROR_FILENAME)
-{	bool timeChecking, memoryChecking;
+{	
+	bool timeChecking, memoryChecking;
 	getConfig(timeChecking, memoryChecking);
 	if(timeChecking){
 		double start, end;
@@ -95,7 +78,7 @@ int ns__loadMat (struct soap *soap,
     /* load image data */
     src = imread(InputImageFilename.c_str(),getColorFlag(colorflag));
     if(src.empty()) {
-        std::cerr << "loadMat:: can not load image" << std::endl;
+        Log() << "loadMat:: can not load image" << std::endl;
         return soap_receiver_fault(soap, "loadMat :: can not load image", NULL);
     }
 
@@ -341,7 +324,6 @@ void getConfig (bool &timeChecking, bool &memoryChecking)
 		std::cerr << "Config File could not be opened. Please run InitialService first." << std::endl;
 		exit(1);
 	}
-	//~ inConfig.read(reinterpret_cast< char* >(&config), sizeof(Configure));
 	inConfig >> config;
 	
 	timeChecking = config.timeChecking;

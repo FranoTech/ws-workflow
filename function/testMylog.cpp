@@ -2,7 +2,7 @@
 
 int main ()
 {
-	LogEn;
+	//LogEn;
 	LOG_FILENAME = "test";
 	const int count = 3;
 	Log(logDEBUG) << "A loop with " << count << " iterations" <<std::endl;
