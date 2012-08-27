@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="mali"
+ targetNamespace="http://localhost/mali.wsdl"
+ xmlns:tns="http://localhost/mali.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:mali"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:mali"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:mali"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <simpleType name="base64Binary"><!-- ns__base64Binary -->
+
+   <restriction base="xsd:base64Binary">
+    <maxLength value="9223372036854775807"/>
+   </restriction>
+  </simpleType>
+ </schema>
+
+</types>
+
+<message name="loadMatRequest">
+ <part name="InputImageFilename" type="xsd:string"/><!-- ns__loadMat::InputImageFilename -->
+ <part name="colorflag" type="xsd:int"/><!-- ns__loadMat::colorflag -->
+ <part name="types" type="xsd:string"/><!-- ns__loadMat::types -->
+</message>
+
+<message name="loadMatResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__loadMat::OutputMatFilename -->
+</message>
+
+<message name="MatToJPGRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__MatToJPG::InputMatFilename -->
+</message>
+
+<message name="MatToJPGResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__MatToJPG::OutputMatFilename -->
+</message>
+
+<message name="ConvertToRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__ConvertTo::InputMatFilename -->
+ <part name="types" type="xsd:string"/><!-- ns__ConvertTo::types -->
+</message>
+
+<message name="ConvertToResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__ConvertTo::OutputMatFilename -->
+</message>
+
+<message name="ThresholdRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__Threshold::InputMatFilename -->
+ <part name="thresholdValue" type="xsd:double"/><!-- ns__Threshold::thresholdValue -->
+ <part name="maxValue" type="xsd:double"/><!-- ns__Threshold::maxValue -->
+ <part name="thresholdType" type="xsd:string"/><!-- ns__Threshold::thresholdType -->
+</message>
+
+<message name="ThresholdResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Threshold::OutputMatFilename -->
+</message>
+
+<message name="MorphologyExRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__MorphologyEx::InputMatFilename -->
+ <part name="morphOperation" type="xsd:string"/><!-- ns__MorphologyEx::morphOperation -->
+</message>
+
+<message name="MorphologyExResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__MorphologyEx::OutputMatFilename -->
+</message>
+
+<message name="erodeRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__erode::InputMatFilename -->
+ <part name="elementFilename" type="xsd:string"/><!-- ns__erode::elementFilename -->
+ <part name="iteration" type="xsd:int"/><!-- ns__erode::iteration -->
+</message>
+
+<message name="erodeResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__erode::OutputMatFilename -->
+</message>
+
+<message name="dilateRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__dilate::InputMatFilename -->
+ <part name="elementFilename" type="xsd:string"/><!-- ns__dilate::elementFilename -->
+ <part name="iteration" type="xsd:int"/><!-- ns__dilate::iteration -->
+</message>
+
+<message name="dilateResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__dilate::OutputMatFilename -->
+</message>
+
+<message name="OrRequest">
+ <part name="src1" type="xsd:string"/><!-- ns__Or::src1 -->
+ <part name="src2" type="xsd:string"/><!-- ns__Or::src2 -->
+</message>
+
+<message name="OrResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Or::OutputMatFilename -->
+</message>
+
+<message name="AndRequest">
+ <part name="src1" type="xsd:string"/><!-- ns__And::src1 -->
+ <part name="src2" type="xsd:string"/><!-- ns__And::src2 -->
+</message>
+
+<message name="AndResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__And::OutputMatFilename -->
+</message>
+
+<message name="NotRequest">
+ <part name="src" type="xsd:string"/><!-- ns__Not::src -->
+</message>
+
+<message name="NotResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Not::OutputMatFilename -->
+</message>
+
+<message name="removeSmallCell">
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__removeSmallCell::inputMatFilename -->
+</message>
+
+<message name="RemoveSmallCell">
+ <part name="keepedArea" type="xsd:string"/><!-- ns__removeSmallCell::keepedArea -->
+ <part name="biggerArea" type="xsd:string"/><!-- ns__removeSmallCell::biggerArea -->
+</message>
+
+<message name="scanningCellRequest">
+ <part name="biggerArea" type="xsd:string"/><!-- ns__scanningCell::biggerArea -->
+ <part name="keepArea" type="xsd:string"/><!-- ns__scanningCell::keepArea -->
+</message>
+
+<message name="scanningCellResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__scanningCell::OutputMatFilename -->
+</message>
+
+<message name="trainANNRequest">
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__trainANN::inputMatFilename -->
+ <part name="neuralFile" type="xsd:string"/><!-- ns__trainANN::neuralFile -->
+</message>
+
+<message name="trainANNResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__trainANN::OutputMatFilename -->
+</message>
+
+<message name="separateCellRequest">
+ <part name="input1" type="xsd:string"/><!-- ns__separateCell::input1 -->
+ <part name="input2" type="xsd:string"/><!-- ns__separateCell::input2 -->
+</message>
+
+<message name="separateCellResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__separateCell::OutputMatFilename -->
+</message>
+
+<message name="prepareResultRequest">
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__prepareResult::inputMatFilename -->
+ <part name="afterthresNN" type="xsd:string"/><!-- ns__prepareResult::afterthresNN -->
+</message>
+
+<message name="prepareResultResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__prepareResult::OutputMatFilename -->
+</message>
+
+<message name="viewImageRequest">
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__viewImage::inputMatFilename -->
+</message>
+
+<message name="viewImageResponse">
+ <part name="image" type="ns:base64Binary"/><!-- ns__viewImage::image -->
+</message>
+
+<portType name="maliPortType">
+ <operation name="loadMat">
+  <documentation>Service definition of function ns__loadMat</documentation>
+  <input message="tns:loadMatRequest"/>
+  <output message="tns:loadMatResponse"/>
+ </operation>
+ <operation name="MatToJPG">
+  <documentation>Service definition of function ns__MatToJPG</documentation>
+  <input message="tns:MatToJPGRequest"/>
+  <output message="tns:MatToJPGResponse"/>
+ </operation>
+ <operation name="ConvertTo">
+  <documentation>Service definition of function ns__ConvertTo</documentation>
+  <input message="tns:ConvertToRequest"/>
+  <output message="tns:ConvertToResponse"/>
+ </operation>
+ <operation name="Threshold">
+  <documentation>Service definition of function ns__Threshold</documentation>
+  <input message="tns:ThresholdRequest"/>
+  <output message="tns:ThresholdResponse"/>
+ </operation>
+ <operation name="MorphologyEx">
+  <documentation>Service definition of function ns__MorphologyEx</documentation>
+  <input message="tns:MorphologyExRequest"/>
+  <output message="tns:MorphologyExResponse"/>
+ </operation>
+ <operation name="erode">
+  <documentation>Service definition of function ns__erode</documentation>
+  <input message="tns:erodeRequest"/>
+  <output message="tns:erodeResponse"/>
+ </operation>
+ <operation name="dilate">
+  <documentation>Service definition of function ns__dilate</documentation>
+  <input message="tns:dilateRequest"/>
+  <output message="tns:dilateResponse"/>
+ </operation>
+ <operation name="Or">
+  <documentation>Service definition of function ns__Or</documentation>
+  <input message="tns:OrRequest"/>
+  <output message="tns:OrResponse"/>
+ </operation>
+ <operation name="And">
+  <documentation>Service definition of function ns__And</documentation>
+  <input message="tns:AndRequest"/>
+  <output message="tns:AndResponse"/>
+ </operation>
+ <operation name="Not">
+  <documentation>Service definition of function ns__Not</documentation>
+  <input message="tns:NotRequest"/>
+  <output message="tns:NotResponse"/>
+ </operation>
+ <operation name="removeSmallCell">
+  <documentation>Service definition of function ns__removeSmallCell</documentation>
+  <input message="tns:removeSmallCell"/>
+  <output message="tns:RemoveSmallCell"/>
+ </operation>
+ <operation name="scanningCell">
+  <documentation>Service definition of function ns__scanningCell</documentation>
+  <input message="tns:scanningCellRequest"/>
+  <output message="tns:scanningCellResponse"/>
+ </operation>
+ <operation name="trainANN">
+  <documentation>Service definition of function ns__trainANN</documentation>
+  <input message="tns:trainANNRequest"/>
+  <output message="tns:trainANNResponse"/>
+ </operation>
+ <operation name="separateCell">
+  <documentation>Service definition of function ns__separateCell</documentation>
+  <input message="tns:separateCellRequest"/>
+  <output message="tns:separateCellResponse"/>
+ </operation>
+ <operation name="prepareResult">
+  <documentation>Service definition of function ns__prepareResult</documentation>
+  <input message="tns:prepareResultRequest"/>
+  <output message="tns:prepareResultResponse"/>
+ </operation>
+ <operation name="viewImage">
+  <documentation>Service definition of function ns__viewImage</documentation>
+  <input message="tns:viewImageRequest"/>
+  <output message="tns:viewImageResponse"/>
+ </operation>
+</portType>
+
+<binding name="mali" type="tns:maliPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="loadMat">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="MatToJPG">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="ConvertTo">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Threshold">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="MorphologyEx">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="erode">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="dilate">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Or">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="And">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Not">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="removeSmallCell">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="scanningCell">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="trainANN">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="separateCell">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="prepareResult">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="viewImage">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="mali">
+ <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <port name="mali" binding="tns:mali">
+  <SOAP:address location="http://localhost/cgi-bin/maliServer"/>
+ </port>
+</service>
+
+</definitions>
