@@ -41,7 +41,8 @@
 	inline std::ofstream& Log::Get(LogLevel level)
 	{	
 		
-		out << "- " << NowDate() << NowTime();
+		//~ out << "- " << NowDate() << NowTime();
+		out << "- " << NowTime();
 		out << " " << ToString(level) << ": ";
 		out << "\t";
 		return out;
