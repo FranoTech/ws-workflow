@@ -13,6 +13,7 @@
 	enum LogLevel {logERROR, logWARNING, logINFO, logDEBUG};
 	std::string LOG_FILENAME;
 
+	inline std::string NowDate();
 	inline std::string NowTime();
 
 	class Log {
@@ -40,7 +41,7 @@
 	inline std::ofstream& Log::Get(LogLevel level)
 	{	
 		
-		out << "- " << NowTime();
+		out << "- " << NowDate() << NowTime();
 		out << " " << ToString(level) << ": ";
 		out << "\t";
 		return out;
