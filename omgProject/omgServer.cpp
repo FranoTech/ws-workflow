@@ -1,9 +1,3 @@
-/* *** TO-DO *** */
-//~ *** redirect cerr to file -> macro
-
-/* *** NOTE *** */
-//~ omg is  a bit faster than mali (loadMat) 
-
 #include "headerfile.cpp"
 #include "omg.nsmap"
 #include "myLog.h"
@@ -30,8 +24,7 @@ void getConfig (bool &timeChecking, bool &memoryChecking);
 std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
 std::string CONFIG_FILE = "/home/lluu/thesis/result/config.cfg";
-
-
+double start, end; /* time checking */
 
 
 int main(int argc, char **argv)
@@ -50,26 +43,25 @@ int main(int argc, char **argv)
 }
 
 /* Load image data to Mat, save to binary file */
-int ns__loadMat (struct soap *soap,
-                std::string InputImageFilename,
+int ns__imgToMat (struct soap *soap,
+                std::string InputMatFilename,
                 int colorflag=0,
-                std::string types="CV_32FC1",
+                std::string types="CV_8UC1",
                 std::string &OutputMatFilename=ERROR_FILENAME)
 {	
 	bool timeChecking, memoryChecking;
 	getConfig(timeChecking, memoryChecking);
-	//~ if(timeChecking){
-		double start, end;
+	
+	if(timeChecking){
 		start = omp_get_wtime();
-	//~ }
-	
-    Mat src;
-	
+	}
+
     /* load image data */
-    src = imread(InputImageFilename.c_str(), getColorFlag(colorflag));
+	Mat src;
+    src = imread(InputMatFilename.c_str(), getColorFlag(colorflag));
     if(src.empty()) {
-        Log(logERROR) << "loadMat:: can not load image" << std::endl;
-        return soap_receiver_fault(soap, "loadMat :: can not load image", NULL);
+        Log(logERROR) << "imgToMat :: can not load image" << std::endl;
+        return soap_receiver_fault(soap, "imgToMat :: can not load image", NULL);
     }
 
     /* convert Mat to required type */
@@ -79,35 +71,207 @@ int ns__loadMat (struct soap *soap,
     }
 
 	/* generate output file name  and save to bin*/
-	std::string toAppend = "_loadMat";
+	std::string toAppend = "_imgToMat";
 	getOutputFilename(OutputMatFilename,toAppend);
 
     if(!saveMat(OutputMatFilename, src))
     {
-        Log(logERROR) << "loadMat:: can not save mat to binary file" << std::endl;
-        return soap_receiver_fault(soap, "loadMat:: can not save mat to binary file", NULL);
+        Log(logERROR) << "imgToMat :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "imgToMat :: can not save mat to binary file", NULL);
     }
 
     src.release();
 	
-	//~ if(timeChecking) 
-	//~ { 
+	if(timeChecking) 
+	{ 
 		end = omp_get_wtime();
-		Log(logINFO) << "ns__loadMat " << "time elapsed " << end-start << std::endl;
-	//~ }
+		Log(logINFO) << "imgToMat :: " << "time elapsed " << end-start << std::endl;
+	}
 	
 	if(memoryChecking)
 	{	
 		double vm, rss;
 		getMemoryUsage(vm, rss);
-		Log(logINFO) << "ns__loadMat VM usage :" << vm << std::endl << "Resident set size :" << rss << std::endl;
+		Log(logINFO)<< "imgToMat :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
 	}
 	
     return SOAP_OK;
 }
 
 
-/* helper function */
+int ns__MatToJPG (struct soap *soap, std::string InputMatFilename,  
+					std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        Log(logERROR) << "MatToJPG :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "MatToJPG :: can not read bin file", NULL);
+    }
+	Log(logDEBUG) << "MatToJPG :: Image has been loaded" << std::endl;
+
+    /* check if it is not 8U then convert to 8UC(n) */
+    int chan = src.channels();
+	Log(logDEBUG) << "MatToJPG :: Image channel = " << chan << std::endl;
+	Log(logDEBUG) << "MatToJPG :: Image type = " << src.type() << std::endl;
+	
+    if( src.type() != CV_8UC1|| src.type() != CV_8UC2 || src.type() != CV_8UC3 )
+    {
+		Log(logINFO) << "convert image from" << src.type() << " to " << CV_8UC(chan) << std::endl;
+		src.convertTo(src, CV_8UC(chan));
+		
+    }
+
+    /* generate output file name */
+	std::string toAppend = ".jpg";
+    getOutputFilename(OutputMatFilename, toAppend);
+
+    if(!imwrite(OutputMatFilename.c_str(), src))
+    {
+        Log(logERROR)<< "MatToJPG :: can not save mat to jpg file" << std::endl;
+        return soap_receiver_fault(soap, "MatToJPG :: can not save mat to jpg file", NULL);
+    }
+
+    src.release();
+	
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "MatToJPG :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "MatToJPG :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+	
+    return SOAP_OK;
+}
+
+int ns__ConvertTo( struct soap *soap, 
+					std::string InputMatFilename,
+					std::string types="CV_32FC1",
+					std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+        Log(logERROR)<< "ConvertTo :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "ConvertTo :: can not read bin file", NULL);
+    }
+
+    int MatType = getMatType(types);
+    int cols = src.cols ;
+
+    if( src.type() != MatType )
+    {
+        src.convertTo(src, MatType);
+    }
+
+    /* generate output file name */
+	std::string toAppend = "_ConvertTo";
+    getOutputFilename(OutputMatFilename, toAppend);
+
+	/* save to bin */
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) <<"ConvertTo :: can not save mat to binary file" << std::endl;
+		return soap_receiver_fault(soap, "ConvertTo :: can not save mat to binary file", NULL);
+    }
+	
+	src.release();
+	
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "ConvertTo :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "ConvertTo :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+	
+    return SOAP_OK;
+}
+
+int ns__Threshold(struct soap *soap,
+                        std::string InputMatFilename,
+                        double thresholdValue=127.0,
+                        double maxValue=255.0,
+                        std::string thresholdType="THRESH_BINARY",
+                        std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "Threshold :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "Threshold :: can not read bin file", NULL);
+    }
+
+    int threstype = getThresholdType (thresholdType);
+    threshold(src, src, thresholdValue, maxValue, threstype);
+
+    /* generate output file name and save to binary file */
+	std::string toAppend = "_Threshold";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) << "Threshold :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "Threshold :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "Threshold :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "Threshold :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+	
+    return SOAP_OK;
+}
+
+
+
+/* ########################################################### */
+/* ###############         helper function        ############ */
+/* ########################################################### */
+
 /* Save matrix to binary file */
 int saveMat( const std::string& filename, const Mat& M){
     if (M.empty()){
@@ -269,8 +433,7 @@ int ByteArrayToANN(std::string& annfile, CvANN_MLP* ann)
     }
 }
 
-/* cleared */
-void getOutputFilename (std::string& filename, std::string& toAppend)
+void getOutputFilename (std::string& filename, std::string& toAppend=ERROR_FILENAME)
 {
 	char tmp[60] = {0};
     time_t now = time(0);
