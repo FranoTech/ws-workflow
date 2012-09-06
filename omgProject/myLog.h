@@ -41,8 +41,8 @@
 	inline std::ofstream& Log::Get(LogLevel level)
 	{	
 		
-		//~ out << "- " << NowDate() << NowTime();
-		out << "- " << NowTime();
+		out << "- " << NowDate() <<" "<< NowTime();
+		//~ out << "- " << NowTime();
 		out << " " << ToString(level) << ": ";
 		out << "\t";
 		return out;
@@ -80,6 +80,7 @@
 	{
 		char tmp[60] = {0};
 		time_t now = time(0);
-		strftime(tmp, sizeof(tmp),"%Y%m%d_%H%M%S", localtime(&now));
+		strftime(tmp, sizeof(tmp),"%Y-%m-%d", localtime(&now));
+		return tmp;
 	}
 //~ }
