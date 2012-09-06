@@ -158,6 +158,7 @@ int ns__MatToJPG (struct soap *soap, std::string InputMatFilename,
     return SOAP_OK;
 }
 
+
 int ns__ConvertTo( struct soap *soap, 
 					std::string InputMatFilename,
 					std::string types="CV_32FC1",
@@ -214,6 +215,7 @@ int ns__ConvertTo( struct soap *soap,
     return SOAP_OK;
 }
 
+
 int ns__Threshold(struct soap *soap,
                         std::string InputMatFilename,
                         double thresholdValue=127.0,
@@ -266,6 +268,136 @@ int ns__Threshold(struct soap *soap,
     return SOAP_OK;
 }
 
+
+
+
+
+
+
+int ns__MorphologyEx( struct soap *soap,
+						std::string InputMatFilename,
+						std::string morphOperation="MORPH_OPEN",
+						std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "MorphologyEx :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "MorphologyEx :: can not read bin file", NULL);
+    }
+
+    Mat dst(src.rows, src.cols, src.depth());
+    Mat se;
+    Size seSize(3, 3);
+    Point seAnc(1, 1);
+    int opt = getMorphOperation(morphOperation);
+
+    se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
+    morphologyEx(src, dst, opt, se, seAnc);
+
+    if(src.empty()) {
+			cerr << "MorphologyEx :: something's wrong" << endl;
+            return soap_receiver_fault(soap, "MorphologyEx:: something's wrong", NULL);
+    }
+
+    std::string toAppend = "_MorphologyEx";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) << "MorphologyEx :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "MorphologyEx :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	se.release();
+	dst.release();
+	
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "MorphologyEx :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "MorphologyEx :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+	
+    return SOAP_OK;
+}
+
+int ns__erode(  struct soap *soap, 
+				std::string InputMatFilename,
+				std::string elementFilename,
+				int iteration=1,
+				std::string &OutputMatFilename=NULL)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "erode :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "erode :: can not read bin file", NULL);
+    }
+
+
+    Mat dst;
+    Mat element;
+
+    if(!readMat(elementFilename, element))
+    {
+		Log(logINFO) << "erode: use default element" << std::endl;
+        element.release();
+        erode(src, dst, Mat(), Point(-1, -1), iteration);
+    } else {
+		Log(logINFO) << "erode: use defined element" << std::endl;
+        erode(src, dst, element, Point(-1, -1), iteration);
+		element.release();
+    }
+
+    std::string toAppend = "_erode";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "erode :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "erode :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+	
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "erode :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "erode :: VM usage :" << vm << std::endl 
+					<< "erode set size :" << rss << std::endl;
+	}
+	
+    return SOAP_OK;
+}
 
 
 /* ########################################################### */
