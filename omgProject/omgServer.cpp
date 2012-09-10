@@ -297,7 +297,7 @@ int ns__MorphologyEx( struct soap *soap,
     morphologyEx(src, dst, opt, se, seAnc);
 
     if(src.empty()) {
-			cerr << "MorphologyEx :: something's wrong" << endl;
+			Log(logERROR) << "MorphologyEx :: something's wrong" << std::endl;
             return soap_receiver_fault(soap, "MorphologyEx:: something's wrong", NULL);
     }
 
@@ -736,7 +736,8 @@ int ns__Inverse(  struct soap *soap,
         return soap_receiver_fault(soap, "Inv :: can not save mat to binary file", NULL);
     }
 
-    matSrc.release();
+    src.release();
+	dst.release();
 
 	if(timeChecking) 
 	{ 
@@ -758,6 +759,7 @@ int ns__Inverse(  struct soap *soap,
 int ns__mul(  struct soap *soap, 
 			std::string InputMatFilename,
 			std::string AnotherMatFilename,
+			double scale=1,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -782,7 +784,7 @@ int ns__mul(  struct soap *soap,
         return soap_receiver_fault(soap, "mul :: can not read bin file for src1", NULL);
     }
 	
-    dst = src.mul(anotherMat);
+    dst = src.mul(anotherMat,scale);
 
 	std::string toAppend = "_mul";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -792,7 +794,9 @@ int ns__mul(  struct soap *soap,
         return soap_receiver_fault(soap, "mul :: can not save mat to binary file", NULL);
     }
 
-    matSrc.release();
+    src.release();
+    dst.release();
+    anotherMat.release();
 
 	if(timeChecking) 
 	{ 
@@ -810,6 +814,570 @@ int ns__mul(  struct soap *soap,
 
     return SOAP_OK;
 }
+
+/* Computes a cross-product of two 3-element vectors.  */
+int ns__cross(  struct soap *soap, 
+			std::string InputMatFilename,
+			std::string AnotherMatFilename,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "cross :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "cross :: can not read bin file for src1", NULL);
+    }
+	
+	Mat anotherMat;
+	if(!readMat(AnotherMatFilename, anotherMat))
+    {
+		Log(logERROR) << "cross:: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "cross :: can not read bin file for src1", NULL);
+    }
+	
+    dst = src.cross(anotherMat);
+
+	std::string toAppend = "_cross";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "cross :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "cross :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+    dst.release();
+    anotherMat.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "cross :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "mul :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+/* Computes a dot-product of two vectors.  */
+int ns__dot(  struct soap *soap, 
+			std::string InputMatFilename,
+			std::string AnotherMatFilename,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "dot :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "dot :: can not read bin file for src1", NULL);
+    }
+	
+	Mat anotherMat;
+	if(!readMat(AnotherMatFilename, anotherMat))
+    {
+		Log(logERROR) << "dot:: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "dot :: can not read bin file for src1", NULL);
+    }
+	
+    dst = src.dot(anotherMat);
+
+	std::string toAppend = "_dot";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "dot :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "dot :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+    dst.release();
+    anotherMat.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "dot :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "dot :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+
+/* Returns a zero array of the specified size and type.  */
+/* choose only rows&&cols or size  */
+int ns__zeros(  struct soap *soap, 
+			int rows=0, int cols=0,
+			std::string type="CV_32F",
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+	Mat src;
+	int matType = getMatType(type);
+	if(rows != 0 && cols != 0)
+		src = Mat::zeros(rows, cols, matType);
+	else {
+		Log(logERROR) << "zeros :: Invalid input, please reconfig." << std::endl;
+        return soap_receiver_fault(soap, "zeros :: Invalid input, please reconfig.", NULL);
+	}
+	
+	std::string toAppend = "_zeros";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) << "zeros :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "zeros :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "zeros :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "zeros :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+/* Returns an array of all 1’s of the specified size and type.  */
+int ns__ones(  struct soap *soap, 
+			int rows=0, int cols=0,
+			int size=0, std::string type="CV_32F",
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+	Mat src;
+	int matType = getMatType(type);
+	if(rows != 0 && cols != 0)
+		src = Mat::ones(rows, cols, matType);
+	else {
+		Log(logERROR) << "ones :: Invalid input, please reconfig. (Choose either rows-cols or size)" << std::endl;
+        return soap_receiver_fault(soap, "ones :: Invalid input, please reconfig. (Choose either rows-cols or size)", NULL);
+	}
+	
+	std::string toAppend = "_ones";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) << "ones :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "ones :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "ones :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "ones :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+int ns__createMat(  struct soap *soap, 
+			int rows=0, int cols=0,
+			std::string type="CV_32F",
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;	
+	int matType = getMatType(type);
+	if(rows != 0 && cols != 0)
+		src.create(rows, cols, matType);
+	else {
+		Log(logERROR) << "createMat :: Invalid input, please reconfig." << std::endl;
+        return soap_receiver_fault(soap, "createMat :: Invalid input, please reconfig.", NULL);
+	}
+	
+	std::string toAppend = "_createMat";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) << "createMat :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "createMat :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "createMat :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "createMat :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+/* Creates a matrix header for the specified row span.  */
+int ns__colRange(  struct soap *soap, 
+			std::string InputMatFilename,
+			int startCol=0, int endCol=0, 
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "colRange:: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "colRange :: can not read bin file for src1", NULL);
+    }
+    
+    if(endCol == 0){
+        dst = src.colRange(startCol, Range::all());
+    } else {
+        dst = src.colRange(startCol, endCol);
+    }
+
+	std::string toAppend = "_colRange";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "colRange :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "colRange :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "colRange :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "colRange :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+/* Creates a matrix header for the specified row span.  */
+int ns__rowRange(  struct soap *soap, 
+			std::string InputMatFilename,
+			int startCol=0, int endCol=0, 
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "rowRange:: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "rowRange :: can not read bin file for src1", NULL);
+    }
+
+    if(endCol == 0){
+        dst = src.rowRange(startCol, Range::all());
+    } else {
+        dst = src.rowRange(startCol, endCol);
+    }
+
+	std::string toAppend = "_rowRange";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "rowRange :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "rowRange :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "rowRange :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "rowRange :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+
+int ns__getMatDetail(  struct soap *soap, 
+			std::string InputMatFilename,
+			ns__MatDetail &detail)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "rowRange:: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "rowRange :: can not read bin file for src1", NULL);
+    }
+	
+	detail.columns = src.cols;
+	detail.rows = src.rows;
+
+/*	
+CV_8U - 8-bit unsigned integers ( 0..255 )
+CV_8S - 8-bit signed integers ( -128..127 )
+CV_16U - 16-bit unsigned integers ( 0..65535 )
+CV_16S - 16-bit signed integers ( -32768..32767 )
+CV_32S - 32-bit signed integers ( -2147483648..2147483647 )
+CV_32F - 32-bit floating-point numbers ( -FLT_MAX..FLT_MAX, INF, NAN )
+CV_64F - 64-bit floating-point numbers ( -DBL_MAX..DBL_MAX, INF, NAN )
+*/
+	int d = src.depth();
+	if(d == CV_8U)
+        return detail.type = "CV_8U";
+	else if(t == CV_32F)
+        return detail.type = "CV_8S";
+	else if(t == CV_32F)
+        return detail.type = "CV_16U";
+	else if(t == CV_32F)
+        return detail.type = "CV_16S";
+	else if(t == CV_32F)
+        return detail.type = "CV_32S";
+    else if(t == CV_32F)
+        return detail.type = "CV_32F";
+	else if(t == CV_32S)
+        return detail.type = "CV_64F";
+	else
+		return detail.type = "unknown type";
+
+	
+	int t = src.type();
+	if(t == CV_8UC1)
+        return detail.type = "CV_8UC1";
+    else if(t == CV_8UC2)
+        return detail.type = "CV_8UC2";
+	else if(t == CV_8UC3)
+        return detail.type = "CV_8UC3";
+    else if(t == CV_32FC1)
+        return detail.type = "CV_32FC1";
+	else if(t == CV_32FC2)
+        return detail.type = "CV_32FC2";
+    else if(t == CV_32FC3)
+        return detail.type = "CV_32FC3";
+	else
+		return detail.type = "unknown type";
+	
+	detail.channel = src.channels();
+	detail.empty = src.empty();
+	
+    src.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "rowRange :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "rowRange :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+/* void blur(InputArray src, OutputArray dst, Size ksize, Point anchor=Point(-1,-1), int borderType=BORDER_DEFAULT ) */
+
+int ns__blur(  struct soap *soap, 
+			std::string InputMatFilename, int rows=0, int cols=0, 
+            int anchorX=-1, int anchorY=-1, int borderType=BORDER_DEFAULT,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "blur :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "blur :: can not read bin file for src1", NULL);
+    }
+    
+    if(rows != 0 && cols != 0)
+        blur(src, dst, Size(cols, rows), Point(anchorX, anchorY), borderType); 
+
+	std::string toAppend = "_blur";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "blur :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "blur :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "blur :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "blur :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+
+/* void GaussianBlur(InputArray src, OutputArray dst, Size ksize, double sigmaX, double sigmaY=0, int borderType=BORDER_DEFAULT ) */
+int ns__GaussianBlur(  struct soap *soap, 
+			std::string InputMatFilename, int rows=0, int cols=0,
+            double sigmaX=0, double sigmaY=0, int borderType=BORDER_DEFAULT,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "GaussianBlur :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "GaussianBlur :: can not read bin file for src1", NULL);
+    }
+    
+    if(rows != 0 && cols != 0)
+        GaussianBlur(src, dst, Size(cols, rows), sigmaX, sigmaY, borderType); 
+
+	std::string toAppend = "_blur";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "GaussianBlur :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "GaussianBlur :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "GaussianBlur :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "GaussianBlur :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+
 
 /* ########################################################### */
 /* ###############         helper function        ############ */
@@ -896,17 +1464,21 @@ int readMat( const std::string& filename, Mat& M)
 int getMatType ( const std::string& typeName)
 {
     if(typeName.compare("CV_8UC1") == 0)
-        return 0;
+        return CV_8UC1;
     else if(typeName.compare("CV_8UC2") == 0)
-        return 8;
+        return CV_8UC2;
     else if(typeName.compare("CV_8UC3") == 0)
-        return 16;
+        return CV_8UC3;
     else if(typeName.compare("CV_32FC1") == 0)
-        return 5;
+        return CV_32FC1;
     else if(typeName.compare("CV_32FC2") == 0)
-        return 13;
+        return CV_32FC2;
     else if(typeName.compare("CV_32FC3") == 0)
-        return 21;
+        return CV_32FC3;    
+	else if(typeName.compare("CV_32F") == 0)
+        return CV_32F;	
+	else if(typeName.compare("CV_8U") == 0)
+        return CV_8U;
 }
 
 int getThresholdType ( const std::string& typeName)
