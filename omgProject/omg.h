@@ -7,9 +7,6 @@
 //gsoap ns schema namespace: urn:omg
 
 #include <string>
-extern class std::string;
-
-#include <cv.h>
 
 class ns__RemoveSmallCell
 { 
@@ -91,3 +88,34 @@ int ns__blur(std::string InputMatFilename, int rows=0, int cols=0,
 int ns__GaussianBlur( std::string InputMatFilename, int rows=0, int cols=0,
             double sigmaX=0, double sigmaY=0, int borderType,
 			std::string &OutputMatFilename );
+int ns__cvtColor( std::string InputMatFilename, std::string code, int dstChannel=0
+			std::string &OutputMatFilename);
+int ns__integral( std::string InputMatFilename, int sdepth=-1,
+			std::string &OutputMatFilename);
+int ns__adaptiveadaptiveThreshold(
+                        std::string InputMatFilename,
+                        std::string adaptiveMethod,
+                        double maxValue=255.0,
+                        std::string adaptiveThresholdType="THRESH_BINARY",
+                        int blockSize=3, double C=1,
+                        std::string &OutputMatFilename);
+int ns__adjustBrighnessAndContrast(
+						double alpha, int beta,
+						std::string &OutputMatFilename);
+int ns__integral(   std::string InputMatFilename, int sdepth=-1,
+                    std::string &OutputMatFilename);
+int ns__prepareResult(  std::string inputMatFilename,
+                        std::string afterthresNN,
+						std::string &OutputMatFilename);
+int ns__trainANN(
+                std::string inputMatFilename,
+                std::string neuralFile,
+                std::string &OutputMatFilename);
+int ns__removeSmallCell(std::string inputMatFilename,
+						ns__RemoveSmallCell &out);
+int ns__separateCell(   std::string outSingleCh,
+                        std::string outputFormMorph,
+						std::string &OutputMatFilename);
+int ns__scanningCell(   std::string biggerArea,
+                        std::string keepArea,
+						std::string &OutputMatFilename);        

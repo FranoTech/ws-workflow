@@ -268,6 +268,69 @@ int ns__Threshold(struct soap *soap,
     return SOAP_OK;
 }
 
+//~ void adaptiveThreshold(InputArray src, OutputArray dst, double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C)
+int ns__adaptiveadaptiveThreshold(struct soap *soap,
+                        std::string InputMatFilename,
+                        std::string adaptiveMethod,
+                        double maxValue=255.0,
+                        std::string adaptiveThresholdType="THRESH_BINARY",
+                        int blockSize=3, double C=1,
+                        std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "adaptiveThreshold :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "adaptiveThreshold :: can not read bin file", NULL);
+    }
+
+    Mat dst;
+    int adapt;
+    if (adaptiveMethod.compare("ADAPTIVE_THRESH_MEAN_C") == 0) {
+        adapt = ADAPTIVE_THRESH_MEAN_C;
+    } else if (adaptiveMethod.compare("ADAPTIVE_THRESH_GAUSSIAN_C") == 0) {
+        adapt = ADAPTIVE_THRESH_GAUSSIAN_C;
+    }
+
+    int threstype = getadaptiveThresholdType (adaptiveThresholdType);
+    adaptiveadaptiveThreshold(src, dst, maxValue, adaptiveMethod, adaptiveThresholdType, blockSize, C);
+
+    /* generate output file name and save to binary file */
+	std::string toAppend = "_adaptiveThreshold";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) << "adaptiveThreshold :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "adaptiveThreshold :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "adaptiveThreshold :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "adaptiveThreshold :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+	
+    return SOAP_OK;
+}
+
+
 int ns__MorphologyEx( struct soap *soap,
 						std::string InputMatFilename,
 						std::string morphOperation="MORPH_OPEN",
@@ -1099,10 +1162,12 @@ int ns__colRange(  struct soap *soap,
     }
     
     if(endCol == 0){
-        dst = src.colRange(startCol, Range::all());
-    } else {
-        dst = src.colRange(startCol, endCol);
+        Log(logERROR) << "colRange:: Invalid endCol value" << std::endl;
+        return soap_receiver_fault(soap, "colRange :: Invalid endCol value", NULL);
     }
+        
+    dst = src.colRange(startCol, endCol);
+
 
 	std::string toAppend = "_colRange";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -1154,10 +1219,12 @@ int ns__rowRange(  struct soap *soap,
     }
 
     if(endCol == 0){
-        dst = src.rowRange(startCol, Range::all());
-    } else {
-        dst = src.rowRange(startCol, endCol);
+        Log(logERROR) << "rowRange:: Invalid endCol value" << std::endl;
+        return soap_receiver_fault(soap, "colRange :: Invalid endCol value", NULL);
     }
+    
+    dst = src.rowRange(startCol, endCol);
+    
 
 	std::string toAppend = "_rowRange";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -1220,38 +1287,38 @@ CV_64F - 64-bit floating-point numbers ( -DBL_MAX..DBL_MAX, INF, NAN )
 */
 	int d = src.depth();
 	if(d == CV_8U)
-        return detail.type = "CV_8U";
-	else if(t == CV_32F)
-        return detail.type = "CV_8S";
-	else if(t == CV_32F)
-        return detail.type = "CV_16U";
-	else if(t == CV_32F)
-        return detail.type = "CV_16S";
-	else if(t == CV_32F)
-        return detail.type = "CV_32S";
-    else if(t == CV_32F)
-        return detail.type = "CV_32F";
-	else if(t == CV_32S)
-        return detail.type = "CV_64F";
+        detail.type = "CV_8U";
+	else if(d == CV_32F)
+        detail.type = "CV_8S";
+	else if(d == CV_32F)
+        detail.type = "CV_16U";
+	else if(d == CV_32F)
+        detail.type = "CV_16S";
+	else if(d == CV_32F)
+        detail.type = "CV_32S";
+    else if(d == CV_32F)
+        detail.type = "CV_32F";
+	else if(d == CV_32S)
+        detail.type = "CV_64F";
 	else
-		return detail.type = "unknown type";
+        detail.type = "unknown type";
 
 	
 	int t = src.type();
 	if(t == CV_8UC1)
-        return detail.type = "CV_8UC1";
+        detail.type = "CV_8UC1";
     else if(t == CV_8UC2)
-        return detail.type = "CV_8UC2";
+        detail.type = "CV_8UC2";
 	else if(t == CV_8UC3)
-        return detail.type = "CV_8UC3";
+        detail.type = "CV_8UC3";
     else if(t == CV_32FC1)
-        return detail.type = "CV_32FC1";
+        detail.type = "CV_32FC1";
 	else if(t == CV_32FC2)
-        return detail.type = "CV_32FC2";
+        detail.type = "CV_32FC2";
     else if(t == CV_32FC3)
-        return detail.type = "CV_32FC3";
+        detail.type = "CV_32FC3";
 	else
-		return detail.type = "unknown type";
+		detail.type = "unknown type";
 	
 	detail.channel = src.channels();
 	detail.empty = src.empty();
@@ -1377,7 +1444,771 @@ int ns__GaussianBlur(  struct soap *soap,
     return SOAP_OK;
 }
 
+//~ void cvtColor(InputArray src, OutputArray dst, int code, int dstCn=0 )
+int ns__cvtColor(  struct soap *soap, 
+			std::string InputMatFilename, std::string code, int dstChannel=0
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
 
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "cvtColor :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "cvtColor :: can not read bin file for src1", NULL);
+    }
+    
+    int colorCode;
+    if (code.compare("CV_RGB2GRAY") == 0)  colorCode = CV_RGB2GRAY;
+    else if (code.compare("CV_BGR2XYZ") == 0)  colorCode = CV_BGR2XYZ;
+    else if (code.compare("CV_RGB2XYZ") == 0)  colorCode = CV_RGB2XYZ;
+    else if (code.compare("CV_XYZ2BGR") == 0)  colorCode = CV_XYZ2BGR;
+    else if (code.compare("CV_XYZ2RGB") == 0)  colorCode = CV_XYZ2RGB;
+    else if (code.compare("CV_BGR2YCrCb") == 0)  colorCode = CV_BGR2YCrCb;
+    else if (code.compare("CV_RGB2YCrCb") == 0)  colorCode = CV_RGB2YCrCb;
+    else if (code.compare("CV_YCrCb2BGR") == 0)  colorCode = CV_YCrCb2BGR;
+    else if (code.compare("CV_YCrCb2RGB") == 0)  colorCode = CV_YCrCb2RGB;
+    else if (code.compare("CV_BGR2HSV") == 0)  colorCode = CV_BGR2HSV;
+    else if (code.compare("CV_RGB2HSV") == 0)  colorCode = CV_RGB2HSV;
+    else if (code.compare("CV_HSV2BGR") == 0)  colorCode = CV_HSV2BGR;
+    else if (code.compare("CV_HSV2RGB") == 0)  colorCode = CV_HSV2RGB;
+    else if (code.compare("CV_BGR2HLS") == 0)  colorCode = CV_BGR2HLS;
+    else if (code.compare("CV_RGB2HLS") == 0)  colorCode = CV_RGB2HLS;
+    else if (code.compare("CV_HLS2BGR") == 0)  colorCode = CV_HLS2BGR;
+    else if (code.compare("CV_HLS2RGB") == 0)  colorCode = CV_HLS2RGB;
+    else if (code.compare("CV_BGR2Lab") == 0)  colorCode = CV_BGR2Lab;
+    else if (code.compare("CV_RGB2Lab") == 0)  colorCode = CV_RGB2Lab;
+    else if (code.compare("CV_Lab2BGR") == 0)  colorCode = CV_Lab2BGR;
+    else if (code.compare("CV_Lab2RGB") == 0)  colorCode = CV_Lab2RGB;
+    else if (code.compare("CV_BGR2Luv") == 0)  colorCode = CV_BGR2Luv;
+    else if (code.compare("CV_RGB2Luv") == 0)  colorCode = CV_RGB2Luv;
+    else if (code.compare("CV_Luv2BGR") == 0)  colorCode = CV_Luv2BGR;
+    else if (code.compare("CV_Luv2RGB") == 0)  colorCode = CV_Luv2RGB;
+    else if (code.compare("CV_BayerBG2BGR") == 0)  colorCode = CV_BayerBG2BGR;
+    else if (code.compare("CV_BayerGB2BGR") == 0)  colorCode = CV_BayerGB2BGR;
+    else if (code.compare("CV_BayerRG2BGR") == 0)  colorCode = CV_BayerRG2BGR;
+    else if (code.compare("CV_BayerBG2RGB") == 0)  colorCode = CV_BayerBG2RGB;
+    else if (code.compare("CV_BayerGR2BGR") == 0)  colorCode = CV_BayerGR2BGR;
+    else if (code.compare("CV_BayerGB2RGB") == 0)  colorCode = CV_BayerGB2RGB;
+    else if (code.compare("CV_BayerRG2RGB") == 0)  colorCode = CV_BayerRG2RGB;
+    else if (code.compare("CV_BayerGR2RGB") == 0)  colorCode = CV_BayerGR2RGB;
+    else {
+        Log(logERROR) << "cvtColor :: Invalid Color Code to convert" << std::endl;
+        return soap_receiver_fault(soap, "cvtColor :: Invalid Color Code to convert", NULL);
+    }
+    
+    cvtColor(src, dst, code, dstChannels); 
+
+	std::string toAppend = "_cvtColor";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "cvtColor :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "cvtColor :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "cvtColor :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "cvtColor :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+
+int ns__integral(  struct soap *soap, 
+			std::string InputMatFilename, int sdepth=-1,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "integral :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "integral :: can not read bin file for src1", NULL);
+    }
+    
+    
+    integral(src, dst, sdepth); 
+
+	std::string toAppend = "_integral";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "integral :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "integral :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "integral :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "integral :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+int ns__removeSmallCell(struct soap *soap,
+						std::string inputMatFilename,
+						ns__RemoveSmallCell &out)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "removeSmallCell :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "removeSmallCell :: can not read bin file for src", NULL);
+    }
+
+    Mat tmp = Mat(src.rows, src.cols, CV_32FC1);
+
+    if( src.type() != CV_8UC1)
+    {
+        src.convertTo(src, CV_8UC1);
+    }
+
+    Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
+	vector<vector<cv::Point> > contours;
+    double area = 0;
+    const cv::Point* p;
+    int n = 0;
+    
+    try{
+        findContours(src, contours, CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+	} catch (std::exception& e) { 
+        Log(logERROR) << "removeSmallCell :: "<< e.what()<< std::endl;
+        return soap_receiver_fault(soap, e.what() , NULL);
+		//~ cerr<<"error "<<e.what()<<endl; 
+	}
+
+    for(size_t i = 0; i< contours.size(); i++)
+    {
+		p = &contours[i][0];
+        n = (int)contours[i].size();
+		area = fabs(contourArea(Mat(contours[i])));
+
+		if(area < 1500.0) //lower bound
+		{
+			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
+
+		} else if (area < 7500.0) {
+			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
+			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
+
+		} else {
+			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
+
+		}
+		
+	}
+
+	contours.clear();
+
+    /* save to bin */    
+    std::string toAppend = "_keepedArea";
+    getOutputFilename(out.keepedArea, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "removeSmallCell :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "removeSmallCell :: can not save mat to binary file", NULL);
+    }
+
+    std::string toAppend = "_unkeepArea";
+    getOutputFilename(out.biggerArea, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "removeSmallCell :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "removeSmallCell :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+    tmp.release();
+    outSingle.release();
+    
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "removeSmallCell :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "removeSmallCell :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    
+    return SOAP_OK;
+}
+
+int ns__scanningCell(struct soap *soap,
+						std::string biggerArea,
+                        std::string keepArea,
+						std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(biggerArea, src))
+    {
+		Log(logERROR) << "scanningCell :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "scanningCell :: can not read bin file for src", NULL);
+    }
+    
+    Mat out_single;
+    if(!readMat(keepArea, out_single))
+    {
+        Log(logERROR) << "scanningCell :: can not read bin file" << endl;
+        return soap_receiver_fault(soap, "scanningCell :: can not read bin file", NULL);
+    }
+    
+    
+    Mat srcTmp;
+    Mat src32FC1;
+    src.convertTo(src32FC1, CV_32FC1);
+    //~ Mat output = Mat::zeros(src.rows,src.cols, CV_32FC1);
+
+    int nContour = 1;
+    int prevContour = 0;
+    int sameCount = 0;
+    double area = 0;
+    const Point* p;
+    int n = 0;
+    vector<vector<Point> > contours;
+
+    while(nContour != 0)
+    {
+        src32FC1.convertTo(srcTmp, CV_8UC1); //cvConvert(input_morph, tmp8UC1);
+
+        findContours( srcTmp, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+        nContour = contours.size();
+
+        if( nContour == 0){ break; }
+        if( nContour == prevContour ){
+            erode( src32FC1, src32FC1, Mat());
+            sameCount++;
+        }else {
+            sameCount = 0;
+        }
+
+        prevContour = nContour;
+
+        for(size_t i = 0; i< contours.size(); i++)
+        {
+            p = &contours[i][0];
+            n = (int)contours[i].size();
+            area = fabs(contourArea(Mat(contours[i])));
+
+            if((area < 3000.0) || (sameCount > 10))
+            {
+                fillPoly( src32FC1, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
+                fillPoly( out_single, &p, &n, 1, Scalar(255, 255, 255));
+            }
+        }
+    }
+
+	std::string toAppend = "_unkeepArea";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, out_single))
+    {
+        Log(logERROR) << "scanningCell :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "scanningCell :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+    srcTmp.release();
+    src32FC1.release();
+    out_single.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "scanningCell :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "scanningCell :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+int ns__separateCell(struct soap *soap,
+                        std::string outSingleCh,
+                        std::string outputFormMorph,
+						std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat outSingle;
+	if(!readMat(outSingleCh, outSingle))
+    {
+		Log(logERROR) << "separateCell :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "separateCell :: can not read bin file", NULL);
+    }
+
+    Mat tmp;
+    outSingle.convertTo(tmp, CV_8UC1);
+    
+    int count = 1;
+    int c = 0;
+    int n = 0;
+    const Point *p;
+	vector<vector<Point> > contours;
+    findContours(	tmp, contours, CV_RETR_EXTERNAL,
+					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+
+    for(size_t i = 0; i< contours.size(); i++)
+    {
+		p = &contours[i][0]; 
+        n = (int)contours[i].size();
+        c = ((count++)%254)+1;
+        fillPoly( outSingle, &p, &n, 1, Scalar(c, c, c)); 
+	}
+	contours.clear();
+    
+    Mat inwater = Mat(outSingle.rows, outSingle.cols, CV_8UC3);
+    //~ Mat outwater = Mat(outSingle.size(),CV_32SC1,outSingle.data);  //Is it correct?
+    //Mat outwater;
+    //outSingle.convertTo(outwater,CV_32SC1);
+    outSingle.convertTo(outSingle,CV_32SC1);
+    
+    Mat cell; //output_morph
+    if(!readMat(outputFormMorph, cell))
+    {
+        Log(logERROR) << "separateCell :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "separateCell :: can not read bin file", NULL);
+    }
+    
+    Mat tmp8UC1;
+    cell.convertTo(tmp8UC1,CV_8UC1);
+    
+    vector<Mat> wt;
+    wt.push_back(tmp8UC1);
+    wt.push_back(tmp8UC1);
+    wt.push_back(tmp8UC1);
+
+    merge(wt, inwater);  
+    watershed(inwater, outSingle);
+    
+    outSingle.convertTo(outSingle,CV_32FC1);
+    erode(outSingle, outSingle, Mat(), Point(-1, -1), 2); 
+    
+    cell.convertTo(tmp8UC1,CV_8UC1);
+    subtract(cell, outSingle, cell, tmp8UC1);
+
+    //~ if(!imwrite("result_sepCell_3.jpg", cell))
+    //~ {
+        //~ Log(logERROR) << "scanningCell :: can not read bin file" << std::endl;
+        //~ return soap_receiver_fault(soap, "scanningCell :: can not read bin file", NULL);
+    //~ }
+
+	/* generate output file name */
+    std::string toAppend = "_separateCell";
+    getOutputFilename(OutputMatFilename, toAppend);
+
+    /* save to bin */
+    if(!saveMat(OutputMatFilename, cell))
+    {
+        Log(logERROR) << "separateCell :: save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "separateCell :: save mat to binary file", NULL);
+    }
+
+    tmp8UC1.release();
+    cell.release();
+    outSingle.release();
+
+    if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "separateCell :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "separateCell :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+    
+}
+
+int ns__prepareResult(struct soap *soap,
+						std::string inputMatFilename,
+                        std::string afterthresNN,
+						std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    Mat src;
+    if(!readMat(inputMatFilename, src))
+    {
+        Log(logERROR) << "prepareResult :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "prepareResult :: can not read bin file", NULL);
+    }
+
+    // convert src to CvMat to use an old-school function
+    CvMat tmp = src;
+    CV_Assert(tmp.cols == src.cols && tmp.rows == src.rows &&
+        tmp.data.ptr == (uchar*)src.data && tmp.step == src.step);
+    
+    CvMat *output_morph = cvCreateMat(src.rows, src.cols, CV_32FC1);
+    cvConvert(&tmp, output_morph);
+    
+    //***************************//
+    Mat output1ChSrc;
+    if(!readMat(afterthresNN, output1ChSrc))
+    {
+        Log(logERROR) << "output1Ch:: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "output1Ch :: can not read bin file", NULL);
+    }
+
+    // convert src to CvMat to use an old-school function
+    CvMat tmp2 = output1ChSrc;
+    CV_Assert(tmp2.cols == output1ChSrc.cols && tmp2.rows == output1ChSrc.rows &&
+        tmp2.data.ptr == (uchar*)output1ChSrc.data && tmp2.step == output1ChSrc.step);
+    
+    CvMat *output1Ch = cvCreateMat(tmp2.rows, tmp2.cols, CV_32FC1);
+    cvConvert(&tmp2, output1Ch);
+    
+    //**********************//
+    
+    
+    IplImage *tmp8UC1 = cvCreateImage(cvGetSize(output_morph), IPL_DEPTH_8U, 1);
+    cvConvertScale(output_morph, tmp8UC1);
+    
+    CvMemStorage *storage = cvCreateMemStorage();
+	CvSeq *first_con = NULL;
+	CvSeq *cur = NULL;
+    
+    cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
+    
+    IplImage *tmpImage = cvCreateImage(cvSize(tmp8UC1->width, tmp8UC1->height), IPL_DEPTH_8U, 3);
+    cvSet(tmpImage, CV_RGB(0,0,255)); // Background, blue
+
+    cvSetZero(tmp8UC1);
+    CvScalar pixel;
+    cur = first_con;
+    //~ int ncell = 0; // total cells
+    
+    while (cur != NULL) {
+        if ((cur->total > 2) && (fabs(cvContourArea(cur)) > 1500.0)) { // remove small area
+            int npts = cur->total;
+            CvPoint *p = new CvPoint[npts];
+            cvCvtSeqToArray(cur, p);
+            cvFillPoly(tmp8UC1, &p, &npts, 1, cvScalar(255)); // set mask
+            pixel = cvAvg(output1Ch, tmp8UC1);
+            cvFillPoly(tmp8UC1, &p, &npts, 1, cvScalar(0)); // clear mask
+            if (pixel.val[0] > 0.5) { // Negative, green
+                if (tmpImage != NULL)
+                    cvFillPoly(tmpImage, &p, &npts, 1, CV_RGB(0,255,0));
+                    
+            } else if (pixel.val[0] > -0.5) { // Positive, red
+                if (tmpImage != NULL)
+                    cvFillPoly(tmpImage, &p, &npts, 1, CV_RGB(255,0,0));
+            }
+            delete[] p;
+        }
+        cur = cur->h_next;
+    }
+    
+    Mat result = cvarrToMat(tmpImage, false);
+
+	/* generate output file name */
+    std::string toAppend = "_result";
+    getOutputFilename(OutputMatFilename, toAppend);
+
+    /* save to bin */
+    if(!saveMat(OutputMatFilename, result))
+    {
+        Log(logERROR) << "result:: save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "result:: save mat to binary file", NULL);
+    }
+
+    src.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "result :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "result :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+int ns__trainANN(struct soap *soap,
+                std::string inputMatFilename,
+                std::string neuralFile,
+                std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+	Mat src; //must be 3ch image
+    if(!readMat(inputMatFilename, src))
+    {
+        Log(logERROR) << "trainANN :: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "trainANN :: can not read bin file", NULL);
+    }
+
+    // convert src to CvMat to use an old-school function
+    CvMat tmp = src;
+    CV_Assert(tmp.cols == src.cols && tmp.rows == src.rows &&
+        tmp.data.ptr == (uchar*)src.data && tmp.step == src.step);
+
+    CvMat *input3Ch = cvCreateMat(src.rows, src.cols, CV_32FC3);
+    cvConvert(&tmp, input3Ch);
+    CvMat *output1Ch = cvCreateMat(src.rows, src.cols, CV_32FC1);
+
+    CvANN_MLP* neuron = NULL ;
+    if (neuron == NULL )
+        neuron = new CvANN_MLP();
+	else
+        neuron->clear();
+
+    if(!ByteArrayToANN(neuralFile, neuron)){
+        Log(logERROR) << "trainANN :: can not load byte array to neural" << std::endl;
+        return soap_receiver_fault(soap, "trainANN :: can not load byte array to neural", NULL);
+    }
+
+    CvMat input_nn = cvMat(input3Ch->height*input3Ch->width, 3, CV_32FC1, input3Ch->data.fl);
+    CvMat output_nn = cvMat(output1Ch->height*output1Ch->width, 1, CV_32FC1, output1Ch->data.fl);
+    neuron->predict(&input_nn, &output_nn);
+
+    Mat resultNN = cvarrToMat(output1Ch, false);
+
+    /* generate output file name */
+    std::string toAppend = "_trainANN";
+    getOutputFilename(OutputMatFilename, toAppend);
+
+    /* save to bin */
+    if(!saveMat(OutputMatFilename, resultNN))
+    {
+        Log(logERROR) << "trainANN :: save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "trainANN :: save mat to binary file", NULL);
+    }
+
+    src.release();
+    resultNN.release();
+    cvReleaseMat(&output1Ch);
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "trainANN :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "trainANN :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+
+int ns__adjustBrighnessAndContrast(struct soap *soap,
+						double alpha, int beta,
+						std::string &OutputMatFilename=ERROR_FILENAME)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(biggerArea, src))
+    {
+		Log(logERROR) << "adjustBrighnessAndContrast :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "adjustBrighnessAndContrast :: can not read bin file for src", NULL);
+    }
+
+    Mat dst = Mat::zeros( src.size(), src.type() );
+    
+    for( int y = 0; y < src.rows; y++ )
+    {   for( int x = 0; x < src.cols; x++ )
+        {   for( int c = 0; c < 3; c++ )
+            {
+                dst.at<Vec3b>(y,x)[c] =
+                saturate_cast<uchar>( alpha*( src.at<Vec3b>(y,x)[c] ) + beta );
+            }
+        }
+    }
+    
+    std::string toAppend = "_adjustBrighnessAndContrast";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "adjustBrighnessAndContrast :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "adjustBrighnessAndContrast :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "adjustBrighnessAndContrast :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "adjustBrighnessAndContrast :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+
+}
+
+int ns__viewImage(  struct soap *soap, 
+                    std::string inputMatFilename, 
+                    ns__base64Binary &image)
+{
+    bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    Mat src;
+    if(!readMat(inputMatFilename, src))
+    {
+        Log(logERROR) << "viewImage:: can not read bin file" << std::endl;
+        return soap_receiver_fault(soap, "viewImage:: can not read bin file", NULL);
+    }
+
+    /* check if it is not 8U then convert to 8UC(n) */
+    int chan = src.channels();
+    if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
+    {
+       src.convertTo(src, CV_8UC(chan));
+    }
+    
+    if(!imwrite("/home/lluu/thesis/result/output.jpg", src))
+    {
+        Log(logERROR) << "viewImage:: can not save mat to jpg file" << std::endl;
+    }
+
+    FILE *fd = fopen("/home/lluu/thesis/result/output.jpg", "r");
+    if(fd){
+        int i =0, c = 0;
+        fseek(fd,0,SEEK_END); // seek to end of file
+        int size = ftell(fd); // get current file pointer
+        fseek(fd, 0, SEEK_SET); // seek back to beginning of file
+        
+        image.__ptr = (unsigned char*)soap_malloc(soap, size);
+        for (i = 0; i < size; i++)
+        { if ((c = fgetc(fd)) == EOF)
+            break;
+          image.__ptr[i] = c;
+        }
+        image.__size = i;
+    } else {
+        Log(logERROR) <<"viewImage:: image file read error"<<std::endl;
+    }
+    
+    return SOAP_OK;
+}
+
+
+//~ 
+//~ int int ns__printMat(  struct soap *soap, 
+			//~ std::string InputMatFilename,
+			//~ std::string &MatData)
+//~ {
+    //~ bool timeChecking, memoryChecking;
+	//~ getConfig(timeChecking, memoryChecking);
+	//~ if(timeChecking){
+		//~ start = omp_get_wtime();
+	//~ }
+//~ 
+    //~ /* read from bin */
+    //~ Mat src;
+	//~ if(!readMat(InputMatFilename, src))
+    //~ {
+		//~ Log(logERROR) << "integral :: can not read bin file for src1" << std::endl;
+        //~ return soap_receiver_fault(soap, "integral :: can not read bin file for src1", NULL);
+    //~ }
+    //~ 
+    //~ int i=0, j=0;
+    //~ for(i=0; i < src.rows; i++ ){
+        //~ for(j=0; j<src.cols; j++){
+            //~ MatData += 
+            //~ 
+//~ }
 
 /* ########################################################### */
 /* ###############         helper function        ############ */
