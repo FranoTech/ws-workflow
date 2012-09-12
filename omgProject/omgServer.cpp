@@ -269,11 +269,11 @@ int ns__Threshold(struct soap *soap,
 }
 
 //~ void adaptiveThreshold(InputArray src, OutputArray dst, double maxValue, int adaptiveMethod, int thresholdType, int blockSize, double C)
-int ns__adaptiveadaptiveThreshold(struct soap *soap,
+int ns__adaptiveThreshold(struct soap *soap,
                         std::string InputMatFilename,
                         std::string adaptiveMethod,
                         double maxValue=255.0,
-                        std::string adaptiveThresholdType="THRESH_BINARY",
+                        std::string thresholdType="THRESH_BINARY",
                         int blockSize=3, double C=1,
                         std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -299,8 +299,8 @@ int ns__adaptiveadaptiveThreshold(struct soap *soap,
         adapt = ADAPTIVE_THRESH_GAUSSIAN_C;
     }
 
-    int threstype = getadaptiveThresholdType (adaptiveThresholdType);
-    adaptiveadaptiveThreshold(src, dst, maxValue, adaptiveMethod, adaptiveThresholdType, blockSize, C);
+    int threstype = getThresholdType (thresholdType);
+    adaptiveThreshold(src, dst, maxValue, adapt, threstype, blockSize, C);
 
     /* generate output file name and save to binary file */
 	std::string toAppend = "_adaptiveThreshold";
@@ -1446,7 +1446,7 @@ int ns__GaussianBlur(  struct soap *soap,
 
 //~ void cvtColor(InputArray src, OutputArray dst, int code, int dstCn=0 )
 int ns__cvtColor(  struct soap *soap, 
-			std::string InputMatFilename, std::string code, int dstChannel=0
+			std::string InputMatFilename, std::string code, int dstChannel=0,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -1503,7 +1503,7 @@ int ns__cvtColor(  struct soap *soap,
         return soap_receiver_fault(soap, "cvtColor :: Invalid Color Code to convert", NULL);
     }
     
-    cvtColor(src, dst, code, dstChannels); 
+    cvtColor(src, dst, colorCode, dstChannel); 
 
 	std::string toAppend = "_cvtColor";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -1580,8 +1580,8 @@ int ns__integral(  struct soap *soap,
     return SOAP_OK;
 }
 
-int ns__removeSmallCell(struct soap *soap,
-						std::string inputMatFilename,
+int ns__CIAremoveSmallCell(struct soap *soap,
+						std::string InputMatFilename,
 						ns__RemoveSmallCell &out)
 {
     bool timeChecking, memoryChecking;
@@ -1645,15 +1645,15 @@ int ns__removeSmallCell(struct soap *soap,
     /* save to bin */    
     std::string toAppend = "_keepedArea";
     getOutputFilename(out.keepedArea, toAppend);
-    if(!saveMat(OutputMatFilename, dst))
+    if(!saveMat(out.keepedArea, outSingle))
     {
         Log(logERROR) << "removeSmallCell :: can not save mat to binary file" << std::endl;
         return soap_receiver_fault(soap, "removeSmallCell :: can not save mat to binary file", NULL);
     }
 
-    std::string toAppend = "_unkeepArea";
+    toAppend = "_unkeepArea";
     getOutputFilename(out.biggerArea, toAppend);
-    if(!saveMat(OutputMatFilename, dst))
+    if(!saveMat(out.biggerArea, tmp))
     {
         Log(logERROR) << "removeSmallCell :: can not save mat to binary file" << std::endl;
         return soap_receiver_fault(soap, "removeSmallCell :: can not save mat to binary file", NULL);
@@ -1679,7 +1679,7 @@ int ns__removeSmallCell(struct soap *soap,
     return SOAP_OK;
 }
 
-int ns__scanningCell(struct soap *soap,
+int ns__CIAscanningCell(struct soap *soap,
 						std::string biggerArea,
                         std::string keepArea,
 						std::string &OutputMatFilename=ERROR_FILENAME)
@@ -1701,7 +1701,7 @@ int ns__scanningCell(struct soap *soap,
     Mat out_single;
     if(!readMat(keepArea, out_single))
     {
-        Log(logERROR) << "scanningCell :: can not read bin file" << endl;
+        Log(logERROR) << "scanningCell :: can not read bin file" << std::endl;
         return soap_receiver_fault(soap, "scanningCell :: can not read bin file", NULL);
     }
     
@@ -1779,7 +1779,7 @@ int ns__scanningCell(struct soap *soap,
     return SOAP_OK;
 }
 
-int ns__separateCell(struct soap *soap,
+int ns__CIAseparateCell(struct soap *soap,
                         std::string outSingleCh,
                         std::string outputFormMorph,
 						std::string &OutputMatFilename=ERROR_FILENAME)
@@ -1886,8 +1886,8 @@ int ns__separateCell(struct soap *soap,
     
 }
 
-int ns__prepareResult(struct soap *soap,
-						std::string inputMatFilename,
+int ns__CIAprepareResult(struct soap *soap,
+						std::string InputMatFilename,
                         std::string afterthresNN,
 						std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -1898,7 +1898,7 @@ int ns__prepareResult(struct soap *soap,
 	}
 
     Mat src;
-    if(!readMat(inputMatFilename, src))
+    if(!readMat(InputMatFilename, src))
     {
         Log(logERROR) << "prepareResult :: can not read bin file" << std::endl;
         return soap_receiver_fault(soap, "prepareResult :: can not read bin file", NULL);
@@ -2000,8 +2000,8 @@ int ns__prepareResult(struct soap *soap,
     return SOAP_OK;
 }
 
-int ns__trainANN(struct soap *soap,
-                std::string inputMatFilename,
+int ns__CIAtrainANN(struct soap *soap,
+                std::string InputMatFilename,
                 std::string neuralFile,
                 std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -2012,7 +2012,7 @@ int ns__trainANN(struct soap *soap,
 	}
 
 	Mat src; //must be 3ch image
-    if(!readMat(inputMatFilename, src))
+    if(!readMat(InputMatFilename, src))
     {
         Log(logERROR) << "trainANN :: can not read bin file" << std::endl;
         return soap_receiver_fault(soap, "trainANN :: can not read bin file", NULL);
@@ -2077,6 +2077,7 @@ int ns__trainANN(struct soap *soap,
 
 
 int ns__adjustBrighnessAndContrast(struct soap *soap,
+                        std::string InputMatFilename,
 						double alpha, int beta,
 						std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -2088,7 +2089,7 @@ int ns__adjustBrighnessAndContrast(struct soap *soap,
 
     /* read from bin */
     Mat src;
-	if(!readMat(biggerArea, src))
+	if(!readMat(InputMatFilename, src))
     {
 		Log(logERROR) << "adjustBrighnessAndContrast :: can not read bin file for src" << std::endl;
         return soap_receiver_fault(soap, "adjustBrighnessAndContrast :: can not read bin file for src", NULL);
@@ -2134,7 +2135,7 @@ int ns__adjustBrighnessAndContrast(struct soap *soap,
 }
 
 int ns__viewImage(  struct soap *soap, 
-                    std::string inputMatFilename, 
+                    std::string InputMatFilename, 
                     ns__base64Binary &image)
 {
     bool timeChecking, memoryChecking;
@@ -2144,7 +2145,7 @@ int ns__viewImage(  struct soap *soap,
 	}
 
     Mat src;
-    if(!readMat(inputMatFilename, src))
+    if(!readMat(InputMatFilename, src))
     {
         Log(logERROR) << "viewImage:: can not read bin file" << std::endl;
         return soap_receiver_fault(soap, "viewImage:: can not read bin file", NULL);
