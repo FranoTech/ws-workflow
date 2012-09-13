@@ -132,13 +132,13 @@ int ns__CIAscanningCell(   std::string biggerArea, std::string keepArea, std::st
 int ns__medianBlur( std::string InputMatFilename, int kSize=1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: Laplacian Calculates the Laplacian of an image
-int ns__Laplacian( std::string InputMatFilename, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT, std::string &OutputMatFilename);
+int ns__Laplacian( std::string InputMatFilename, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: pyrDown Smoothes an image and downsamples it
-int ns__pyrDown( std::string InputMatFilename, int rows=0, int cols=0, int borderType=BORDER_DEFAULT, std::string &OutputMatFilename);
+int ns__pyrDown( std::string InputMatFilename, int rows=0, int cols=0, int borderType, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: pyrUp Upsamples an image and then smoothes it
-int ns__pyrUp( std::string InputMatFilename, int rows=0, int cols=0, int borderType=BORDER_DEFAULT, std::string &OutputMatFilename);
+int ns__pyrUp( std::string InputMatFilename, int rows=0, int cols=0, int borderType, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: addWeighted Computes the weighted sum of two arrays
 int ns__addWeighted( std::string InputMatFilename1, double alpha, std::string InputMatFilename2 , double beta, double gamma, int dtype=-1, std::string &OutputMatFilename);
