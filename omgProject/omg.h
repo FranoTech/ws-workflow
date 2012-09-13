@@ -35,6 +35,9 @@ int ns__imgToMat(std::string InputMatFilename, int colorflag=0, std::string type
 //gsoap ns service method-documentation: MatToJPG Saving Mat to JPG image
 int ns__MatToJPG (std::string InputMatFilename, std::string &OutputMatFilename);
 
+//gsoap ns service method-documentation: viewImage View an image in workbench
+int ns__viewImage( std::string InputMatFilename, ns__base64Binary &image);
+
 //gsoap ns service method-documentation: ConvertTo Converts an array to another data type
 int ns__ConvertTo(std::string InputMatFilename, std::string types="CV_32FC1", std::string &OutputMatFilename);
 
@@ -124,3 +127,42 @@ int ns__CIAseparateCell(   std::string outSingleCh, std::string outputFormMorph,
 
 //gsoap ns service method-documentation: CIAscanningCell Scanning cells in cancer image
 int ns__CIAscanningCell(   std::string biggerArea, std::string keepArea, std::string &OutputMatFilename);        
+
+//gsoap ns service method-documentation: medianBlur Smoothes an image using the median filter
+int ns__medianBlur( std::string InputMatFilename, int kSize=1, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: Laplacian Calculates the Laplacian of an image
+int ns__Laplacian( std::string InputMatFilename, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: pyrDown Smoothes an image and downsamples it
+int ns__pyrDown( std::string InputMatFilename, int rows=0, int cols=0, int borderType=BORDER_DEFAULT, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: pyrUp Upsamples an image and then smoothes it
+int ns__pyrUp( std::string InputMatFilename, int rows=0, int cols=0, int borderType=BORDER_DEFAULT, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: addWeighted Computes the weighted sum of two arrays
+int ns__addWeighted( std::string InputMatFilename1, double alpha, std::string InputMatFilename2 , double beta, double gamma, int dtype=-1, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: add Computes the per-element sum of two arrays or an array and a scalar
+int ns__add( std::string InputMatFilename1, std::string InputMatFilename2 , std::string maskFilename , int dtype=-1, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: subtract Calculates the per-element difference between two arrays or array and a scalar
+int ns__subtract( std::string InputMatFilename1, std::string InputMatFilename2 , std::string maskFilename , int dtype=-1, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: abs Computes an absolute value of each matrix element
+int ns__abs( std::string InputMatFilename, std::string &OutputMatFilename)
+
+//gsoap ns service method-documentation: absdiff Computes the per-element absolute difference between two arrays or between an array and a scalar
+int ns__absdiff( std::string InputMatFilename1, std::string InputMatFilename2, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: sqrt Calculates a square root of array elements
+int ns__sqrt( std::string InputMatFilename, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: watershed Performs a marker-based image segmentation using the watershed algorithm
+int ns__watershed( std::string InputMatFilename, std::string MarkerMatFilename, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: circle Draws a simple or filled circle with a given center and radius
+int ns__circle( std::string InputMatFilename, int centerX, int centerY, int radius, int scalarColor0, int scalarColor1, int scalarColor2, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: ellipse Draws a simple or thick elliptic arc or fills an ellipse sector
+int ns__ellipse( std::string InputMatFilename, int centerX=10, int centerY=10, int axeX=1, int axeY=1, double angle=0.0, double startAngle=0.0, double endAngle=360.0, int scalarColor0, int scalarColor1, int scalarColor2, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename);
