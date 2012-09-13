@@ -381,7 +381,7 @@ int ns__getStructuringElement(  struct soap *soap,
     }
     
     try{
-        se = getStructuringElement(StructuringShape, seSize, seAnc);
+        se = getStructuringElement(shape, seSize, seAnc);
     } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
@@ -456,7 +456,7 @@ int ns__MorphologyEx( struct soap *soap,
         }
         
         try{
-        se = getStructuringElement(StructuringShape, seSize, seAnc);
+        se = getStructuringElement(shape, seSize, seAnc);
         } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
@@ -513,7 +513,7 @@ int ns__MorphologyEx( struct soap *soap,
 
 int ns__erode(  struct soap *soap, 
 				std::string InputMatFilename,
-				std::string elementFilename,
+				std::string StructuringElementFilename,
 				int iteration=1,
 				std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -535,14 +535,27 @@ int ns__erode(  struct soap *soap,
     Mat dst;
     Mat element;
 
-    if(!readMat(elementFilename, element))
+    if(!readMat(StructuringElementFilename, element))
     {
 		Log(logINFO) << "erode: use default element" << std::endl;
         element.release();
-        erode(src, dst, Mat(), Point(-1, -1), iteration);
+        
+        try{
+            erode(src, dst, Mat(), Point(-1, -1), iteration);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }   
+        
     } else {
 		Log(logINFO) << "erode: use defined element" << std::endl;
-        erode(src, dst, element, Point(-1, -1), iteration);
+        
+        try{
+            erode(src, dst, element, Point(-1, -1), iteration);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
 		element.release();
     }
 
@@ -576,7 +589,7 @@ int ns__erode(  struct soap *soap,
 
 int ns__dilate(  struct soap *soap, 
 				std::string InputMatFilename,
-				std::string elementFilename,
+				std::string StructuringElementFilename,
 				int iteration=1,
 				std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -598,14 +611,29 @@ int ns__dilate(  struct soap *soap,
     Mat dst;
     Mat element;
 
-    if(!readMat(elementFilename, element))
+    if(!readMat(StructuringElementFilename, element))
     {
 		Log(logINFO) << "dilate: use default element" << std::endl;
         element.release();
-        dilate(src, dst, Mat(), Point(-1, -1), iteration);
+        
+        try{
+            dilate(src, dst, Mat(), Point(-1, -1), iteration);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
+        
     } else {
+        
 		Log(logINFO) << "dilate: use defined element" << std::endl;
-        dilate(src, dst, element, Point(-1, -1), iteration);
+        
+        try{
+            dilate(src, dst, element, Point(-1, -1), iteration);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
+        
 		element.release();
     }
 
@@ -670,12 +698,23 @@ int ns__Or(  struct soap *soap,
 
     if(srcType1 != srcType2)
     {
-        matSrc2.convertTo(matSrc2, srcType1);
+        try{
+            matSrc2.convertTo(matSrc2, srcType1);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
 	}
 
     Mat dst;
-    bitwise_or(matSrc1, matSrc2, dst);
-
+    
+    try{
+        bitwise_or(matSrc1, matSrc2, dst);
+    } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+    }
+    
     std::string toAppend = "_or";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
@@ -738,8 +777,13 @@ int ns__And(  struct soap *soap,
 
     if(srcType1 != srcType2)
     {
-        matSrc2.convertTo(matSrc2, srcType1);
-	}
+        try{
+            matSrc2.convertTo(matSrc2, srcType1);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
+    }
 
     Mat dst;
     bitwise_and(matSrc1, matSrc2, dst);
@@ -1176,9 +1220,14 @@ int ns__ones(  struct soap *soap,
 	}
 	Mat src;
 	int matType = getMatType(type);
-	if(rows != 0 && cols != 0)
-		src = Mat::ones(rows, cols, matType);
-	else {
+	if(rows != 0 && cols != 0){
+        try{            
+            src = Mat::ones(rows, cols, matType);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
+    }else {
 		Log(logERROR) << "ones :: Invalid input, please reconfig. (Choose either rows-cols or size)" << std::endl;
         return soap_receiver_fault(soap, "ones :: Invalid input, please reconfig. (Choose either rows-cols or size)", NULL);
 	}
@@ -1225,7 +1274,12 @@ int ns__createMat(  struct soap *soap,
     Mat src;	
 	int matType = getMatType(type);
 	if(rows != 0 && cols != 0)
-		src.create(rows, cols, matType);
+		try{
+            src.create(rows, cols, matType);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
 	else {
 		Log(logERROR) << "createMat :: Invalid input, please reconfig." << std::endl;
         return soap_receiver_fault(soap, "createMat :: Invalid input, please reconfig.", NULL);
@@ -1283,9 +1337,13 @@ int ns__colRange(  struct soap *soap,
         Log(logERROR) << "colRange:: Invalid endCol value" << std::endl;
         return soap_receiver_fault(soap, "colRange :: Invalid endCol value", NULL);
     }
-        
-    dst = src.colRange(startCol, endCol);
-
+    
+    try{    
+        dst = src.colRange(startCol, endCol);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_colRange";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -1341,8 +1399,12 @@ int ns__rowRange(  struct soap *soap,
         return soap_receiver_fault(soap, "colRange :: Invalid endCol value", NULL);
     }
     
-    dst = src.rowRange(startCol, endCol);
-    
+    try{
+        dst = src.rowRange(startCol, endCol);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_rowRange";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -1533,9 +1595,13 @@ int ns__GaussianBlur(  struct soap *soap,
         return soap_receiver_fault(soap, "GaussianBlur :: can not read bin file for src1", NULL);
     }
     
-    if(rows != 0 && cols != 0)
+    try{
         GaussianBlur(src, dst, Size(cols, rows), sigmaX, sigmaY, borderType); 
-
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
+    
 	std::string toAppend = "_blur";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
@@ -1621,7 +1687,12 @@ int ns__cvtColor(  struct soap *soap,
         return soap_receiver_fault(soap, "cvtColor :: Invalid Color Code to convert", NULL);
     }
     
-    cvtColor(src, dst, colorCode, dstChannel); 
+    try{
+        cvtColor(src, dst, colorCode, dstChannel); 
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_cvtColor";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -1669,8 +1740,12 @@ int ns__integral(  struct soap *soap,
         return soap_receiver_fault(soap, "integral :: can not read bin file for src1", NULL);
     }
     
-    
-    integral(src, dst, sdepth); 
+    try{
+        integral(src, dst, sdepth); 
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_integral";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -2273,7 +2348,12 @@ int ns__viewImage(  struct soap *soap,
     int chan = src.channels();
     if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
     {
-       src.convertTo(src, CV_8UC(chan));
+        try{
+           src.convertTo(src, CV_8UC(chan));
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
     }
     
     if(!imwrite("/home/lluu/thesis/result/output.jpg", src))
@@ -2328,9 +2408,14 @@ int ns__medianBlur(  struct soap *soap,
         return soap_receiver_fault(soap, "medianBlur :: ksize (Aperture linear size) must be odd and greater than 1, for example: 3, 5, 7 ...", NULL);
     }
     
-    medianBlur(src, dst, kSize); 
-
-	std::string toAppend = "_medianBlur";
+    try{
+        medianBlur(src, dst, kSize); 
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
+	
+    std::string toAppend = "_medianBlur";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
     {
@@ -2383,7 +2468,12 @@ int ns__Laplacian(  struct soap *soap,
         return soap_receiver_fault(soap, "kSize must be positive and odd", NULL);
     }
     
-   Laplacian(src, dst, ddepth, kSize ,scale , delta , borderType );
+    try{
+        Laplacian(src, dst, ddepth, kSize ,scale , delta , borderType );
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_Laplacian";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -2432,7 +2522,12 @@ int ns__pyrDown(  struct soap *soap,
         return soap_receiver_fault(soap, "pyrDown :: can not read bin file for src", NULL);
     }
     
-   pyrDown(src, dst, Size(rows,cols), borderType );
+    try{
+       pyrDown(src, dst, Size(rows,cols), borderType );
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_pyrDown";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -2538,8 +2633,13 @@ int ns__addWeighted(  struct soap *soap,
         return soap_receiver_fault(soap, "addWeighted :: can not read bin file for src2", NULL);
     }
     
-   addWeighted(src1, alpha, src2, beta, gamma, dst, dtype);
-
+    try{
+        addWeighted(src1, alpha, src2, beta, gamma, dst, dtype);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
+    
 	std::string toAppend = "_addWeighted";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
@@ -2596,7 +2696,13 @@ int ns__add(  struct soap *soap,
     }
     
     if(maskFilename.compare(ERROR_FILENAME)==0){
-        add(src1, src2, dst, noArray(), dtype);
+        try{
+            add(src1, src2, dst, noArray(), dtype);
+         } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
+ 
     } else {
         Mat mask;
         if(!readMat(maskFilename, mask))
@@ -2605,7 +2711,12 @@ int ns__add(  struct soap *soap,
             return soap_receiver_fault(soap, "add :: can not read bin file for mask", NULL);
         }
         
-        add(src1, src2, dst, mask, dtype);
+        try{
+            add(src1, src2, dst, mask, dtype);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
     }
 
 	std::string toAppend = "_add";
@@ -2664,7 +2775,13 @@ int ns__subtract(  struct soap *soap,
     }
     
     if(maskFilename.compare(ERROR_FILENAME)==0){
-        subtract(src1, src2, dst, noArray(), dtype);
+        try{
+            subtract(src1, src2, dst, noArray(), dtype);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
+            
     } else {
         Mat mask;
         if(!readMat(maskFilename, mask))
@@ -2672,8 +2789,12 @@ int ns__subtract(  struct soap *soap,
             Log(logERROR) << "subtract :: can not read bin file for mask" << std::endl;
             return soap_receiver_fault(soap, "subtract :: can not read bin file for mask", NULL);
         }
-        
-        subtract(src1, src2, dst, mask, dtype);
+        try{
+            subtract(src1, src2, dst, mask, dtype);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
     }
 
 	std::string toAppend = "_subtract";
@@ -2887,8 +3008,13 @@ int ns__watershed(  struct soap *soap,
 		Log(logERROR) << "watershed :: can not read bin file for marker" << std::endl;
         return soap_receiver_fault(soap, "watershed :: can not read bin file for marker", NULL);
     }
-
-    watershed(image, marker);
+    
+    try{
+        watershed(image, marker);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_watershed";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -2937,8 +3063,12 @@ int ns__circle(  struct soap *soap,
         return soap_receiver_fault(soap, "circle :: can not read bin file for src1", NULL);
     }
     
-
-    circle(src, Point(centerX, centerY), radius, Scalar(scalarColor0, scalarColor1, scalarColor2), thickness, lineType, shift);
+    try{
+        circle(src, Point(centerX, centerY), radius, Scalar(scalarColor0, scalarColor1, scalarColor2), thickness, lineType, shift);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_circle";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -2985,8 +3115,12 @@ int ns__ellipse(  struct soap *soap,
         return soap_receiver_fault(soap, "ellipse :: can not read bin file for src1", NULL);
     }
     
-
-    ellipse(src, Point(centerX, centerY), Size(axeX, axeY), angle, startAngle, endAngle, Scalar(scalarColor0, scalarColor1, scalarColor2), thickness, lineType, shift);
+    try{
+        ellipse(src, Point(centerX, centerY), Size(axeX, axeY), angle, startAngle, endAngle, Scalar(scalarColor0, scalarColor1, scalarColor2), thickness, lineType, shift);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
 	std::string toAppend = "_ellipse";
     getOutputFilename(OutputMatFilename, toAppend);
