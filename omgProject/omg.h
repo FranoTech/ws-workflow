@@ -44,8 +44,12 @@ int ns__ConvertTo(std::string InputMatFilename, std::string types="CV_32FC1", st
 //gsoap ns service method-documentation: Threshold Applies a fixed-level threshold to each array element
 int ns__Threshold(std::string InputMatFilename, double thresholdValue=127.0, double maxValue=255.0, std::string thresholdType="THRESH_BINARY", std::string &OutputMatFilename);
 
+//gsoap ns service method-documentation: getStructuringElement Returns a structuring element of the specified size and shape for morphological operations
+int ns__getStructuringElement( std::string StructuringShape="MORPH_ELLIPSE", int seSizeW=3, int seSizeH=3, int anchorX=-1, int anchorY=-1, std::string &OutputMatFilename);
+
+
 //gsoap ns service method-documentation: MorphologyEx Performs advanced morphological transformations
-int ns__MorphologyEx(   std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", std::string &OutputMatFilename );
+int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", int anchorX=-1, int anchorY=-1, std::string StructuringElementFname, std::string StructuringShape="MORPH_ELLIPSE", int seSizeW=3, int seSizeH=3, std::string &OutputMatFilename)
 
 //gsoap ns service method-documentation: erode Erodes an image by using a specific structuring element
 int ns__erode(  std::string InputMatFilename, std::string elementFilename, int iteration=1, std::string &OutputMatFilename );
@@ -150,7 +154,7 @@ int ns__add( std::string InputMatFilename1, std::string InputMatFilename2 , std:
 int ns__subtract( std::string InputMatFilename1, std::string InputMatFilename2 , std::string maskFilename , int dtype=-1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: abs Computes an absolute value of each matrix element
-int ns__abs( std::string InputMatFilename, std::string &OutputMatFilename)
+int ns__abs( std::string InputMatFilename, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: absdiff Computes the per-element absolute difference between two arrays or between an array and a scalar
 int ns__absdiff( std::string InputMatFilename1, std::string InputMatFilename2, std::string &OutputMatFilename);
@@ -165,4 +169,4 @@ int ns__watershed( std::string InputMatFilename, std::string MarkerMatFilename, 
 int ns__circle( std::string InputMatFilename, int centerX, int centerY, int radius, int scalarColor0, int scalarColor1, int scalarColor2, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: ellipse Draws a simple or thick elliptic arc or fills an ellipse sector
-int ns__ellipse( std::string InputMatFilename, int centerX=10, int centerY=10, int axeX=1, int axeY=1, double angle=0.0, double startAngle=0.0, double endAngle=360.0, int scalarColor0, int scalarColor1, int scalarColor2, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename);
+int ns__ellipse( std::string InputMatFilename, int centerX=10, int centerY=10, int axeX=1, int axeY=1, double angle=0.0, double startAngle=0.0, double endAngle=360.0, int scalarColor0=0, int scalarColor1=0, int scalarColor2=0, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename);

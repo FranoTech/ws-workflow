@@ -67,7 +67,12 @@ int ns__imgToMat (struct soap *soap,
     /* convert Mat to required type */
     if(src.type()!= getMatType(types))
     {
-        src.convertTo(src,getMatType(types));
+        try{
+            src.convertTo(src,getMatType(types));
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
     }
 
 	/* generate output file name  and save to bin*/
@@ -125,8 +130,12 @@ int ns__MatToJPG (struct soap *soap, std::string InputMatFilename,
     if( src.type() != CV_8UC1|| src.type() != CV_8UC2 || src.type() != CV_8UC3 )
     {
 		Log(logINFO) << "convert image from" << src.type() << " to " << CV_8UC(chan) << std::endl;
-		src.convertTo(src, CV_8UC(chan));
-		
+        try{
+            src.convertTo(src, CV_8UC(chan));
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
     }
 
     /* generate output file name */
@@ -182,7 +191,12 @@ int ns__ConvertTo( struct soap *soap,
 
     if( src.type() != MatType )
     {
+        try{
         src.convertTo(src, MatType);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
     }
 
     /* generate output file name */
@@ -238,8 +252,13 @@ int ns__Threshold(struct soap *soap,
     }
 
     int threstype = getThresholdType (thresholdType);
-    threshold(src, src, thresholdValue, maxValue, threstype);
-
+    try{
+        threshold(src, src, thresholdValue, maxValue, threstype);
+    } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+    }
+    
     /* generate output file name and save to binary file */
 	std::string toAppend = "_Threshold";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -298,10 +317,15 @@ int ns__adaptiveThreshold(struct soap *soap,
     } else if (adaptiveMethod.compare("ADAPTIVE_THRESH_GAUSSIAN_C") == 0) {
         adapt = ADAPTIVE_THRESH_GAUSSIAN_C;
     }
-
     int threstype = getThresholdType (thresholdType);
-    adaptiveThreshold(src, dst, maxValue, adapt, threstype, blockSize, C);
-
+    
+    try{
+        adaptiveThreshold(src, dst, maxValue, adapt, threstype, blockSize, C);
+    } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+    }
+    
     /* generate output file name and save to binary file */
 	std::string toAppend = "_adaptiveThreshold";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -330,10 +354,73 @@ int ns__adaptiveThreshold(struct soap *soap,
     return SOAP_OK;
 }
 
+int ns__getStructuringElement(  struct soap *soap, 
+                std::string StructuringShape="MORPH_ELLIPSE",
+                int seSizeW=3, int seSizeH=3, 
+                int anchorX=-1, int anchorY=-1,
+                std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat se;
+    Size seSize(seSizeW, seSizeH);
+    Point seAnc(anchorX, anchorY);
+    int shape;
+    
+    if (StructuringShape.compare("MORPH_ELLIPSE") == 0)  shape = MORPH_ELLIPSE;
+    else if (StructuringShape.compare("MORPH_RECT") == 0)  shape = MORPH_RECT;
+    else if (StructuringShape.compare("MORPH_CROSS") == 0)  shape = MORPH_CROSS;
+    else {
+        Log(logERROR) << "MorgetStructuringElement :: Invalid Structuring element shape" << std::endl;
+        return soap_receiver_fault(soap, "getStructuringElement :: Invalid Structuring element shape", NULL);
+    }
+    
+    try{
+        se = getStructuringElement(StructuringShape, seSize, seAnc);
+    } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+    }
+
+	std::string toAppend = "_getStructuringElement";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, se))
+    {
+        Log(logERROR) << "getStructuringElement :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "getStructuringElement :: can not save mat to binary file", NULL);
+    }
+
+    se.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "getStructuringElement :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "getStructuringElement :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
 
 int ns__MorphologyEx( struct soap *soap,
 						std::string InputMatFilename,
 						std::string morphOperation="MORPH_OPEN",
+                        int anchorX=-1, int anchorY=-1,
+                        std::string StructuringElementFname=ERROR_FILENAME,
+                        std::string StructuringShape="MORPH_ELLIPSE",
+                        int seSizeW=3, int seSizeH=3, 
 						std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -351,14 +438,44 @@ int ns__MorphologyEx( struct soap *soap,
     }
 
     Mat dst(src.rows, src.cols, src.depth());
-    Mat se;
-    Size seSize(3, 3);
-    Point seAnc(1, 1);
+
     int opt = getMorphOperation(morphOperation);
+    int shape;
+    Mat se;
+    Size seSize(seSizeW, seSizeH);
+    Point seAnc(anchorX, anchorY);
+    
+    if(StructuringElementFname.compare(ERROR_FILENAME)==0){
+        
+        if (StructuringShape.compare("MORPH_ELLIPSE") == 0)  shape = MORPH_ELLIPSE;
+        else if (StructuringShape.compare("MORPH_RECT") == 0)  shape = MORPH_RECT;
+        else if (StructuringShape.compare("MORPH_CROSS") == 0)  shape = MORPH_CROSS;
+        else {
+            Log(logERROR) << "MorphologyEx :: Invalid Structuring element shape" << std::endl;
+            return soap_receiver_fault(soap, "MorphologyEx :: Invalid Structuring element shape", NULL);
+        }
+        
+        try{
+        se = getStructuringElement(StructuringShape, seSize, seAnc);
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
+    } else {
+            if(!readMat(StructuringElementFname, se))
+            {
+                Log(logERROR) << "MorphologyEx :: can not read bin file for Structuring element" << std::endl;
+                return soap_receiver_fault(soap, "MorphologyEx :: can not read bin file for Structuring element", NULL);
+            }
+    }
 
-    se = getStructuringElement(MORPH_ELLIPSE, seSize, seAnc);
-    morphologyEx(src, dst, opt, se, seAnc);
-
+    try{
+        morphologyEx(src, dst, opt, se, seAnc);
+    } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+    }
+    
     if(src.empty()) {
 			Log(logERROR) << "MorphologyEx :: something's wrong" << std::endl;
             return soap_receiver_fault(soap, "MorphologyEx:: something's wrong", NULL);
@@ -392,6 +509,7 @@ int ns__MorphologyEx( struct soap *soap,
 	
     return SOAP_OK;
 }
+
 
 int ns__erode(  struct soap *soap, 
 				std::string InputMatFilename,
@@ -2241,7 +2359,7 @@ int ns__medianBlur(  struct soap *soap,
 //~ C++: void Laplacian(InputArray src, OutputArray dst, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT )
 int ns__Laplacian(  struct soap *soap, 
 			std::string InputMatFilename, int ddepth, 
-            int ksize=1, double scale=1, double delta=0, 
+            int kSize=1, double scale=1, double delta=0, 
             int borderType=BORDER_DEFAULT,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -2265,7 +2383,7 @@ int ns__Laplacian(  struct soap *soap,
         return soap_receiver_fault(soap, "kSize must be positive and odd", NULL);
     }
     
-   Laplacian(src, dst, ddepth, ksize ,scale , delta , borderType );
+   Laplacian(src, dst, ddepth, kSize ,scale , delta , borderType );
 
 	std::string toAppend = "_Laplacian";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -2478,7 +2596,7 @@ int ns__add(  struct soap *soap,
     }
     
     if(maskFilename.compare(ERROR_FILENAME)==0){
-        add(src1, src2, dst, mask=noarray(), dtype);
+        add(src1, src2, dst, noArray(), dtype);
     } else {
         Mat mask;
         if(!readMat(maskFilename, mask))
@@ -2546,7 +2664,7 @@ int ns__subtract(  struct soap *soap,
     }
     
     if(maskFilename.compare(ERROR_FILENAME)==0){
-        subtract(src1, src2, dst, mask=noarray(), dtype);
+        subtract(src1, src2, dst, noArray(), dtype);
     } else {
         Mat mask;
         if(!readMat(maskFilename, mask))
@@ -2660,7 +2778,7 @@ int ns__absdiff(  struct soap *soap,
         return soap_receiver_fault(soap, "add :: can not read bin file for src2", NULL);
     }
     
-    absdiffdiff(src1, src2, dst);
+    absdiff(src1, src2, dst);
 	
 	std::string toAppend = "_absdiff";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -2770,7 +2888,7 @@ int ns__watershed(  struct soap *soap,
         return soap_receiver_fault(soap, "watershed :: can not read bin file for marker", NULL);
     }
 
-    watershed(image, markers);
+    watershed(image, marker);
 
 	std::string toAppend = "_watershed";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -2851,7 +2969,7 @@ int ns__circle(  struct soap *soap,
 
 //~ void ellipse(Mat& img, Point center, Size axes, double angle, double startAngle, double endAngle, const Scalar& color, int thickness=1, int lineType=8, int shift=0)
 int ns__ellipse(  struct soap *soap, 
-			std::string InputMatFilename, int centerX=10, int centerY=10, int axeX=1, int axeY=1, double angle=0.0, double startAngle=0.0, double endAngle=360.0, int scalarColor0, int scalarColor1, int scalarColor2, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename=ERROR_FILENAME)
+			std::string InputMatFilename, int centerX=10, int centerY=10, int axeX=1, int axeY=1, double angle=0.0, double startAngle=0.0, double endAngle=360.0, int scalarColor0=0, int scalarColor1=0, int scalarColor2=0, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
 	getConfig(timeChecking, memoryChecking);
@@ -3048,6 +3166,7 @@ int getMorphOperation ( const std::string& typeName)
         return MORPH_TOPHAT;
     else if (typeName.compare("MORPH_TOPHAT") == 0)
         return MORPH_BLACKHAT;
+    else return -1;
 }
 
 int ByteArrayToANN(std::string& annfile, CvANN_MLP* ann)
