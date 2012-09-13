@@ -115,12 +115,12 @@ int ns__MatToJPG (struct soap *soap, std::string InputMatFilename,
         Log(logERROR) << "MatToJPG :: can not read bin file" << std::endl;
         return soap_receiver_fault(soap, "MatToJPG :: can not read bin file", NULL);
     }
-	Log(logDEBUG) << "MatToJPG :: Image has been loaded" << std::endl;
+	//~ Log(logDEBUG) << "MatToJPG :: Image has been loaded" << std::endl;
 
     /* check if it is not 8U then convert to 8UC(n) */
     int chan = src.channels();
-	Log(logDEBUG) << "MatToJPG :: Image channel = " << chan << std::endl;
-	Log(logDEBUG) << "MatToJPG :: Image type = " << src.type() << std::endl;
+	//~ Log(logDEBUG) << "MatToJPG :: Image channel = " << chan << std::endl;
+	//~ Log(logDEBUG) << "MatToJPG :: Image type = " << src.type() << std::endl;
 	
     if( src.type() != CV_8UC1|| src.type() != CV_8UC2 || src.type() != CV_8UC3 )
     {
