@@ -2161,6 +2161,7 @@ int ns__viewImage(  struct soap *soap,
     if(!imwrite("/home/lluu/thesis/result/output.jpg", src))
     {
         Log(logERROR) << "viewImage:: can not save mat to jpg file" << std::endl;
+        return soap_receiver_fault(soap, "viewImage:: can not save image to file", NULL);
     }
 
     FILE *fd = fopen("/home/lluu/thesis/result/output.jpg", "r");
@@ -2185,31 +2186,722 @@ int ns__viewImage(  struct soap *soap,
 }
 
 
-//~ 
-//~ int int ns__printMat(  struct soap *soap, 
-			//~ std::string InputMatFilename,
-			//~ std::string &MatData)
-//~ {
-    //~ bool timeChecking, memoryChecking;
-	//~ getConfig(timeChecking, memoryChecking);
-	//~ if(timeChecking){
-		//~ start = omp_get_wtime();
-	//~ }
-//~ 
-    //~ /* read from bin */
-    //~ Mat src;
-	//~ if(!readMat(InputMatFilename, src))
-    //~ {
-		//~ Log(logERROR) << "integral :: can not read bin file for src1" << std::endl;
-        //~ return soap_receiver_fault(soap, "integral :: can not read bin file for src1", NULL);
-    //~ }
-    //~ 
-    //~ int i=0, j=0;
-    //~ for(i=0; i < src.rows; i++ ){
-        //~ for(j=0; j<src.cols; j++){
-            //~ MatData += 
-            //~ 
-//~ }
+int ns__medianBlur(  struct soap *soap, 
+			std::string InputMatFilename, int kSize=1,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "medianBlur :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "medianBlur :: can not read bin file for src", NULL);
+    }
+    
+    if(kSize%2 == 0 || kSize <=1){
+        Log(logERROR) << "medianBlur :: ksize (Aperture linear size) must be odd and greater than 1, for example: 3, 5, 7 ..." << std::endl;
+        return soap_receiver_fault(soap, "medianBlur :: ksize (Aperture linear size) must be odd and greater than 1, for example: 3, 5, 7 ...", NULL);
+    }
+    
+    medianBlur(src, dst, kSize); 
+
+	std::string toAppend = "_medianBlur";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "medianBlur :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "medianBlur :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "medianBlur :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "medianBlur :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+//~ C++: void Laplacian(InputArray src, OutputArray dst, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT )
+int ns__Laplacian(  struct soap *soap, 
+			std::string InputMatFilename, int ddepth, 
+            int ksize=1, double scale=1, double delta=0, 
+            int borderType=BORDER_DEFAULT,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "Laplacian :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "Laplacian :: can not read bin file for src", NULL);
+    }
+    
+    if(kSize%2 == 0 || kSize <=0){
+        Log(logERROR) << "Laplacian :: kSize must be positive and odd" << std::endl;
+        return soap_receiver_fault(soap, "kSize must be positive and odd", NULL);
+    }
+    
+   Laplacian(src, dst, ddepth, ksize ,scale , delta , borderType );
+
+	std::string toAppend = "_Laplacian";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "Laplacian :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "Laplacian :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "Laplacian :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "Laplacian :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+//~ pyrDown(InputArray src, OutputArray dst, const Size& dstsize=Size(), int borderType=BORDER_DEFAULT )
+int ns__pyrDown(  struct soap *soap, 
+			std::string InputMatFilename, int rows=0, int cols=0, 
+            int borderType=BORDER_DEFAULT,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "pyrDown :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "pyrDown :: can not read bin file for src", NULL);
+    }
+    
+   pyrDown(src, dst, Size(rows,cols), borderType );
+
+	std::string toAppend = "_pyrDown";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "pyrDown :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "pyrDown :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "pyrDown :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "pyrDown :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+int ns__pyrUp(  struct soap *soap, 
+			std::string InputMatFilename, int rows=0, int cols=0, 
+            int borderType=BORDER_DEFAULT,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "pyrUp :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "pyrUp :: can not read bin file for src", NULL);
+    }
+    
+   pyrUp(src, dst, Size(rows,cols), borderType );
+
+	std::string toAppend = "_pyrUp";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "pyrUp :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "pyrUp :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "pyrUp :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "pyrUp :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+
+//~ void addWeighted(InputArray src1, double alpha, InputArray src2, double beta, double gamma, OutputArray dst, int dtype=-1)
+int ns__addWeighted(  struct soap *soap, 
+			std::string InputMatFilename1, double alpha, 
+            std::string InputMatFilename2 , double beta, 
+            double gamma, int dtype=-1,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src1;
+    Mat src2;
+	Mat dst;
+	if(!readMat(InputMatFilename1, src1))
+    {
+		Log(logERROR) << "addWeighted :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "addWeighted :: can not read bin file for src1", NULL);
+    }
+    
+    if(!readMat(InputMatFilename2, src2))
+    {
+		Log(logERROR) << "addWeighted :: can not read bin file for src2" << std::endl;
+        return soap_receiver_fault(soap, "addWeighted :: can not read bin file for src2", NULL);
+    }
+    
+   addWeighted(src1, alpha, src2, beta, gamma, dst, dtype);
+
+	std::string toAppend = "_addWeighted";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "addWeighted :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "addWeighted :: can not save mat to binary file", NULL);
+    }
+
+    src1.release();
+    src2.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "addWeighted :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "addWeighted :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+//~ void add(InputArray src1, InputArray src2, OutputArray dst, InputArray mask=noArray(), int dtype=-1)
+int ns__add(  struct soap *soap, 
+			std::string InputMatFilename1, std::string InputMatFilename2 ,
+            std::string maskFilename=ERROR_FILENAME , int dtype=-1,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src1;
+    Mat src2;
+	Mat dst;
+	if(!readMat(InputMatFilename1, src1))
+    {
+		Log(logERROR) << "add :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "add :: can not read bin file for src1", NULL);
+    }
+    
+    if(!readMat(InputMatFilename2, src2))
+    {
+		Log(logERROR) << "add :: can not read bin file for src2" << std::endl;
+        return soap_receiver_fault(soap, "add :: can not read bin file for src2", NULL);
+    }
+    
+    if(maskFilename.compare(ERROR_FILENAME)==0){
+        add(src1, src2, dst, mask=noarray(), dtype);
+    } else {
+        Mat mask;
+        if(!readMat(maskFilename, mask))
+        {
+            Log(logERROR) << "add :: can not read bin file for mask" << std::endl;
+            return soap_receiver_fault(soap, "add :: can not read bin file for mask", NULL);
+        }
+        
+        add(src1, src2, dst, mask, dtype);
+    }
+
+	std::string toAppend = "_add";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "add :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "add :: can not save mat to binary file", NULL);
+    }
+
+    src1.release();
+    src2.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "add :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "add :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+//~ void subtract(InputArray src1, InputArray src2, OutputArray dst, InputArray mask=noArray(), int dtype=-1)
+int ns__subtract(  struct soap *soap, 
+			std::string InputMatFilename1, std::string InputMatFilename2 ,
+            std::string maskFilename=ERROR_FILENAME , int dtype=-1,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src1;
+    Mat src2;
+	Mat dst;
+	if(!readMat(InputMatFilename1, src1))
+    {
+		Log(logERROR) << "subtract :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "subtract :: can not read bin file for src1", NULL);
+    }
+    
+    if(!readMat(InputMatFilename2, src2))
+    {
+		Log(logERROR) << "subtract :: can not read bin file for src2" << std::endl;
+        return soap_receiver_fault(soap, "subtract :: can not read bin file for src2", NULL);
+    }
+    
+    if(maskFilename.compare(ERROR_FILENAME)==0){
+        subtract(src1, src2, dst, mask=noarray(), dtype);
+    } else {
+        Mat mask;
+        if(!readMat(maskFilename, mask))
+        {
+            Log(logERROR) << "subtract :: can not read bin file for mask" << std::endl;
+            return soap_receiver_fault(soap, "subtract :: can not read bin file for mask", NULL);
+        }
+        
+        subtract(src1, src2, dst, mask, dtype);
+    }
+
+	std::string toAppend = "_subtract";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "subtract :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "subtract :: can not save mat to binary file", NULL);
+    }
+
+    src1.release();
+    src2.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "subtract :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "subtract :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+
+//~ MatExpr abs(const Mat& m)
+int ns__abs(  struct soap *soap, 
+			std::string InputMatFilename,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+	Mat src;
+    if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "abs :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "abs :: can not read bin file for src1", NULL);
+    }
+	
+    Mat dst;
+    dst = abs(src);
+	
+	std::string toAppend = "_abs";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "abs :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "abs :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+    dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "abs :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "abs :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+//~ void absdiff(InputArray src1, InputArray src2, OutputArray dst)
+int ns__absdiff(  struct soap *soap, 
+			std::string InputMatFilename1, std::string InputMatFilename2,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+    
+	Mat src1;
+    Mat src2;
+	Mat dst;
+	if(!readMat(InputMatFilename1, src1))
+    {
+		Log(logERROR) << "absdiff :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "add :: can not read bin file for src1", NULL);
+    }
+    
+    if(!readMat(InputMatFilename2, src2))
+    {
+		Log(logERROR) << "absdiff :: can not read bin file for src2" << std::endl;
+        return soap_receiver_fault(soap, "add :: can not read bin file for src2", NULL);
+    }
+    
+    absdiffdiff(src1, src2, dst);
+	
+	std::string toAppend = "_absdiff";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "absdiff :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "absdiff :: can not save mat to binary file", NULL);
+    }
+
+    src1.release();
+    src2.release();
+    dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "absdiff :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "absdiff :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+//~ void sqrt(InputArray src, OutputArray dst)
+int ns__sqrt(  struct soap *soap, 
+			std::string InputMatFilename,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+    Mat dst;
+    
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "sqrt :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "sqrt :: can not read bin file for src1", NULL);
+    }
+
+    sqrt(src, dst);
+
+	std::string toAppend = "_sqrt";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "sqrt :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "sqrt :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+    dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "sqrt :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "sqrt :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+//~ void watershed(InputArray image, InputOutputArray markers)
+int ns__watershed(  struct soap *soap, 
+			std::string InputMatFilename,
+            std::string MarkerMatFilename,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat image;
+    Mat marker;
+    
+	if(!readMat(InputMatFilename, image))
+    {
+		Log(logERROR) << "watershed :: can not read bin file for image" << std::endl;
+        return soap_receiver_fault(soap, "watershed :: can not read bin file for image", NULL);
+    }
+    
+    if(!readMat(InputMatFilename, marker))
+    {
+		Log(logERROR) << "watershed :: can not read bin file for marker" << std::endl;
+        return soap_receiver_fault(soap, "watershed :: can not read bin file for marker", NULL);
+    }
+
+    watershed(image, markers);
+
+	std::string toAppend = "_watershed";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, image))
+    {
+        Log(logERROR) << "watershed :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "watershed :: can not save mat to binary file", NULL);
+    }
+
+    image.release();
+    marker.release();
+    
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "watershed :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "watershed :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+//~ void circle(Mat& img, Point center, int radius, const Scalar& color, int thickness=1, int lineType=8, int shift=0)
+int ns__circle(  struct soap *soap, 
+			std::string InputMatFilename, int centerX, int centerY, int radius, int scalarColor0, int scalarColor1, int scalarColor2,
+            int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "circle :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "circle :: can not read bin file for src1", NULL);
+    }
+    
+
+    circle(src, Point(centerX, centerY), radius, Scalar(scalarColor0, scalarColor1, scalarColor2), thickness, lineType, shift);
+
+	std::string toAppend = "_circle";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) << "circle :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "circle :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "circle :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "circle :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+//~ void ellipse(Mat& img, Point center, Size axes, double angle, double startAngle, double endAngle, const Scalar& color, int thickness=1, int lineType=8, int shift=0)
+int ns__ellipse(  struct soap *soap, 
+			std::string InputMatFilename, int centerX=10, int centerY=10, int axeX=1, int axeY=1, double angle=0.0, double startAngle=0.0, double endAngle=360.0, int scalarColor0, int scalarColor1, int scalarColor2, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "ellipse :: can not read bin file for src1" << std::endl;
+        return soap_receiver_fault(soap, "ellipse :: can not read bin file for src1", NULL);
+    }
+    
+
+    ellipse(src, Point(centerX, centerY), Size(axeX, axeY), angle, startAngle, endAngle, Scalar(scalarColor0, scalarColor1, scalarColor2), thickness, lineType, shift);
+
+	std::string toAppend = "_ellipse";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, src))
+    {
+        Log(logERROR) << "ellipse :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "ellipse :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "ellipse :: " << "time elapsed " << end-start << std::endl;
+	}
+	
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "ellipse :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+
+    return SOAP_OK;
+}
+
+
+//~ area = floodFill(dst, mask, seed, newVal, &ccomp, Scalar(lo, lo, lo), Scalar(up, up, up), flags);
+//~ int floodFill(InputOutputArray image, Point seedPoint, Scalar newVal, Rect* rect=0, Scalar loDiff=Scalar(), Scalar upDiff=Scalar(), int flags=4
+
+
 
 /* ########################################################### */
 /* ###############         helper function        ############ */
