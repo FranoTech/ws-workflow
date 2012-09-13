@@ -49,13 +49,13 @@ int ns__getStructuringElement( std::string StructuringShape="MORPH_ELLIPSE", int
 
 
 //gsoap ns service method-documentation: MorphologyEx Performs advanced morphological transformations
-int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", int anchorX=-1, int anchorY=-1, std::string StructuringElementFname, std::string StructuringShape="MORPH_ELLIPSE", int seSizeW=3, int seSizeH=3, std::string &OutputMatFilename)
+int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", int anchorX=-1, int anchorY=-1, std::string StructuringElementFname, std::string StructuringShape="MORPH_ELLIPSE", int seSizeW=3, int seSizeH=3, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: erode Erodes an image by using a specific structuring element
-int ns__erode(  std::string InputMatFilename, std::string elementFilename, int iteration=1, std::string &OutputMatFilename );
+int ns__erode(  std::string InputMatFilename, std::string StructuringElementFilename, int iteration=1, std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: dilate Dilates an image by using a specific structuring element
-int ns__dilate( std::string InputMatFilename, std::string elementFilename, int iteration=1, std::string &OutputMatFilename );   
+int ns__dilate( std::string InputMatFilename, std::string StructuringElementFilename, int iteration=1, std::string &OutputMatFilename );   
 
 //gsoap ns service method-documentation: Or Calculates the per-element bit-wise disjunction of two arrays
 int ns__Or( std::string src1, std::string src2, std::string &OutputMatFilename );      
