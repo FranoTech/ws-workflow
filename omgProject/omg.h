@@ -39,7 +39,7 @@ int ns__MatToJPG (std::string InputMatFilename, std::string &OutputMatFilename);
 int ns__viewImage( std::string InputMatFilename, ns__base64Binary &image);
 
 //gsoap ns service method-documentation: ConvertTo Converts an array to another data type
-int ns__ConvertTo(std::string InputMatFilename, std::string types="CV_32FC1", std::string &OutputMatFilename);
+int ns__convertTo(std::string InputMatFilename, std::string types="CV_32FC1", double alpha_=1, double beta_=0, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: Threshold Applies a fixed-level threshold to each array element
 int ns__Threshold(std::string InputMatFilename, double thresholdValue=127.0, double maxValue=255.0, std::string thresholdType="THRESH_BINARY", std::string &OutputMatFilename);
@@ -49,13 +49,13 @@ int ns__getStructuringElement( std::string StructuringShape="MORPH_ELLIPSE", int
 
 
 //gsoap ns service method-documentation: MorphologyEx Performs advanced morphological transformations
-int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", int anchorX=-1, int anchorY=-1, std::string StructuringElementFname, std::string StructuringShape="MORPH_ELLIPSE", int seSizeW=3, int seSizeH=3, std::string &OutputMatFilename);
+int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", int anchorX_=-1, int anchorY_=-1, std::string StructuringElementFname, std::string StructuringShape="MORPH_ELLIPSE", int seSizeW_=3, int seSizeH_=3, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: erode Erodes an image by using a specific structuring element
-int ns__erode(  std::string InputMatFilename, std::string StructuringElementFilename, int iteration=1, std::string &OutputMatFilename );
+int ns__erode(  std::string InputMatFilename, std::string StructuringElementFilename, int iteration_=1, int anchorX_=-1, int anchorY_=-1, std::string borderType_ ,std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: dilate Dilates an image by using a specific structuring element
-int ns__dilate( std::string InputMatFilename, std::string StructuringElementFilename, int iteration=1, std::string &OutputMatFilename );   
+int ns__dilate( std::string InputMatFilename, std::string StructuringElementFilename, int iteration_=1, int anchorX_=-1, int anchorY_=-1, std::string borderType_ ,std::string &OutputMatFilename );   
 
 //gsoap ns service method-documentation: Or Calculates the per-element bit-wise disjunction of two arrays
 int ns__Or( std::string src1, std::string src2, std::string &OutputMatFilename );      
@@ -70,10 +70,10 @@ int ns__Xor(std::string src1, std::string src2, std::string &OutputMatFilename )
 int ns__Not(std::string src, std::string &OutputMatFilename );   
 
 //gsoap ns service method-documentation: Inverse Inverses a matrix
-int ns__Inverse(    std::string InputMatFilename, std::string &OutputMatFilename );             
+int ns__Inverse( std::string InputMatFilename, std::string InvMethod_="DECOMP_LU", std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: mul Performs an element-wise multiplication or division of the two matrices
-int ns__mul( std::string InputMatFilename, std::string AnotherMatFilename, double scale=1, std::string &OutputMatFilename );    
+int ns__mul( std::string InputMatFilename, std::string AnotherMatFilename, double scale_=1, std::string &OutputMatFilename );    
 
 //gsoap ns service method-documentation: cross Computes a cross-product of two 3-element vectors
 int ns__cross(  std::string InputMatFilename, std::string AnotherMatFilename, std::string &OutputMatFilename );
@@ -85,7 +85,7 @@ int ns__dot(std::string InputMatFilename, std::string AnotherMatFilename, std::s
 int ns__zeros(int rows=0, int columns=0,std::string type="CV_32F", std::string &OutputMatFilename );        
 
 //gsoap ns service method-documentation: ones Returns an array of all 1’s of the specified size and type
-int ns__ones( int rows=0, int columns=0, int size=0, std::string type="CV_32F", std::string &OutputMatFilename );
+int ns__ones( int rows=0, int columns=0, std::string type="CV_32F", std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: createMat Allocates new array data if needed
 int ns__createMat(int rows=0, int columns=0, std::string type="CV_32F", std::string &OutputMatFilename );
@@ -100,16 +100,16 @@ int ns__rowRange(  std::string InputMatFilename,int startCol, int endCol, std::s
 int ns__getMatDetail( std::string InputMatFilename, ns__MatDetail &detail);
 
 //gsoap ns service method-documentation: blur Smoothes an image using the normalized box filter
-int ns__blur(std::string InputMatFilename, int rows=0, int cols=0, int anchorX=-1, int anchorY=-1, int borderType, std::string &OutputMatFilename );
+int ns__blur(std::string InputMatFilename, int rows=0, int cols=0, int anchorX_=-1, int anchorY_=-1, std::string borderType_, std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: GaussianBlur Smoothes an image using a Gaussian filter
-int ns__GaussianBlur( std::string InputMatFilename, int rows=0, int cols=0, double sigmaX=0, double sigmaY=0, int borderType, std::string &OutputMatFilename );
+int ns__GaussianBlur( std::string InputMatFilename, int rows=0, int cols=0, double sigmaX=0, double sigmaY_=0, std::string borderType_, std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: cvtColor Converts an image from one color space to another
-int ns__cvtColor( std::string InputMatFilename, std::string code, int dstChannel=0, std::string &OutputMatFilename);
+int ns__cvtColor( std::string InputMatFilename, std::string code, int dstChannel_=0, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: integral Calculates the integral of an image
-int ns__integral( std::string InputMatFilename, int sdepth=-1, std::string &OutputMatFilename);
+int ns__integral( std::string InputMatFilename, int sdepth_=-1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: adaptiveThreshold Applies an adaptive threshold to an array
 int ns__adaptiveThreshold( std::string InputMatFilename, std::string adaptiveMethod, double maxValue=255.0, std::string thresholdType="THRESH_BINARY", int blockSize=3, double C=1, std::string &OutputMatFilename);
@@ -136,22 +136,22 @@ int ns__CIAscanningCell(   std::string biggerArea, std::string keepArea, std::st
 int ns__medianBlur( std::string InputMatFilename, int kSize=1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: Laplacian Calculates the Laplacian of an image
-int ns__Laplacian( std::string InputMatFilename, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType, std::string &OutputMatFilename);
+int ns__Laplacian( std::string InputMatFilename, int ddepth, int ksize=1, double scale=1, double delta=0, std::string borderType_ , std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: pyrDown Smoothes an image and downsamples it
-int ns__pyrDown( std::string InputMatFilename, int rows=0, int cols=0, int borderType, std::string &OutputMatFilename);
+int ns__pyrDown( std::string InputMatFilename, int rows=0, int cols=0, std::string borderType_, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: pyrUp Upsamples an image and then smoothes it
-int ns__pyrUp( std::string InputMatFilename, int rows=0, int cols=0, int borderType, std::string &OutputMatFilename);
+int ns__pyrUp( std::string InputMatFilename, int rows=0, int cols=0, std::string borderType_, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: addWeighted Computes the weighted sum of two arrays
-int ns__addWeighted( std::string InputMatFilename1, double alpha, std::string InputMatFilename2 , double beta, double gamma, int dtype=-1, std::string &OutputMatFilename);
+int ns__addWeighted( std::string InputMatFilename1, double alpha, std::string InputMatFilename2 , double beta, double gamma, int dtype_=-1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: add Computes the per-element sum of two arrays or an array and a scalar
-int ns__add( std::string InputMatFilename1, std::string InputMatFilename2 , std::string maskFilename , int dtype=-1, std::string &OutputMatFilename);
+int ns__add( std::string InputMatFilename1, std::string InputMatFilename2 , std::string maskFilename_ , int dtype_=-1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: subtract Calculates the per-element difference between two arrays or array and a scalar
-int ns__subtract( std::string InputMatFilename1, std::string InputMatFilename2 , std::string maskFilename , int dtype=-1, std::string &OutputMatFilename);
+int ns__subtract( std::string InputMatFilename1, std::string InputMatFilename2 , std::string maskFilename_ , int dtype_=-1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: abs Computes an absolute value of each matrix element
 int ns__abs( std::string InputMatFilename, std::string &OutputMatFilename);
@@ -166,7 +166,7 @@ int ns__sqrt( std::string InputMatFilename, std::string &OutputMatFilename);
 int ns__watershed( std::string InputMatFilename, std::string MarkerMatFilename, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: circle Draws a simple or filled circle with a given center and radius
-int ns__circle( std::string InputMatFilename, int centerX, int centerY, int radius, int scalarColor0, int scalarColor1, int scalarColor2, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename);
+int ns__circle( std::string InputMatFilename, int centerX, int centerY, int radius, int scalarColor0, int scalarColor1, int scalarColor2, int thickness_=1, int lineType_=8, int shift_=0, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: ellipse Draws a simple or thick elliptic arc or fills an ellipse sector
-int ns__ellipse( std::string InputMatFilename, int centerX=10, int centerY=10, int axeX=1, int axeY=1, double angle=0.0, double startAngle=0.0, double endAngle=360.0, int scalarColor0=0, int scalarColor1=0, int scalarColor2=0, int thickness=1, int lineType=8, int shift=0, std::string &OutputMatFilename);
+int ns__ellipse( std::string InputMatFilename, int centerX=10, int centerY=10, int axeX=1, int axeY=1, double angle=0.0, double startAngle=0.0, double endAngle=360.0, int scalarColor0=0, int scalarColor1=0, int scalarColor2=0, int thickness_=1, int lineType_=8, int shift_=0, std::string &OutputMatFilename);
