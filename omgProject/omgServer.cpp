@@ -25,6 +25,7 @@ int getMatDepth (const std::string& depth);
 /* Global Configuration */
 std::string BASE_DIR = "/home/lluu/thesis/result/";
 std::string ERROR_FILENAME = "";
+std::string DEFAULTVAL = "";
 std::string CONFIG_FILE = "/home/lluu/thesis/result/config.cfg";
 double start, end; /* time checking */
 
@@ -48,7 +49,7 @@ int main(int argc, char **argv)
 int ns__imgToMat (struct soap *soap,
                 std::string InputMatFilename,
                 int colorflag=0,
-                std::string types=ERROR_FILENAME,
+                std::string types=DEFAULTVAL,
                 std::string &OutputMatFilename=ERROR_FILENAME)
 {	
 	bool timeChecking, memoryChecking;
@@ -66,7 +67,9 @@ int ns__imgToMat (struct soap *soap,
         return soap_receiver_fault(soap, "imgToMat :: can not load image", NULL);
     }
     
-    if(types==ERROR_FILENAME) types = "CV_8UC1";
+    //~ if(types==ERROR_FILENAME) types = "CV_8UC1";
+    
+    int srcType = types == DEFAULTVAL ? CV_8UC1 : getMatType(types);
 
     /* convert Mat to required type */
     if(src.type()!= getMatType(types))
@@ -186,6 +189,10 @@ int ns__convertTo( struct soap *soap,
         Log(logERROR)<< "ConvertTo :: can not read bin file" << std::endl;
         return soap_receiver_fault(soap, "ConvertTo :: can not read bin file", NULL);
     }
+    
+    //~ char* filename = argc >= 2 ? argv[1] : (char*)"fruits.jpg";
+    
+    
 
     int MatType = getMatType(types);
     int cols = src.cols ;
@@ -252,13 +259,14 @@ int ns__Threshold(struct soap *soap,
         return soap_receiver_fault(soap, "Threshold :: can not read bin file", NULL);
     }
 
-    int threstype = getThresholdType (thresholdType);
-    //~ try{
+    int threstype = thresholdType==DEFAULTVAL ? THRESH_BINARY : getThresholdType(thresholdType);
+    
+    try{
         threshold(src, src, thresholdValue, maxValue, threstype);
-    //~ } catch( cv::Exception& e ) {
-            //~ Log(logERROR) << e.what() << std::endl;
-            //~ return soap_receiver_fault(soap, e.what(), NULL);
-    //~ }
+    } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+    }
     
     /* generate output file name and save to binary file */
 	std::string toAppend = "_Threshold";
@@ -417,7 +425,7 @@ int ns__getStructuringElement(  struct soap *soap,
 
 int ns__MorphologyEx( struct soap *soap,
 						std::string InputMatFilename,
-						std::string morphOperation="MORPH_OPEN",
+						std::string morphOperation=DEFAULTVAL,
                         int anchorX_D=-1, int anchorY_D=-1,
                         std::string StructuringElementFname=ERROR_FILENAME,
                         std::string StructuringShape="MORPH_ELLIPSE",
@@ -439,6 +447,12 @@ int ns__MorphologyEx( struct soap *soap,
     }
 
     Mat dst(src.rows, src.cols, src.depth());
+
+//~ morphOperation="MORPH_OPEN"
+//~ StructuringShape="MORPH_ELLIPSE",
+
+    int morphOpt = morphOperation == DEFAULTVAL ? MORPH_OPEN : getMorphOperation(morphOperation);
+    int seShape 
 
     int opt = getMorphOperation(morphOperation);
     int shape;
@@ -941,7 +955,7 @@ int ns__Not(  struct soap *soap,
 
 int ns__Inverse(  struct soap *soap, 
 			std::string InputMatFilename,
-            std::string InvMethod_D="DECOMP_LU",
+            std::string InvMethod_D=DEFAULTVAL,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -959,16 +973,22 @@ int ns__Inverse(  struct soap *soap,
         return soap_receiver_fault(soap, "Inv :: can not read bin file for src1", NULL);
     }
     
+    
     int method;
+    if(InvMethod_D == DEFAULTVAL) InvMethod_D = "DECOMP_LU";
+    
     if(InvMethod_D.compare("DECOMP_LU")==0) method = DECOMP_LU;
     else if(InvMethod_D.compare("DECOMP_CHOLESKY")==0) method = DECOMP_CHOLESKY;
     else if(InvMethod_D.compare("DECOMP_SVD")==0) method = DECOMP_SVD;
 
-
+    try{
         dst = src.inv(method);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }
 
-
-	std::string toAppend = "_inv";
+	std::string toAppend = "_Inv";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
     {
@@ -1236,12 +1256,12 @@ int ns__ones(  struct soap *soap,
 	Mat src;
 	int matType = getMatType(type);
 	if(rows != 0 && cols != 0){
-        //~ try{            
+        try{            
             src = Mat::ones(rows, cols, matType);
-        //~ } catch( cv::Exception& e ) {
-            //~ Log(logERROR) << e.what() << std::endl;
-            //~ return soap_receiver_fault(soap, e.what(), NULL);
-        //~ }
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
     }else {
 		Log(logERROR) << "ones :: Invalid input, please reconfig. (Choose either rows-cols or size)" << std::endl;
         return soap_receiver_fault(soap, "ones :: Invalid input, please reconfig. (Choose either rows-cols or size)", NULL);
@@ -1646,7 +1666,7 @@ int ns__blur(  struct soap *soap,
 /* void GaussianBlur(InputArray src, OutputArray dst, Size ksize, double sigmaX, double sigmaY=0, int borderType=BORDER_DEFAULT ) */
 int ns__GaussianBlur(  struct soap *soap, 
 			std::string InputMatFilename, int rows=0, int cols=0,
-            double sigmaX=0, double sigmaY_D=0, std::string borderType_D="BORDER_DEFAULT",
+            double sigmaX=0, double sigmaY_D=0, std::string borderType_D=DEFAULTVAL,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -1664,8 +1684,7 @@ int ns__GaussianBlur(  struct soap *soap,
         return soap_receiver_fault(soap, "GaussianBlur :: can not read bin file for src1", NULL);
     }
     
-    if (borderType_D == ERROR_FILENAME) borderType_D="BORDER_DEFAULT";
-    int border = getBorderType(borderType_D);
+    int border = borderType_D == DEFAULTVAL ? BORDER_DEFAULT : getBorderType(borderType_D);
     
     try{
         GaussianBlur(src, dst, Size(cols, rows), sigmaX, sigmaY_D, border); 
@@ -2515,9 +2534,9 @@ int ns__medianBlur(  struct soap *soap,
 
 //~ C++: void Laplacian(InputArray src, OutputArray dst, int ddepth, int ksize=1, double scale=1, double delta=0, int borderType=BORDER_DEFAULT )
 int ns__Laplacian(  struct soap *soap, 
-			std::string InputMatFilename, std::string ddepth="CV_8U", 
+			std::string InputMatFilename, std::string ddepth=DEFAULTVAL, 
             int kSize_D=1, double scale_D=1, double delta_D=0, 
-            std::string borderType_D="BORDER_DEFAULT",
+            std::string borderType_D=DEFAULTVAL,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -2535,8 +2554,8 @@ int ns__Laplacian(  struct soap *soap,
         return soap_receiver_fault(soap, "Laplacian :: can not read bin file for src", NULL);
     }
     
-    int d = getMatDepth(ddepth);
-    int border = getBorderType(borderType_D);
+    int d = ddepth == DEFAULTVAL ? CV_8U : getMatDepth(ddepth);
+    int border =  borderType_D == DEFAULTVAL ? BORDER_DEFAULT : getBorderType(borderType_D);
     
     
     if(kSize_D%2 == 0 || kSize_D <=0){
