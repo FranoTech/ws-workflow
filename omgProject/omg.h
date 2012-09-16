@@ -174,4 +174,20 @@ int ns__ellipse( std::string InputMatFilename, int centerX=10, int centerY=10, i
 //gsoap ns service method-documentation: Sobel Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator
 int ns__Sobel( std::string InputMatFilename, std::string ddepth="CV_8U", int kSize_D=3, double scale_D=1, double delta_D=0, int dx, int dy, std::string borderType_D, std::string &OutputMatFilename);
 
+//gsoap ns service method-documentation: printAllMatValue
+int ns__printAllMatValue (std::string InputMatFilename, std::string &OutputMat);
 
+//gsoap ns service method-documentation: accessPixelValue 
+int ns__accessPixelValue(
+            std::string InputMatFilename,
+            std::string returnType,
+            int intToSet=0, float floatToSet=0,
+            int pixelI =0, int pixelJ =0, int channel =0,
+			std::string &OutputMatFilename);
+            
+int ns__filter2D( 
+			std::string InputMatFilename,
+            int ddepth, std::string kernelFname, 
+            int anchorX_D=-1, int anchorY_D=-1, 
+            double delta_D=0, std::string borderType_D,
+            std::string &OutputMatFilename);

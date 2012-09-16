@@ -1,6 +1,6 @@
 #!/bin/bash
 #g++ -o standAloneServer `pkg-config opencv --cflags` `pkg-config opencv --libs` -fopenmp standAloneServer.cpp soapC.cpp soapServer.cpp stdsoap2.cpp
-g++ -o $1Server $1Server.cpp soapC.cpp soapServer.cpp stdsoap2.cpp  `pkg-config opencv --cflags` `pkg-config opencv --libs` -fopenmp
+g++ -Wall -o $1Server $1Server.cpp soapC.cpp soapServer.cpp stdsoap2.cpp  `pkg-config opencv --cflags` `pkg-config opencv --libs` -fopenmp
 
 if [ -a $1Server ]
 	then
