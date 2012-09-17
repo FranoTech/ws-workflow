@@ -184,10 +184,20 @@ int ns__accessPixelValue(
             int intToSet=0, float floatToSet=0,
             int pixelI =0, int pixelJ =0, int channel =0,
 			std::string &OutputMatFilename);
-            
+
+//gsoap ns service method-documentation: filter2D Convolves an image with the kernel
 int ns__filter2D( 
 			std::string InputMatFilename,
             int ddepth, std::string kernelFname, 
             int anchorX_D=-1, int anchorY_D=-1, 
             double delta_D=0, std::string borderType_D,
             std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: Canny Finds edges in an image using the Canny86 algorithm
+int ns__Canny( std::string InputMatFilename, double threshold1, double threshold2,
+            int apertureSize=3, int L2gradient=0,std::string &OutputMatFilenameE);
+
+//gsoap ns service method-documentation: resize Resizes an image
+int ns__resize( std::string InputMatFilename, int dstRows=0, int dstCols=0,
+            double fx_D=0, double fy_D=0, std::string interpolation_D,
+			std::string &OutputMatFilename);

@@ -21,6 +21,9 @@ void getMemoryUsage (double& vm_usage, double& resident_set);
 void getConfig (bool &timeChecking, bool &memoryChecking);
 int getBorderType(std::string& bdType);
 int getMatDepth (const std::string& depth);
+int getInterpolation (const std::string& inter);
+int getContourMode (const std::string& mode);
+
 
 /* Global Configuration */
 std::string BASE_DIR = "/home/lluu/thesis/result/";
@@ -46,11 +49,9 @@ int main(int argc, char **argv)
 }
 
 /* Load image data to Mat, save to binary file */
-int ns__imgToMat (struct soap *soap,
+int ns__imRead (struct soap *soap,
                 std::string InputMatFilename,
-                int colorflag=0,
-                std::string types=DEFAULTVAL,
-                std::string &OutputMatFilename=ERROR_FILENAME)
+                int flag=0, std::string &OutputMatFilename=ERROR_FILENAME)
 {	
 	bool timeChecking, memoryChecking;
 	getConfig(timeChecking, memoryChecking);
@@ -61,7 +62,7 @@ int ns__imgToMat (struct soap *soap,
 
     /* load image data */
 	Mat src;
-    src = imread(InputMatFilename.c_str(), getColorFlag(colorflag));
+    src = imread(InputMatFilename.c_str(), flag);
     if(src.empty()) {
         Log(logERROR) << "imgToMat :: can not load image" << std::endl;
         return soap_receiver_fault(soap, "imgToMat :: can not load image", NULL);
@@ -174,7 +175,7 @@ int ns__MatToJPG (struct soap *soap, std::string InputMatFilename,
 int ns__convertTo( struct soap *soap, 
 					std::string InputMatFilename,
 					std::string types=DEFAULTVAL,
-                    double alpha_=1, double beta_=0,
+                    double alpha_D=1, double beta_D=0,
 					std::string &OutputMatFilename=ERROR_FILENAME)
 {
     bool timeChecking, memoryChecking;
@@ -195,7 +196,7 @@ int ns__convertTo( struct soap *soap,
     if( src.type() != MatType )
     {
         try{
-        src.convertTo(src, MatType, alpha_, beta_);
+        src.convertTo(src, MatType, alpha_D, beta_D);
         } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
@@ -237,7 +238,7 @@ int ns__Threshold(struct soap *soap,
                         std::string InputMatFilename,
                         double thresholdValue=127.0,
                         double maxValue=255.0,
-                        std::string thresholdType="THRESH_BINARY",
+                        std::string thresholdType=DEFAULTVAL,
                         std::string &OutputMatFilename=ERROR_FILENAME)
 {
     bool timeChecking, memoryChecking;
@@ -296,7 +297,7 @@ int ns__adaptiveThreshold(struct soap *soap,
                         std::string InputMatFilename,
                         std::string adaptiveMethod,
                         double maxValue=255.0,
-                        std::string thresholdType="THRESH_BINARY",
+                        std::string thresholdType=DEFAULTVAL,
                         int blockSize=3, double C=1,
                         std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -321,7 +322,7 @@ int ns__adaptiveThreshold(struct soap *soap,
     } else if (adaptiveMethod.compare("ADAPTIVE_THRESH_GAUSSIAN_C") == 0) {
         adapt = ADAPTIVE_THRESH_GAUSSIAN_C;
     }
-    int threstype = getThresholdType (thresholdType);
+    int threstype = thresholdType==DEFAULTVAL ? THRESH_BINARY : getThresholdType(thresholdType);
     
     try{
         adaptiveThreshold(src, dst, maxValue, adapt, threstype, blockSize, C);
@@ -359,7 +360,7 @@ int ns__adaptiveThreshold(struct soap *soap,
 }
 
 int ns__getStructuringElement(  struct soap *soap, 
-                std::string StructuringShape="MORPH_ELLIPSE",
+                std::string StructuringShape=DEFAULTVAL,
                 int seSizeW=3, int seSizeH=3, 
                 int anchorX_D=-1, int anchorY_D=-1,
                 std::string &OutputMatFilename=ERROR_FILENAME)
@@ -376,6 +377,8 @@ int ns__getStructuringElement(  struct soap *soap,
     Point seAnc(anchorX_D, anchorY_D);
     int shape;
     
+    if (StructuringShape == DEFAULTVAL) StructuringShape = "MORPH_ELLIPSE";
+    
     if (StructuringShape.compare("MORPH_ELLIPSE") == 0)  shape = MORPH_ELLIPSE;
     else if (StructuringShape.compare("MORPH_RECT") == 0)  shape = MORPH_RECT;
     else if (StructuringShape.compare("MORPH_CROSS") == 0)  shape = MORPH_CROSS;
@@ -383,6 +386,7 @@ int ns__getStructuringElement(  struct soap *soap,
         Log(logERROR) << "MorgetStructuringElement :: Invalid Structuring element shape" << std::endl;
         return soap_receiver_fault(soap, "getStructuringElement :: Invalid Structuring element shape", NULL);
     }
+    
     
     try{
         se = getStructuringElement(shape, seSize, seAnc);
@@ -1889,7 +1893,6 @@ int ns__CIAremoveSmallCell(struct soap *soap,
 	} catch (std::exception& e) { 
         Log(logERROR) << "removeSmallCell :: "<< e.what()<< std::endl;
         return soap_receiver_fault(soap, e.what() , NULL);
-		//~ cerr<<"error "<<e.what()<<endl; 
 	}
 
     for(size_t i = 0; i< contours.size(); i++)
@@ -3254,8 +3257,6 @@ int ns__accessPixelValue(  struct soap *soap,
     }
     
     if(returnType == DEFAULTVAL) returnType = "uchar";
-    Log(logDEBUG) << "returnType : " << returnType << std::endl;
-    Log(logDEBUG) << "floatToSet : " << floatToSet << std::endl;
         
     if(returnType.compare("uchar")==0)
         src.at<uchar>(pixelJ,pixelI)= intToSet;
@@ -3266,7 +3267,6 @@ int ns__accessPixelValue(  struct soap *soap,
     else if(returnType.compare("Vec3b")==0)
         src.at<Vec3b>(pixelJ,pixelI)[channel]= floatToSet;
     
-    Log(logDEBUG) <<  " src.at<float>(pixelJ,pixelI) :" << src.at<float>(pixelJ,pixelI) << std::endl;
         
     std::string toAppend = "_accessPixelValue";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -3316,7 +3316,6 @@ int ns__printAllMatValue ( struct soap *soap, std::string InputMatFilename,
     ss << src;
     OutputMat = ss.str();
     
-    Log(logDEBUG) << "printAllMatValue : "<< OutputMat << std::endl; 
     src.release();
     
     if(timeChecking) 
@@ -3405,8 +3404,175 @@ int ns__filter2D( struct soap *soap,
     return SOAP_OK;
 }
 
+ //~ void resize(InputArray src, OutputArray dst, Size dsize, double fx=0, double fy=0, int interpolation=INTER_LINEAR )
 
+int ns__resize(  struct soap *soap, 
+			std::string InputMatFilename, int dstRows=0, int dstCols=0,
+            double fx_D=0, double fy_D=0, std::string interpolation_D=DEFAULTVAL,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
 
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "resize :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "resize :: can not read bin file for src", NULL);
+    }
+    
+    int inter = interpolation_D == DEFAULTVAL ? INTER_LINEAR : getInterpolation(interpolation_D);
+    resize(src, dst, Size(dstRows, dstCols), fx_D, fy_D, inter);
+    
+	std::string toAppend = "_resize";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "resize :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "resize :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "resize :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "resize :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+//~ void Canny(InputArray image, OutputArray edges, double threshold1, double threshold2, int apertureSize=3, bool L2gradient=false)
+int ns__Canny(  struct soap *soap, 
+			std::string InputMatFilename, double threshold1, double threshold2,
+            int apertureSize=3, int L2gradient=0,
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "Canny :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "Canny :: can not read bin file for src", NULL);
+    }
+    
+    Canny(src, dst, threshold1, threshold2, apertureSize, L2gradient);
+    
+	std::string toAppend = "_Canny";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "Canny :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "Canny :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "Canny :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "Canny :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
+
+//~ std::vector<std::vector<cv::Point>> contours;
+	//~ cv::findContours(image, 
+		//~ contours, // a vector of contours 
+		//~ CV_RETR_EXTERNAL, // retrieve the external contours
+		//~ CV_CHAIN_APPROX_NONE); // retrieve all pixels of each contours
+//~ 
+	//~ // Print contours' length
+	//~ std::cout << "Contours: " << contours.size() << std::endl;
+	//~ std::vector<std::vector<cv::Point>>::const_iterator itContours= contours.begin();
+	//~ for ( ; itContours!=contours.end(); ++itContours) {
+//~ 
+		//~ std::cout << "Size: " << itContours->size() << std::endl;
+	//~ }
+//~ 
+	//~ // draw black contours on white image
+	//~ cv::Mat result(image.size(),CV_8U,cv::Scalar(255));
+	//~ cv::drawContours(result,contours,
+		//~ -1, // draw all contours
+		//~ cv::Scalar(0), // in black
+		//~ 2); // with a thickness of 2
+
+//~ void findContours(InputOutputArray image, OutputArrayOfArrays contours, OutputArray hierarchy, int mode, int method, Point offset=Point())
+int ns__findContours(  struct soap *soap, 
+			std::string InputMatFilename, int mode, int method,
+            int offsetX_D=0, int offsetY_D=0
+			std::string &OutputMatFilename=ERROR_FILENAME)
+{
+	bool timeChecking, memoryChecking;
+	getConfig(timeChecking, memoryChecking);
+	if(timeChecking){
+		start = omp_get_wtime();
+	}
+
+    /* read from bin */
+    Mat src;
+	Mat dst;
+	if(!readMat(InputMatFilename, src))
+    {
+		Log(logERROR) << "Canny :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "Canny :: can not read bin file for src", NULL);
+    }
+    
+    Canny(src, dst, threshold1, threshold2, apertureSize, L2gradient);
+    
+	std::string toAppend = "_Canny";
+    getOutputFilename(OutputMatFilename, toAppend);
+    if(!saveMat(OutputMatFilename, dst))
+    {
+        Log(logERROR) << "Canny :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "Canny :: can not save mat to binary file", NULL);
+    }
+
+    src.release();
+	dst.release();
+
+	if(timeChecking) 
+	{ 
+		end = omp_get_wtime();
+		Log(logINFO) << "Canny :: " << "time elapsed " << end-start << std::endl;
+	}
+	if(memoryChecking)
+	{	
+		double vm, rss;
+		getMemoryUsage(vm, rss);
+		Log(logINFO)<< "Canny :: VM usage :" << vm << std::endl 
+					<< "Resident set size :" << rss << std::endl;
+	}
+    return SOAP_OK;
+}
 
 
 
@@ -3644,4 +3810,23 @@ int getBorderType(std::string& borderType_D)
     else if(borderType_D.compare("BORDER_REFLECT_101")==0) return BORDER_REFLECT_101;
     else if(borderType_D.compare("BORDER_WRAP")==0) return BORDER_WRAP;
     else return -1;
+}
+
+int getInterpolation (const std::string& inter)
+{
+    if(inter.compare("INTER_NEAREST")==0) return INTER_NEAREST;
+    else if(inter.compare("INTER_LINEAR")==0) return INTER_LINEAR;
+    else if(inter.compare("INTER_AREA")==0) return INTER_AREA;
+    else if(inter.compare("INTER_CUBIC")==0) return INTER_CUBIC;
+    else return -1;
+}
+
+int getContourMode (const std::string& mode)
+{
+    if(mode.compare("CV_RETR_EXTERNAL")==0) return CV_RETR_EXTERNAL;
+    else if(mode.compare("CV_RETR_LIST")==0) return CV_RETR_LIST;
+    else if(mode.compare("CV_RETR_CCOMP")==0) return CV_RETR_CCOMP;
+    else if(mode.compare("CV_RETR_TREE")==0) return CV_RETR_TREE;
+    else return -1;
+
 }
