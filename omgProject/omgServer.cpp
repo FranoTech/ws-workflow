@@ -64,33 +64,18 @@ int ns__imRead (struct soap *soap,
 	Mat src;
     src = imread(InputMatFilename.c_str(), flag);
     if(src.empty()) {
-        Log(logERROR) << "imgToMat :: can not load image" << std::endl;
-        return soap_receiver_fault(soap, "imgToMat :: can not load image", NULL);
-    }
-    
-    //~ if(types==ERROR_FILENAME) types = "CV_8UC1";
-    
-    int srcType = types == DEFAULTVAL ? CV_8UC1 : getMatType(types);
-
-    /* convert Mat to required type */
-    if(src.type()!= srcType)
-    {
-        try{
-            src.convertTo(src,srcType);
-        } catch( cv::Exception& e ) {
-            Log(logERROR) << e.what() << std::endl;
-            return soap_receiver_fault(soap, e.what(), NULL);
-        }
+        Log(logERROR) << "imRead :: can not load image" << std::endl;
+        return soap_receiver_fault(soap, "imRead :: can not load image", NULL);
     }
 
 	/* generate output file name  and save to bin*/
-	std::string toAppend = "_imgToMat";
+	std::string toAppend = "_imRead";
 	getOutputFilename(OutputMatFilename,toAppend);
 
     if(!saveMat(OutputMatFilename, src))
     {
-        Log(logERROR) << "imgToMat :: can not save mat to binary file" << std::endl;
-        return soap_receiver_fault(soap, "imgToMat :: can not save mat to binary file", NULL);
+        Log(logERROR) << "imRead :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "imRead :: can not save mat to binary file", NULL);
     }
 
     src.release();
@@ -98,14 +83,14 @@ int ns__imRead (struct soap *soap,
 	if(timeChecking) 
 	{ 
 		end = omp_get_wtime();
-		Log(logINFO) << "imgToMat :: " << "time elapsed " << end-start << std::endl;
+		Log(logINFO) << "imRead :: " << "time elapsed " << end-start << std::endl;
 	}
 	
 	if(memoryChecking)
 	{	
 		double vm, rss;
 		getMemoryUsage(vm, rss);
-		Log(logINFO)<< "imgToMat :: VM usage :" << vm << std::endl 
+		Log(logINFO)<< "imRead :: VM usage :" << vm << std::endl 
 					<< "Resident set size :" << rss << std::endl;
 	}
 	
@@ -422,13 +407,16 @@ int ns__getStructuringElement(  struct soap *soap,
     return SOAP_OK;
 }
 
+//~ void morphologyEx(InputArray src, OutputArray dst, int op, InputArray kernel, Point anchor=Point(-1,-1), int iterations=1, int borderType=BORDER_CONSTANT, const Scalar& borderValue=morphologyDefaultBorderValue() )¶
+
 int ns__MorphologyEx( struct soap *soap,
 						std::string InputMatFilename,
 						std::string morphOperation=DEFAULTVAL,
-                        int anchorX_D=-1, int anchorY_D=-1,
                         std::string StructuringElementFname=ERROR_FILENAME,
-                        std::string StructuringShape=DEFAULTVAL,
-                        int seSizeW_D=3, int seSizeH_D=3, 
+                        int elementSizeW_D=3, int elementSizeH_D=3, int elementScalar_D=1,
+                        int iteration_D=1, 
+                        int anchorX_D=-1, int anchorY_D=-1,
+                        //~ std::string borderType_D=DEFAULTVAL,
 						std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -444,52 +432,36 @@ int ns__MorphologyEx( struct soap *soap,
 		Log(logERROR) << "MorphologyEx :: can not read bin file" << std::endl;
         return soap_receiver_fault(soap, "MorphologyEx :: can not read bin file", NULL);
     }
-
     Mat dst(src.rows, src.cols, src.depth());
 
-//~ morphOperation="MORPH_OPEN"
-//~ StructuringShape="MORPH_ELLIPSE",
-
     int morphOpt = morphOperation == DEFAULTVAL ? MORPH_OPEN : getMorphOperation(morphOperation);
-    int shape;
-    Mat se;
-    Size seSize(seSizeW_D, seSizeH_D);
     Point seAnc(anchorX_D, anchorY_D);
-    if (StructuringShape == DEFAULTVAL) StructuringShape = "MORPH_ELLIPSE";
-    if(StructuringElementFname.compare(ERROR_FILENAME)==0){
-        
-        if (StructuringShape.compare("MORPH_ELLIPSE") == 0)  shape = MORPH_ELLIPSE;
-        else if (StructuringShape.compare("MORPH_RECT") == 0)  shape = MORPH_RECT;
-        else if (StructuringShape.compare("MORPH_CROSS") == 0)  shape = MORPH_CROSS;
-        else {
-            Log(logERROR) << "MorphologyEx :: Invalid Structuring element shape" << std::endl;
-            return soap_receiver_fault(soap, "MorphologyEx :: Invalid Structuring element shape", NULL);
-        }
-        
+    
+    if(StructuringElementFname.compare(ERROR_FILENAME)==0)
+    { 
+        Mat element (elementSizeW_D, elementSizeH_D, CV_8U, Scalar(elementScalar_D));
         try{
-        se = getStructuringElement(shape, seSize, seAnc);
+            morphologyEx(src, dst, morphOpt, element, seAnc, iteration_D );
         } catch( cv::Exception& e ) {
-            Log(logERROR) << e.what() << std::endl;
-            return soap_receiver_fault(soap, e.what(), NULL);
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
         }
+        
     } else {
+            Mat se;
             if(!readMat(StructuringElementFname, se))
             {
                 Log(logERROR) << "MorphologyEx :: can not read bin file for Structuring element" << std::endl;
                 return soap_receiver_fault(soap, "MorphologyEx :: can not read bin file for Structuring element", NULL);
             }
-    }
 
-    try{
-        morphologyEx(src, dst, morphOpt, se, seAnc);
-    } catch( cv::Exception& e ) {
+            try{
+                morphologyEx(src, dst, morphOpt, se, iteration_D);
+            } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
-    }
-    
-    if(src.empty()) {
-			Log(logERROR) << "MorphologyEx :: something's wrong" << std::endl;
-            return soap_receiver_fault(soap, "MorphologyEx:: something's wrong", NULL);
+            }
+
     }
 
     std::string toAppend = "_MorphologyEx";
@@ -624,9 +596,12 @@ int ns__dilate(  struct soap *soap,
     {
 		Log(logINFO) << "dilate: use default element" << std::endl;
         element.release();
-        
+        try{
             dilate(src, dst, Mat(), Point(anchorX_D, anchorY_D), iteration_D, border);
-
+        } catch( cv::Exception& e ) {
+            Log(logERROR) << e.what() << std::endl;
+            return soap_receiver_fault(soap, e.what(), NULL);
+        }
         
     } else {
         
@@ -1293,6 +1268,7 @@ int ns__ones(  struct soap *soap,
 int ns__createMat(  struct soap *soap, 
 			int rows=0, int cols=0,
 			std::string type=DEFAULTVAL,
+            int scalar=-1,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -1305,13 +1281,24 @@ int ns__createMat(  struct soap *soap,
     Mat src;	
 	int matType = type == DEFAULTVAL? CV_32F : getMatDepth(type);
 	if(rows != 0 && cols != 0)
-		try{
-            src.create(rows, cols, matType);
-        } catch( cv::Exception& e ) {
+    {
+        if(scalar =! -1){
+            try{
+            src.create(rows, cols, matType, scalar);
+            } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
-        }
-	else {
+            }
+        } else {
+            try{
+                src.create(rows, cols, matType);
+            } catch( cv::Exception& e ) {
+                Log(logERROR) << e.what() << std::endl;
+                return soap_receiver_fault(soap, e.what(), NULL);
+            }
+		}
+        
+	}else {
 		Log(logERROR) << "createMat :: Invalid input, please enter rows or cols again." << std::endl;
         return soap_receiver_fault(soap, "createMat :: Invalid input, please enter rows or cols again.", NULL);
 	}
@@ -3527,8 +3514,8 @@ int ns__Canny(  struct soap *soap,
 
 //~ void findContours(InputOutputArray image, OutputArrayOfArrays contours, OutputArray hierarchy, int mode, int method, Point offset=Point())
 int ns__findContours(  struct soap *soap, 
-			std::string InputMatFilename, int mode, int method,
-            int offsetX_D=0, int offsetY_D=0
+			std::string InputMatFilename, std::string mode=DEFAULTVAL , std::string method=DEFAULTVAL,
+            int offsetX_D=-1, int offsetY_D=-1,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -3539,21 +3526,37 @@ int ns__findContours(  struct soap *soap,
 
     /* read from bin */
     Mat src;
-	Mat dst;
 	if(!readMat(InputMatFilename, src))
     {
-		Log(logERROR) << "Canny :: can not read bin file for src" << std::endl;
-        return soap_receiver_fault(soap, "Canny :: can not read bin file for src", NULL);
+		Log(logERROR) << "findContours :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "findContours :: can not read bin file for src", NULL);
     }
     
-    Canny(src, dst, threshold1, threshold2, apertureSize, L2gradient);
+    int contourMode = mode == DEFAULTVAL ? CV_RETR_EXTERNAL : getContourMode(mode);
+    int contourMethod = method == DEFAULTVAL ? CV_CHAIN_APPROX_NONE : getContourMode(method);
+    std::vector< std::vector<cv::Point> > contours;
     
-	std::string toAppend = "_Canny";
+    if(offsetX_D == -1 && offsetY_D == -1) {
+        try{
+            findContours(src, contours, contourMode, contourMethod);
+        } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+        }
+    } else {
+        findContours(src, contours, contourMode, contourMethod, Point(offsetX_D, offsetY_D)); 
+    }
+
+	// draw black contours on white image
+	Mat dst(src.size(),CV_8U, Scalar(255));
+	drawContours(dst,contours,-1, Scalar(0,0,0), 2);
+        
+	std::string toAppend = "_findContours";
     getOutputFilename(OutputMatFilename, toAppend);
-    if(!saveMat(OutputMatFilename, dst))
+    if(!saveMat(OutputMatFilename, dst ))
     {
-        Log(logERROR) << "Canny :: can not save mat to binary file" << std::endl;
-        return soap_receiver_fault(soap, "Canny :: can not save mat to binary file", NULL);
+        Log(logERROR) << "findContours :: can not save mat to binary file" << std::endl;
+        return soap_receiver_fault(soap, "findContours :: can not save mat to binary file", NULL);
     }
 
     src.release();
@@ -3562,13 +3565,13 @@ int ns__findContours(  struct soap *soap,
 	if(timeChecking) 
 	{ 
 		end = omp_get_wtime();
-		Log(logINFO) << "Canny :: " << "time elapsed " << end-start << std::endl;
+		Log(logINFO) << "findContours :: " << "time elapsed " << end-start << std::endl;
 	}
 	if(memoryChecking)
 	{	
 		double vm, rss;
 		getMemoryUsage(vm, rss);
-		Log(logINFO)<< "Canny :: VM usage :" << vm << std::endl 
+		Log(logINFO)<< "findContours :: VM usage :" << vm << std::endl 
 					<< "Resident set size :" << rss << std::endl;
 	}
     return SOAP_OK;
@@ -3827,6 +3830,10 @@ int getContourMode (const std::string& mode)
     else if(mode.compare("CV_RETR_LIST")==0) return CV_RETR_LIST;
     else if(mode.compare("CV_RETR_CCOMP")==0) return CV_RETR_CCOMP;
     else if(mode.compare("CV_RETR_TREE")==0) return CV_RETR_TREE;
+    else if(mode.compare("CV_CHAIN_APPROX_NONE")==0) return CV_CHAIN_APPROX_NONE;
+    else if(mode.compare("CV_CHAIN_APPROX_SIMPLE")==0) return CV_CHAIN_APPROX_SIMPLE;
+    else if(mode.compare("CV_CHAIN_APPROX_TC89_L1")==0) return CV_CHAIN_APPROX_TC89_L1;
+    else if(mode.compare("CV_CHAIN_APPROX_TC89_KCOS")==0) return CV_CHAIN_APPROX_TC89_KCOS;
     else return -1;
 
 }

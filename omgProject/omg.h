@@ -30,7 +30,7 @@ class ns__MatDetail
 };
 
 //gsoap ns service method-documentation: imgToMat Convert Image to Mat data (8UC1 gray scale image is default)
-int ns__imgToMat(std::string InputMatFilename, int colorflag=0, std::string types="CV_8UC1", std::string &OutputMatFilename);
+int ns__imRead(std::string InputMatFilename, int flag=0, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: MatToJPG Saving Mat to JPG image
 int ns__MatToJPG (std::string InputMatFilename, std::string &OutputMatFilename);
@@ -49,7 +49,8 @@ int ns__getStructuringElement( std::string StructuringShape="MORPH_ELLIPSE", int
 
 
 //gsoap ns service method-documentation: MorphologyEx Performs advanced morphological transformations
-int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", int anchorX_D=-1, int anchorY_D=-1, std::string StructuringElementFname, std::string StructuringShape="MORPH_ELLIPSE", int seSizeW_=3, int seSizeH_=3, std::string &OutputMatFilename);
+int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", std::string StructuringElementFname, int elementSizeW_D=3, int elementSizeH_D=3, int elementScalar_D=1,
+                        int iteration_D=1, int anchorX_D=-1, int anchorY_D=-1,std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: erode Erodes an image by using a specific structuring element
 int ns__erode(  std::string InputMatFilename, std::string StructuringElementFilename, int iteration_=1, int anchorX_D=-1, int anchorY_D=-1, std::string borderType_D ,std::string &OutputMatFilename );
@@ -88,7 +89,7 @@ int ns__zeros(int rows=0, int columns=0,std::string type="CV_32F", std::string &
 int ns__ones( int rows=0, int columns=0, std::string type="CV_32F", std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: createMat Allocates new array data if needed
-int ns__createMat(int rows=0, int columns=0, std::string type="CV_32F", std::string &OutputMatFilename );
+int ns__createMat(int rows=0, int columns=0, std::string type="CV_32F", int scalar=-1, std::string &OutputMatFilename );
   
 //gsoap ns service method-documentation: colRange Creates a matrix header for the specified column span
 int ns__colRange(std::string InputMatFilename,int startCol, int endCol,std::string &OutputMatFilename );       
@@ -201,3 +202,7 @@ int ns__Canny( std::string InputMatFilename, double threshold1, double threshold
 int ns__resize( std::string InputMatFilename, int dstRows=0, int dstCols=0,
             double fx_D=0, double fy_D=0, std::string interpolation_D,
 			std::string &OutputMatFilename);
+
+//gsoap ns service method-documentation: findContours 
+int ns__findContours( std::string InputMatFilename, std::string mode, std::string method,
+            int offsetX_D=-1, int offsetY_D=-1, std::string &OutputMatFilename);
