@@ -23,6 +23,15 @@ int getBorderType(std::string& bdType);
 int getMatDepth (const std::string& depth);
 int getInterpolation (const std::string& inter);
 int getContourMode (const std::string& mode);
+bool fileExists(const std::string& filename)
+{
+    struct stat buf;
+    if (stat(filename.c_str(), &buf) != -1)
+    {
+        return true;
+    }
+    return false;
+}
 
 
 /* Global Configuration */
@@ -98,7 +107,7 @@ int ns__imRead (struct soap *soap,
 }
 
 
-int ns__MatToJPG (struct soap *soap, std::string InputMatFilename,  
+int ns__imWrite (struct soap *soap, std::string InputMatFilename, std::string fileExtension=DEFAULTVAL, 
 					std::string &OutputMatFilename=ERROR_FILENAME)
 {
     bool timeChecking, memoryChecking;
@@ -126,10 +135,11 @@ int ns__MatToJPG (struct soap *soap, std::string InputMatFilename,
             return soap_receiver_fault(soap, e.what(), NULL);
         }
     }
+    
+    if(fileExtension == DEFAULTVAL) fileExtension = ".jpg" ;
 
     /* generate output file name */
-	std::string toAppend = ".jpg";
-    getOutputFilename(OutputMatFilename, toAppend);
+    getOutputFilename(OutputMatFilename, fileExtension);
 
     if(!imwrite(OutputMatFilename.c_str(), src))
     {
@@ -413,7 +423,6 @@ int ns__MorphologyEx( struct soap *soap,
 						std::string InputMatFilename,
 						std::string morphOperation=DEFAULTVAL,
                         std::string StructuringElementFname=ERROR_FILENAME,
-                        int elementSizeW_D=3, int elementSizeH_D=3, int elementScalar_D=1,
                         int iteration_D=1, 
                         int anchorX_D=-1, int anchorY_D=-1,
                         //~ std::string borderType_D=DEFAULTVAL,
@@ -439,13 +448,8 @@ int ns__MorphologyEx( struct soap *soap,
     
     if(StructuringElementFname.compare(ERROR_FILENAME)==0)
     { 
-        Mat element (elementSizeW_D, elementSizeH_D, CV_8U, Scalar(elementScalar_D));
-        try{
-            morphologyEx(src, dst, morphOpt, element, seAnc, iteration_D );
-        } catch( cv::Exception& e ) {
-        Log(logERROR) << e.what() << std::endl;
-        return soap_receiver_fault(soap, e.what(), NULL);
-        }
+        Log(logERROR) << "MorphologyEx :: Please enter StructuringElement Filename" << std::endl;
+        return soap_receiver_fault(soap, "MorphologyEx :: Please enter StructuringElement Filename", NULL);
         
     } else {
             Mat se;
@@ -456,7 +460,7 @@ int ns__MorphologyEx( struct soap *soap,
             }
 
             try{
-                morphologyEx(src, dst, morphOpt, se, iteration_D);
+                morphologyEx(src, dst, morphOpt, se, seAnc, iteration_D);
             } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
@@ -466,14 +470,13 @@ int ns__MorphologyEx( struct soap *soap,
 
     std::string toAppend = "_MorphologyEx";
     getOutputFilename(OutputMatFilename, toAppend);
-    if(!saveMat(OutputMatFilename, src))
+    if(!saveMat(OutputMatFilename, dst))
     {
         Log(logERROR) << "MorphologyEx :: can not save mat to binary file" << std::endl;
         return soap_receiver_fault(soap, "MorphologyEx :: can not save mat to binary file", NULL);
     }
 
     src.release();
-	se.release();
 	dst.release();
 	
 	if(timeChecking) 
@@ -766,8 +769,14 @@ int ns__And(  struct soap *soap,
     }
 
     Mat dst;
-    bitwise_and(matSrc1, matSrc2, dst);
-
+    
+    try{
+        bitwise_and(matSrc1, matSrc2, dst);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }   	
+	
     std::string toAppend = "_and";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
@@ -894,8 +903,13 @@ int ns__Not(  struct soap *soap,
         return soap_receiver_fault(soap, "Not :: can not read bin file for src", NULL);
     }
     
+    try{
         bitwise_not(matSrc, matSrc);
-
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }   	
+	
     
 	std::string toAppend = "_not";
     getOutputFilename(OutputMatFilename, toAppend);
@@ -1268,7 +1282,7 @@ int ns__ones(  struct soap *soap,
 int ns__createMat(  struct soap *soap, 
 			int rows=0, int cols=0,
 			std::string type=DEFAULTVAL,
-            int scalar=-1,
+            int scalar_=-1,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
 	bool timeChecking, memoryChecking;
@@ -1279,12 +1293,19 @@ int ns__createMat(  struct soap *soap,
 
     /* read from bin */
     Mat src;	
-	int matType = type == DEFAULTVAL? CV_32F : getMatDepth(type);
+	int matType = type == DEFAULTVAL? CV_8U : getMatDepth(type);
+
+    
 	if(rows != 0 && cols != 0)
     {
-        if(scalar =! -1){
+        
+        if( scalar_ != -1){
             try{
-            src.create(rows, cols, matType, scalar);
+                src = Mat(Size(rows, cols), matType, cv::Scalar(scalar_));
+                //~ Log(logDEBUG) << "rows :" << rows << std::endl;
+                //~ Log(logDEBUG) << "cols :" << cols << std::endl;
+                //~ Log(logDEBUG) << "scalar :" << scalar_ << std::endl;
+                //~ Log(logDEBUG) << "Mat :" << src << std::endl;
             } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
@@ -1305,6 +1326,7 @@ int ns__createMat(  struct soap *soap,
 	
 	std::string toAppend = "_createMat";
     getOutputFilename(OutputMatFilename, toAppend);
+    Log(logDEBUG)<< "OutputMatFilename :"<<OutputMatFilename<<std::endl;
     if(!saveMat(OutputMatFilename, src))
     {
         Log(logERROR) << "createMat :: can not save mat to binary file" << std::endl;
@@ -2917,8 +2939,13 @@ int ns__abs(  struct soap *soap,
     }
 	
     Mat dst;
-    dst = abs(src);
-	
+    try{
+        dst = abs(src);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }   	
+		
 	std::string toAppend = "_abs";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
@@ -2973,9 +3000,14 @@ int ns__absdiff(  struct soap *soap,
         return soap_receiver_fault(soap, "add :: can not read bin file for src2", NULL);
     }
     
-    absdiff(src1, src2, dst);
+    try{
+        absdiff(src1, src2, dst);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }   	
 	
-	std::string toAppend = "_absdiff";
+    std::string toAppend = "_absdiff";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
     {
@@ -3025,9 +3057,14 @@ int ns__sqrt(  struct soap *soap,
         return soap_receiver_fault(soap, "sqrt :: can not read bin file for src", NULL);
     }
 
-    sqrt(src, dst);
-
-	std::string toAppend = "_sqrt";
+    try{
+        sqrt(src, dst);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }    
+	
+    std::string toAppend = "_sqrt";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
     {
@@ -3135,6 +3172,7 @@ int ns__circle(  struct soap *soap,
 		Log(logERROR) << "circle :: can not read bin file for src" << std::endl;
         return soap_receiver_fault(soap, "circle :: can not read bin file for src", NULL);
     }
+    
     try{
         circle(src, Point(centerX, centerY), radius, Scalar(scalarColor0, scalarColor1, scalarColor2), thickness_D, lineType_D, shift_D);
     } catch( cv::Exception& e ) {
@@ -3295,8 +3333,8 @@ int ns__printAllMatValue ( struct soap *soap, std::string InputMatFilename,
     Mat src;
 	if(!readMat(InputMatFilename, src))
     {
-		Log(logERROR) << "accessPixelValue :: can not read bin file for src" << std::endl;
-        return soap_receiver_fault(soap, "accessPixelValue :: can not read bin file for src", NULL);
+		Log(logERROR) << "printAllMatValue :: can not read bin file for src" << std::endl;
+        return soap_receiver_fault(soap, "printAllMatValue :: can not read bin file for src", NULL);
     }
     
     std::stringstream ss;    
@@ -3308,14 +3346,14 @@ int ns__printAllMatValue ( struct soap *soap, std::string InputMatFilename,
     if(timeChecking) 
 	{ 
 		end = omp_get_wtime();
-		Log(logINFO) << "accessPixelValue :: " << "time elapsed " << end-start << std::endl;
+		Log(logINFO) << "printAllMatValue :: " << "time elapsed " << end-start << std::endl;
 	}
 	
 	if(memoryChecking)
 	{	
 		double vm, rss;
 		getMemoryUsage(vm, rss);
-		Log(logINFO)<< "accessPixelValue :: VM usage :" << vm << std::endl 
+		Log(logINFO)<< "printAllMatValue :: VM usage :" << vm << std::endl 
 					<< "Resident set size :" << rss << std::endl;
 	}
 
@@ -3463,8 +3501,13 @@ int ns__Canny(  struct soap *soap,
         return soap_receiver_fault(soap, "Canny :: can not read bin file for src", NULL);
     }
     
-    Canny(src, dst, threshold1, threshold2, apertureSize, L2gradient);
-    
+    try{
+        Canny(src, dst, threshold1, threshold2, apertureSize, L2gradient);
+    } catch( cv::Exception& e ) {
+        Log(logERROR) << e.what() << std::endl;
+        return soap_receiver_fault(soap, e.what(), NULL);
+    }   	
+	
 	std::string toAppend = "_Canny";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
@@ -3767,6 +3810,9 @@ void getOutputFilename (std::string& filename, std::string& toAppend=ERROR_FILEN
     time_t now = time(0);
     strftime(tmp, sizeof(tmp),"%Y%m%d_%H%M%S", localtime(&now));
 	filename = BASE_DIR + tmp + toAppend;
+    if(fileExists(filename)){
+        filename += "_2";
+    }
 }
 
 void getMemoryUsage (double& vm_usage, double& resident_set)
