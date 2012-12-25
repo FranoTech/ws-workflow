@@ -33,7 +33,7 @@ class ns__MatDetail
 int ns__imRead(std::string InputMatFilename, int flag=0, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: MatToJPG Saving Mat to JPG image
-int ns__MatToJPG (std::string InputMatFilename, std::string &OutputMatFilename);
+int ns__imWrite ( std::string InputMatFilename, std::string fileExtension, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: viewImage View an image in workbench
 int ns__viewImage( std::string InputMatFilename, ns__base64Binary &image);
@@ -49,8 +49,7 @@ int ns__getStructuringElement( std::string StructuringShape="MORPH_ELLIPSE", int
 
 
 //gsoap ns service method-documentation: MorphologyEx Performs advanced morphological transformations
-int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation="MORPH_OPEN", std::string StructuringElementFname, int elementSizeW_D=3, int elementSizeH_D=3, int elementScalar_D=1,
-                        int iteration_D=1, int anchorX_D=-1, int anchorY_D=-1,std::string &OutputMatFilename);
+int ns__MorphologyEx( std::string InputMatFilename, std::string morphOperation, std::string StructuringElementFname, int iteration_D=1, int anchorX_D=-1, int anchorY_D=-1,std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: erode Erodes an image by using a specific structuring element
 int ns__erode(  std::string InputMatFilename, std::string StructuringElementFilename, int iteration_=1, int anchorX_D=-1, int anchorY_D=-1, std::string borderType_D ,std::string &OutputMatFilename );
@@ -71,7 +70,7 @@ int ns__Xor(std::string src1, std::string src2, std::string &OutputMatFilename )
 int ns__Not(std::string src, std::string &OutputMatFilename );   
 
 //gsoap ns service method-documentation: Inverse Inverses a matrix
-int ns__Inverse( std::string InputMatFilename, std::string InvMethod_D="DECOMP_LU", std::string &OutputMatFilename );
+int ns__Inverse( std::string InputMatFilename, std::string InvMethod_D, std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: mul Performs an element-wise multiplication or division of the two matrices
 int ns__mul( std::string InputMatFilename, std::string AnotherMatFilename, double scale_D=1, std::string &OutputMatFilename );    
@@ -83,13 +82,13 @@ int ns__cross(  std::string InputMatFilename, std::string AnotherMatFilename, st
 int ns__dot(std::string InputMatFilename, std::string AnotherMatFilename, std::string &OutputMatFilename ) ;     
 
 //gsoap ns service method-documentation: zeros Returns a zero array of the specified size and type
-int ns__zeros(int rows=0, int columns=0,std::string type="CV_32F", std::string &OutputMatFilename );        
+int ns__zeros(int rows=0, int columns=0,std::string type, std::string &OutputMatFilename );        
 
 //gsoap ns service method-documentation: ones Returns an array of all 1’s of the specified size and type
-int ns__ones( int rows=0, int columns=0, std::string type="CV_32F", std::string &OutputMatFilename );
+int ns__ones( int rows=0, int columns=0, std::string type, std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: createMat Allocates new array data if needed
-int ns__createMat(int rows=0, int columns=0, std::string type="CV_32F", int scalar=-1, std::string &OutputMatFilename );
+int ns__createMat(int rows=0, int columns=0, std::string type, int scalar=-1, std::string &OutputMatFilename );
   
 //gsoap ns service method-documentation: colRange Creates a matrix header for the specified column span
 int ns__colRange(std::string InputMatFilename,int startCol, int endCol,std::string &OutputMatFilename );       
@@ -113,7 +112,7 @@ int ns__cvtColor( std::string InputMatFilename, std::string code, int dstChannel
 int ns__integral( std::string InputMatFilename, int sdepth_D=-1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: adaptiveThreshold Applies an adaptive threshold to an array
-int ns__adaptiveThreshold( std::string InputMatFilename, std::string adaptiveMethod, double maxValue=255.0, std::string thresholdType="THRESH_BINARY", int blockSize=3, double C=1, std::string &OutputMatFilename);
+int ns__adaptiveThreshold( std::string InputMatFilename, std::string adaptiveMethod, double maxValue=255.0, std::string thresholdType, int blockSize=3, double C=1, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: adjustBrighnessAndContrast simple brighness and contrast control (alpha value [1.0-3.0], beta value [0-100])
 int ns__adjustBrighnessAndContrast( std::string InputMatFilename, double alpha, int beta, std::string &OutputMatFilename);
