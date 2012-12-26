@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="highGUI"
+ targetNamespace="http://localhost/highGUI.wsdl"
+ xmlns:tns="http://localhost/highGUI.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:gui"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:gui"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:gui"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <simpleType name="base64Binary"><!-- ns__base64Binary -->
+
+   <restriction base="xsd:base64Binary">
+    <maxLength value="9223372036854775807"/>
+   </restriction>
+  </simpleType>
+ </schema>
+
+</types>
+
+<message name="imReadRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__imRead::InputMatFilename -->
+ <part name="flag" type="xsd:int"/><!-- ns__imRead::flag -->
+</message>
+
+<message name="imReadResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__imRead::OutputMatFilename -->
+</message>
+
+<message name="imWriteRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__imWrite::InputMatFilename -->
+ <part name="fileExtension" type="xsd:string"/><!-- ns__imWrite::fileExtension -->
+</message>
+
+<message name="imWriteResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__imWrite::OutputMatFilename -->
+</message>
+
+<message name="viewImageRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__viewImage::InputMatFilename -->
+</message>
+
+<message name="viewImageResponse">
+ <part name="image" type="ns:base64Binary"/><!-- ns__viewImage::image -->
+</message>
+
+<portType name="highGUIPortType">
+ <operation name="imRead">
+  <documentation>Service definition of function ns__imRead</documentation>
+  <input message="tns:imReadRequest"/>
+  <output message="tns:imReadResponse"/>
+ </operation>
+ <operation name="imWrite">
+  <documentation>Service definition of function ns__imWrite</documentation>
+  <input message="tns:imWriteRequest"/>
+  <output message="tns:imWriteResponse"/>
+ </operation>
+ <operation name="viewImage">
+  <documentation>View an image in workbench</documentation>
+  <input message="tns:viewImageRequest"/>
+  <output message="tns:viewImageResponse"/>
+ </operation>
+</portType>
+
+<binding name="highGUI" type="tns:highGUIPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="imRead">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:gui" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:gui" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="imWrite">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:gui" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:gui" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="viewImage">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:gui" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:gui" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="highGUI">
+ <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <port name="highGUI" binding="tns:highGUI">
+  <SOAP:address location="http://localhost/cgi-bin/highGUIServer"/>
+ </port>
+</service>
+
+</definitions>

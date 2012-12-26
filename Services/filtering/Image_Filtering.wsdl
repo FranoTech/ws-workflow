@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Image_Filtering"
+ targetNamespace="http://localhost/Image_Filtering.wsdl"
+ xmlns:tns="http://localhost/Image_Filtering.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:filt"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:filt"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:filt"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="blurRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__blur::InputMatFilename -->
+ <part name="kernelRows" type="xsd:int"/><!-- ns__blur::kernelRows -->
+ <part name="kernelCols" type="xsd:int"/><!-- ns__blur::kernelCols -->
+ <part name="anchorX-D" type="xsd:int"/><!-- ns__blur::anchorX_D -->
+ <part name="anchorY-D" type="xsd:int"/><!-- ns__blur::anchorY_D -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__blur::borderType_D -->
+</message>
+
+<message name="blurResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__blur::OutputMatFilename -->
+</message>
+
+<message name="GaussianBlurRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__GaussianBlur::InputMatFilename -->
+ <part name="kernelRows" type="xsd:int"/><!-- ns__GaussianBlur::kernelRows -->
+ <part name="kernelCols" type="xsd:int"/><!-- ns__GaussianBlur::kernelCols -->
+ <part name="sigmaX" type="xsd:double"/><!-- ns__GaussianBlur::sigmaX -->
+ <part name="sigmaY-D" type="xsd:double"/><!-- ns__GaussianBlur::sigmaY_D -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__GaussianBlur::borderType_D -->
+</message>
+
+<message name="GaussianBlurResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__GaussianBlur::OutputMatFilename -->
+</message>
+
+<message name="erodeRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__erode::InputMatFilename -->
+ <part name="StructuringElementFilename" type="xsd:string"/><!-- ns__erode::StructuringElementFilename -->
+ <part name="iteration" type="xsd:int"/><!-- ns__erode::iteration_ -->
+ <part name="anchorX-D" type="xsd:int"/><!-- ns__erode::anchorX_D -->
+ <part name="anchorY-D" type="xsd:int"/><!-- ns__erode::anchorY_D -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__erode::borderType_D -->
+</message>
+
+<message name="erodeResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__erode::OutputMatFilename -->
+</message>
+
+<message name="dilateRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__dilate::InputMatFilename -->
+ <part name="StructuringElementFilename" type="xsd:string"/><!-- ns__dilate::StructuringElementFilename -->
+ <part name="iteration" type="xsd:int"/><!-- ns__dilate::iteration_ -->
+ <part name="anchorX-D" type="xsd:int"/><!-- ns__dilate::anchorX_D -->
+ <part name="anchorY-D" type="xsd:int"/><!-- ns__dilate::anchorY_D -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__dilate::borderType_D -->
+</message>
+
+<message name="dilateResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__dilate::OutputMatFilename -->
+</message>
+
+<message name="filter2DRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__filter2D::InputMatFilename -->
+ <part name="ddepth" type="xsd:int"/><!-- ns__filter2D::ddepth -->
+ <part name="kernelFname" type="xsd:string"/><!-- ns__filter2D::kernelFname -->
+ <part name="anchorX-D" type="xsd:int"/><!-- ns__filter2D::anchorX_D -->
+ <part name="anchorY-D" type="xsd:int"/><!-- ns__filter2D::anchorY_D -->
+ <part name="delta-D" type="xsd:double"/><!-- ns__filter2D::delta_D -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__filter2D::borderType_D -->
+</message>
+
+<message name="filter2DResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__filter2D::OutputMatFilename -->
+</message>
+
+<message name="getStructuringElementRequest">
+ <part name="StructuringShape" type="xsd:string"/><!-- ns__getStructuringElement::StructuringShape -->
+ <part name="seSizeW" type="xsd:int"/><!-- ns__getStructuringElement::seSizeW -->
+ <part name="seSizeH" type="xsd:int"/><!-- ns__getStructuringElement::seSizeH -->
+ <part name="anchorX-D" type="xsd:int"/><!-- ns__getStructuringElement::anchorX_D -->
+ <part name="anchorY-D" type="xsd:int"/><!-- ns__getStructuringElement::anchorY_D -->
+</message>
+
+<message name="getStructuringElementResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__getStructuringElement::OutputMatFilename -->
+</message>
+
+<message name="medianBlurRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__medianBlur::InputMatFilename -->
+ <part name="kSize-D" type="xsd:int"/><!-- ns__medianBlur::kSize_D -->
+</message>
+
+<message name="medianBlurResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__medianBlur::OutputMatFilename -->
+</message>
+
+<message name="MorphologyExRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__MorphologyEx::InputMatFilename -->
+ <part name="morphOperation" type="xsd:string"/><!-- ns__MorphologyEx::morphOperation -->
+ <part name="StructuringElementFname" type="xsd:string"/><!-- ns__MorphologyEx::StructuringElementFname -->
+ <part name="iteration-D" type="xsd:int"/><!-- ns__MorphologyEx::iteration_D -->
+ <part name="anchorX-D" type="xsd:int"/><!-- ns__MorphologyEx::anchorX_D -->
+ <part name="anchorY-D" type="xsd:int"/><!-- ns__MorphologyEx::anchorY_D -->
+</message>
+
+<message name="MorphologyExResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__MorphologyEx::OutputMatFilename -->
+</message>
+
+<message name="LaplacianRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__Laplacian::InputMatFilename -->
+ <part name="ddepth" type="xsd:string"/><!-- ns__Laplacian::ddepth -->
+ <part name="ksize-D" type="xsd:int"/><!-- ns__Laplacian::ksize_D -->
+ <part name="scale-D" type="xsd:double"/><!-- ns__Laplacian::scale_D -->
+ <part name="delta-D" type="xsd:double"/><!-- ns__Laplacian::delta_D -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__Laplacian::borderType_D -->
+</message>
+
+<message name="LaplacianResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Laplacian::OutputMatFilename -->
+</message>
+
+<message name="pyrDownRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__pyrDown::InputMatFilename -->
+ <part name="rows" type="xsd:int"/><!-- ns__pyrDown::rows -->
+ <part name="cols" type="xsd:int"/><!-- ns__pyrDown::cols -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__pyrDown::borderType_D -->
+</message>
+
+<message name="pyrDownResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__pyrDown::OutputMatFilename -->
+</message>
+
+<message name="pyrUpRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__pyrUp::InputMatFilename -->
+ <part name="rows" type="xsd:int"/><!-- ns__pyrUp::rows -->
+ <part name="cols" type="xsd:int"/><!-- ns__pyrUp::cols -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__pyrUp::borderType_D -->
+</message>
+
+<message name="pyrUpResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__pyrUp::OutputMatFilename -->
+</message>
+
+<message name="SobelRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__Sobel::InputMatFilename -->
+ <part name="ddepth" type="xsd:string"/><!-- ns__Sobel::ddepth -->
+ <part name="kSize-D" type="xsd:int"/><!-- ns__Sobel::kSize_D -->
+ <part name="scale-D" type="xsd:double"/><!-- ns__Sobel::scale_D -->
+ <part name="delta-D" type="xsd:double"/><!-- ns__Sobel::delta_D -->
+ <part name="dx" type="xsd:int"/><!-- ns__Sobel::dx -->
+ <part name="dy" type="xsd:int"/><!-- ns__Sobel::dy -->
+ <part name="borderType-D" type="xsd:string"/><!-- ns__Sobel::borderType_D -->
+</message>
+
+<message name="SobelResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Sobel::OutputMatFilename -->
+</message>
+
+<portType name="Image_FilteringPortType">
+ <operation name="blur">
+  <documentation>Smoothes an image using the normalized box filter</documentation>
+  <input message="tns:blurRequest"/>
+  <output message="tns:blurResponse"/>
+ </operation>
+ <operation name="GaussianBlur">
+  <documentation>Smoothes an image using a Gaussian filter</documentation>
+  <input message="tns:GaussianBlurRequest"/>
+  <output message="tns:GaussianBlurResponse"/>
+ </operation>
+ <operation name="erode">
+  <documentation>Erodes an image by using a specific structuring element</documentation>
+  <input message="tns:erodeRequest"/>
+  <output message="tns:erodeResponse"/>
+ </operation>
+ <operation name="dilate">
+  <documentation>Dilates an image by using a specific structuring element</documentation>
+  <input message="tns:dilateRequest"/>
+  <output message="tns:dilateResponse"/>
+ </operation>
+ <operation name="filter2D">
+  <documentation>Convolves an image with the kernel</documentation>
+  <input message="tns:filter2DRequest"/>
+  <output message="tns:filter2DResponse"/>
+ </operation>
+ <operation name="getStructuringElement">
+  <documentation>Returns a structuring element of the specified size and shape for morphological operations</documentation>
+  <input message="tns:getStructuringElementRequest"/>
+  <output message="tns:getStructuringElementResponse"/>
+ </operation>
+ <operation name="medianBlur">
+  <documentation>Smoothes an image using the median filter</documentation>
+  <input message="tns:medianBlurRequest"/>
+  <output message="tns:medianBlurResponse"/>
+ </operation>
+ <operation name="MorphologyEx">
+  <documentation>Performs advanced morphological transformations</documentation>
+  <input message="tns:MorphologyExRequest"/>
+  <output message="tns:MorphologyExResponse"/>
+ </operation>
+ <operation name="Laplacian">
+  <documentation>Calculates the Laplacian of an image</documentation>
+  <input message="tns:LaplacianRequest"/>
+  <output message="tns:LaplacianResponse"/>
+ </operation>
+ <operation name="pyrDown">
+  <documentation>Smoothes an image and downsamples it</documentation>
+  <input message="tns:pyrDownRequest"/>
+  <output message="tns:pyrDownResponse"/>
+ </operation>
+ <operation name="pyrUp">
+  <documentation>Upsamples an image and then smoothes it</documentation>
+  <input message="tns:pyrUpRequest"/>
+  <output message="tns:pyrUpResponse"/>
+ </operation>
+ <operation name="Sobel">
+  <documentation>Calculates the first, second, third, or mixed image derivatives using an extended Sobel operator</documentation>
+  <input message="tns:SobelRequest"/>
+  <output message="tns:SobelResponse"/>
+ </operation>
+</portType>
+
+<binding name="Image_Filtering" type="tns:Image_FilteringPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="blur">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="GaussianBlur">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="erode">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="dilate">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="filter2D">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="getStructuringElement">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="medianBlur">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="MorphologyEx">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Laplacian">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="pyrDown">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="pyrUp">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Sobel">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:filt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="Image_Filtering">
+ <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <port name="Image_Filtering" binding="tns:Image_Filtering">
+  <SOAP:address location="http://localhost/cgi-bin/ImageFilteringServer"/>
+ </port>
+</service>
+
+</definitions>

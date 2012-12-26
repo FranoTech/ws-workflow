@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:filt">
+ <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <ns:GaussianBlur>
+   <InputMatFilename></InputMatFilename>
+   <kernelRows>1</kernelRows>
+   <kernelCols>1</kernelCols>
+   <sigmaX>0.000000</sigmaX>
+   <sigmaY-D>0.000000</sigmaY-D>
+   <borderType-D></borderType-D>
+  </ns:GaussianBlur>
+ </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

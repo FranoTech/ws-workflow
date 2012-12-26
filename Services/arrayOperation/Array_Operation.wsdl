@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Array_Operation"
+ targetNamespace="http://localhost/Array_Operation.wsdl"
+ xmlns:tns="http://localhost/Array_Operation.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:aropt"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:aropt"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:aropt"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="OrRequest">
+ <part name="src1" type="xsd:string"/><!-- ns__Or::src1 -->
+ <part name="src2" type="xsd:string"/><!-- ns__Or::src2 -->
+</message>
+
+<message name="OrResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Or::OutputMatFilename -->
+</message>
+
+<message name="AndRequest">
+ <part name="src1" type="xsd:string"/><!-- ns__And::src1 -->
+ <part name="src2" type="xsd:string"/><!-- ns__And::src2 -->
+</message>
+
+<message name="AndResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__And::OutputMatFilename -->
+</message>
+
+<message name="XorRequest">
+ <part name="src1" type="xsd:string"/><!-- ns__Xor::src1 -->
+ <part name="src2" type="xsd:string"/><!-- ns__Xor::src2 -->
+</message>
+
+<message name="XorResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Xor::OutputMatFilename -->
+</message>
+
+<message name="NotRequest">
+ <part name="src" type="xsd:string"/><!-- ns__Not::src -->
+</message>
+
+<message name="NotResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Not::OutputMatFilename -->
+</message>
+
+<message name="addWeightedRequest">
+ <part name="InputMatFilename1" type="xsd:string"/><!-- ns__addWeighted::InputMatFilename1 -->
+ <part name="alpha" type="xsd:double"/><!-- ns__addWeighted::alpha -->
+ <part name="InputMatFilename2" type="xsd:string"/><!-- ns__addWeighted::InputMatFilename2 -->
+ <part name="beta" type="xsd:double"/><!-- ns__addWeighted::beta -->
+ <part name="gamma" type="xsd:double"/><!-- ns__addWeighted::gamma -->
+ <part name="dtype-D" type="xsd:int"/><!-- ns__addWeighted::dtype_D -->
+</message>
+
+<message name="addWeightedResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__addWeighted::OutputMatFilename -->
+</message>
+
+<message name="addRequest">
+ <part name="InputMatFilename1" type="xsd:string"/><!-- ns__add::InputMatFilename1 -->
+ <part name="InputMatFilename2" type="xsd:string"/><!-- ns__add::InputMatFilename2 -->
+ <part name="maskFilename-D" type="xsd:string"/><!-- ns__add::maskFilename_D -->
+ <part name="dtype-D" type="xsd:int"/><!-- ns__add::dtype_D -->
+</message>
+
+<message name="addResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__add::OutputMatFilename -->
+</message>
+
+<message name="subtractRequest">
+ <part name="InputMatFilename1" type="xsd:string"/><!-- ns__subtract::InputMatFilename1 -->
+ <part name="InputMatFilename2" type="xsd:string"/><!-- ns__subtract::InputMatFilename2 -->
+ <part name="maskFilename-D" type="xsd:string"/><!-- ns__subtract::maskFilename_D -->
+ <part name="dtype-D" type="xsd:int"/><!-- ns__subtract::dtype_D -->
+</message>
+
+<message name="subtractResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__subtract::OutputMatFilename -->
+</message>
+
+<message name="absRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__abs::InputMatFilename -->
+</message>
+
+<message name="absResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__abs::OutputMatFilename -->
+</message>
+
+<message name="absdiffRequest">
+ <part name="InputMatFilename1" type="xsd:string"/><!-- ns__absdiff::InputMatFilename1 -->
+ <part name="InputMatFilename2" type="xsd:string"/><!-- ns__absdiff::InputMatFilename2 -->
+</message>
+
+<message name="absdiffResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__absdiff::OutputMatFilename -->
+</message>
+
+<message name="sqrtRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__sqrt::InputMatFilename -->
+</message>
+
+<message name="sqrtResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__sqrt::OutputMatFilename -->
+</message>
+
+<portType name="Array_OperationPortType">
+ <operation name="Or">
+  <documentation>Calculates the per-element bit-wise disjunction of two arrays</documentation>
+  <input message="tns:OrRequest"/>
+  <output message="tns:OrResponse"/>
+ </operation>
+ <operation name="And">
+  <documentation>Calculates the per-element bit-wise conjunction of two arrays</documentation>
+  <input message="tns:AndRequest"/>
+  <output message="tns:AndResponse"/>
+ </operation>
+ <operation name="Xor">
+  <documentation>Calculates the per-element bit-wise “exclusive or” operation on two arrays</documentation>
+  <input message="tns:XorRequest"/>
+  <output message="tns:XorResponse"/>
+ </operation>
+ <operation name="Not">
+  <documentation>Inverts every bit of an array</documentation>
+  <input message="tns:NotRequest"/>
+  <output message="tns:NotResponse"/>
+ </operation>
+ <operation name="addWeighted">
+  <documentation>Computes the weighted sum of two arrays</documentation>
+  <input message="tns:addWeightedRequest"/>
+  <output message="tns:addWeightedResponse"/>
+ </operation>
+ <operation name="add">
+  <documentation>Computes the per-element sum of two arrays or an array and a scalar</documentation>
+  <input message="tns:addRequest"/>
+  <output message="tns:addResponse"/>
+ </operation>
+ <operation name="subtract">
+  <documentation>Calculates the per-element difference between two arrays or array and a scalar</documentation>
+  <input message="tns:subtractRequest"/>
+  <output message="tns:subtractResponse"/>
+ </operation>
+ <operation name="abs">
+  <documentation>Computes an absolute value of each matrix element</documentation>
+  <input message="tns:absRequest"/>
+  <output message="tns:absResponse"/>
+ </operation>
+ <operation name="absdiff">
+  <documentation>Computes the per-element absolute difference between two arrays or between an array and a scalar</documentation>
+  <input message="tns:absdiffRequest"/>
+  <output message="tns:absdiffResponse"/>
+ </operation>
+ <operation name="sqrt">
+  <documentation>Calculates a square root of array elements</documentation>
+  <input message="tns:sqrtRequest"/>
+  <output message="tns:sqrtResponse"/>
+ </operation>
+</portType>
+
+<binding name="Array_Operation" type="tns:Array_OperationPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="Or">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="And">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Xor">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Not">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="addWeighted">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="add">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="subtract">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="abs">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="absdiff">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="sqrt">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:aropt" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="Array_Operation">
+ <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <port name="Array_Operation" binding="tns:Array_Operation">
+  <SOAP:address location="http://localhost/cgi-bin/ArrayOperationServer"/>
+ </port>
+</service>
+
+</definitions>
