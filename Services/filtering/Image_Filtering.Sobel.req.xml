@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:filt">
+ <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <ns:Sobel>
+   <InputMatFilename></InputMatFilename>
+   <ddepth>CV_8U</ddepth>
+   <kSize-D>3</kSize-D>
+   <scale-D>1.000000</scale-D>
+   <delta-D>0.000000</delta-D>
+   <dx>0</dx>
+   <dy>0</dy>
+   <borderType-D></borderType-D>
+  </ns:Sobel>
+ </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

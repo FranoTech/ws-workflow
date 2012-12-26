@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:trn">
+ <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <ns:adaptiveThreshold>
+   <InputMatFilename></InputMatFilename>
+   <adaptiveMethod></adaptiveMethod>
+   <maxValue>255.000000</maxValue>
+   <thresholdType></thresholdType>
+   <blockSize>3</blockSize>
+   <C>1.000000</C>
+  </ns:adaptiveThreshold>
+ </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

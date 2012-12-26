@@ -1,0 +1,5 @@
+File file = new File(filename);
+FileInputStream fin = new FileInputStream(file);
+byte[] fileContent = new byte[(int)file.length()];
+fin.read(fileContent);
+image = fileContent

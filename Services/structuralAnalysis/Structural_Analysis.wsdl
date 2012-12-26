@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Structural_Analysis"
+ targetNamespace="http://localhost/Structural_Analysis.wsdl"
+ xmlns:tns="http://localhost/Structural_Analysis.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:str"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:str"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:str"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="findContoursRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__findContours::InputMatFilename -->
+ <part name="mode" type="xsd:string"/><!-- ns__findContours::mode -->
+ <part name="method" type="xsd:string"/><!-- ns__findContours::method -->
+ <part name="offsetX-D" type="xsd:int"/><!-- ns__findContours::offsetX_D -->
+ <part name="offsetY-D" type="xsd:int"/><!-- ns__findContours::offsetY_D -->
+</message>
+
+<message name="findContoursResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__findContours::OutputMatFilename -->
+</message>
+
+<message name="resizeRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__resize::InputMatFilename -->
+ <part name="dstRows" type="xsd:int"/><!-- ns__resize::dstRows -->
+ <part name="dstCols" type="xsd:int"/><!-- ns__resize::dstCols -->
+ <part name="fx-D" type="xsd:double"/><!-- ns__resize::fx_D -->
+ <part name="fy-D" type="xsd:double"/><!-- ns__resize::fy_D -->
+ <part name="interpolation-D" type="xsd:string"/><!-- ns__resize::interpolation_D -->
+</message>
+
+<message name="resizeResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__resize::OutputMatFilename -->
+</message>
+
+<portType name="Structural_AnalysisPortType">
+ <operation name="findContours">
+  <documentation>Service definition of function ns__findContours</documentation>
+  <input message="tns:findContoursRequest"/>
+  <output message="tns:findContoursResponse"/>
+ </operation>
+ <operation name="resize">
+  <documentation>Resizes an image</documentation>
+  <input message="tns:resizeRequest"/>
+  <output message="tns:resizeResponse"/>
+ </operation>
+</portType>
+
+<binding name="Structural_Analysis" type="tns:Structural_AnalysisPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="findContours">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:str" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:str" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="resize">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:str" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:str" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="Structural_Analysis">
+ <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <port name="Structural_Analysis" binding="tns:Structural_Analysis">
+  <SOAP:address location="http://localhost/cgi-bin/StructuralAnalysisServer"/>
+ </port>
+</service>
+
+</definitions>

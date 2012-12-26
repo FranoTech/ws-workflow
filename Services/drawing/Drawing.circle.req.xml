@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:draw">
+ <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <ns:circle>
+   <InputMatFilename></InputMatFilename>
+   <centerX>0</centerX>
+   <centerY>0</centerY>
+   <radius>0</radius>
+   <scalarColor0>0</scalarColor0>
+   <scalarColor1>0</scalarColor1>
+   <scalarColor2>0</scalarColor2>
+   <thickness-D>1</thickness-D>
+   <lineType-D>8</lineType-D>
+   <shift-D>0</shift-D>
+  </ns:circle>
+ </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

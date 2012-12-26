@@ -1,0 +1,6 @@
+#!/bin/bash
+rm -rf soap*
+rm -rf *.wsdl
+rm -rf *.xsd
+rm -rf *.xml
+rm -rf *.nsmap

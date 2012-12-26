@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:fea">
+ <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <ns:Canny>
+   <InputMatFilename></InputMatFilename>
+   <threshold1>0.0</threshold1>
+   <threshold2>0.0</threshold2>
+   <apertureSize-D>3</apertureSize-D>
+   <L2gradient-D>0</L2gradient-D>
+  </ns:Canny>
+ </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

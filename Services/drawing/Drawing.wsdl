@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Drawing"
+ targetNamespace="http://localhost/Drawing.wsdl"
+ xmlns:tns="http://localhost/Drawing.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:draw"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:draw"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:draw"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="circleRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__circle::InputMatFilename -->
+ <part name="centerX" type="xsd:int"/><!-- ns__circle::centerX -->
+ <part name="centerY" type="xsd:int"/><!-- ns__circle::centerY -->
+ <part name="radius" type="xsd:int"/><!-- ns__circle::radius -->
+ <part name="scalarColor0" type="xsd:int"/><!-- ns__circle::scalarColor0 -->
+ <part name="scalarColor1" type="xsd:int"/><!-- ns__circle::scalarColor1 -->
+ <part name="scalarColor2" type="xsd:int"/><!-- ns__circle::scalarColor2 -->
+ <part name="thickness-D" type="xsd:int"/><!-- ns__circle::thickness_D -->
+ <part name="lineType-D" type="xsd:int"/><!-- ns__circle::lineType_D -->
+ <part name="shift-D" type="xsd:int"/><!-- ns__circle::shift_D -->
+</message>
+
+<message name="circleResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__circle::OutputMatFilename -->
+</message>
+
+<message name="ellipseRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__ellipse::InputMatFilename -->
+ <part name="centerX" type="xsd:int"/><!-- ns__ellipse::centerX -->
+ <part name="centerY" type="xsd:int"/><!-- ns__ellipse::centerY -->
+ <part name="axeX" type="xsd:int"/><!-- ns__ellipse::axeX -->
+ <part name="axeY" type="xsd:int"/><!-- ns__ellipse::axeY -->
+ <part name="angle" type="xsd:double"/><!-- ns__ellipse::angle -->
+ <part name="startAngle" type="xsd:double"/><!-- ns__ellipse::startAngle -->
+ <part name="endAngle" type="xsd:double"/><!-- ns__ellipse::endAngle -->
+ <part name="scalarColor0" type="xsd:int"/><!-- ns__ellipse::scalarColor0 -->
+ <part name="scalarColor1" type="xsd:int"/><!-- ns__ellipse::scalarColor1 -->
+ <part name="scalarColor2" type="xsd:int"/><!-- ns__ellipse::scalarColor2 -->
+ <part name="thickness-D" type="xsd:int"/><!-- ns__ellipse::thickness_D -->
+ <part name="lineType-D" type="xsd:int"/><!-- ns__ellipse::lineType_D -->
+ <part name="shift-D" type="xsd:int"/><!-- ns__ellipse::shift_D -->
+</message>
+
+<message name="ellipseResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__ellipse::OutputMatFilename -->
+</message>
+
+<portType name="DrawingPortType">
+ <operation name="circle">
+  <documentation>Draws a simple or filled circle with a given center and radius</documentation>
+  <input message="tns:circleRequest"/>
+  <output message="tns:circleResponse"/>
+ </operation>
+ <operation name="ellipse">
+  <documentation>Draws a simple or thick elliptic arc or fills an ellipse sector</documentation>
+  <input message="tns:ellipseRequest"/>
+  <output message="tns:ellipseResponse"/>
+ </operation>
+</portType>
+
+<binding name="Drawing" type="tns:DrawingPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="circle">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:draw" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:draw" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="ellipse">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:draw" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:draw" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="Drawing">
+ <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <port name="Drawing" binding="tns:Drawing">
+  <SOAP:address location="http://localhost/cgi-bin/DrawingServer"/>
+ </port>
+</service>
+
+</definitions>

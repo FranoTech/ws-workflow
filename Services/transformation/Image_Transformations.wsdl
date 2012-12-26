@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Image_Transformations"
+ targetNamespace="http://localhost/Image_Transformations.wsdl"
+ xmlns:tns="http://localhost/Image_Transformations.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:trn"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:trn"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:trn"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="ThresholdRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__Threshold::InputMatFilename -->
+ <part name="thresholdValue" type="xsd:double"/><!-- ns__Threshold::thresholdValue -->
+ <part name="maxValue" type="xsd:double"/><!-- ns__Threshold::maxValue -->
+ <part name="thresholdType" type="xsd:string"/><!-- ns__Threshold::thresholdType -->
+</message>
+
+<message name="ThresholdResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Threshold::OutputMatFilename -->
+</message>
+
+<message name="cvtColorRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__cvtColor::InputMatFilename -->
+ <part name="code" type="xsd:string"/><!-- ns__cvtColor::code -->
+ <part name="dstChannel-D" type="xsd:int"/><!-- ns__cvtColor::dstChannel_D -->
+</message>
+
+<message name="cvtColorResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__cvtColor::OutputMatFilename -->
+</message>
+
+<message name="integralRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__integral::InputMatFilename -->
+ <part name="sdepth-D" type="xsd:int"/><!-- ns__integral::sdepth_D -->
+</message>
+
+<message name="integralResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__integral::OutputMatFilename -->
+</message>
+
+<message name="adaptiveThresholdRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__adaptiveThreshold::InputMatFilename -->
+ <part name="adaptiveMethod" type="xsd:string"/><!-- ns__adaptiveThreshold::adaptiveMethod -->
+ <part name="maxValue" type="xsd:double"/><!-- ns__adaptiveThreshold::maxValue -->
+ <part name="thresholdType" type="xsd:string"/><!-- ns__adaptiveThreshold::thresholdType -->
+ <part name="blockSize" type="xsd:int"/><!-- ns__adaptiveThreshold::blockSize -->
+ <part name="C" type="xsd:double"/><!-- ns__adaptiveThreshold::C -->
+</message>
+
+<message name="adaptiveThresholdResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__adaptiveThreshold::OutputMatFilename -->
+</message>
+
+<message name="adjustBrighnessAndContrastRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__adjustBrighnessAndContrast::InputMatFilename -->
+ <part name="alpha" type="xsd:double"/><!-- ns__adjustBrighnessAndContrast::alpha -->
+ <part name="beta" type="xsd:int"/><!-- ns__adjustBrighnessAndContrast::beta -->
+</message>
+
+<message name="adjustBrighnessAndContrastResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__adjustBrighnessAndContrast::OutputMatFilename -->
+</message>
+
+<message name="watershedRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__watershed::InputMatFilename -->
+ <part name="MarkerMatFilename" type="xsd:string"/><!-- ns__watershed::MarkerMatFilename -->
+</message>
+
+<message name="watershedResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__watershed::OutputMatFilename -->
+</message>
+
+<portType name="Image_TransformationsPortType">
+ <operation name="Threshold">
+  <documentation>Applies a fixed-level threshold to each array element</documentation>
+  <input message="tns:ThresholdRequest"/>
+  <output message="tns:ThresholdResponse"/>
+ </operation>
+ <operation name="cvtColor">
+  <documentation>Converts an image from one color space to another</documentation>
+  <input message="tns:cvtColorRequest"/>
+  <output message="tns:cvtColorResponse"/>
+ </operation>
+ <operation name="integral">
+  <documentation>Calculates the integral of an image</documentation>
+  <input message="tns:integralRequest"/>
+  <output message="tns:integralResponse"/>
+ </operation>
+ <operation name="adaptiveThreshold">
+  <documentation>Applies an adaptive threshold to an array</documentation>
+  <input message="tns:adaptiveThresholdRequest"/>
+  <output message="tns:adaptiveThresholdResponse"/>
+ </operation>
+ <operation name="adjustBrighnessAndContrast">
+  <documentation>simple brighness and contrast control (alpha value [1.0-3.0], beta value [0-100])</documentation>
+  <input message="tns:adjustBrighnessAndContrastRequest"/>
+  <output message="tns:adjustBrighnessAndContrastResponse"/>
+ </operation>
+ <operation name="watershed">
+  <documentation>Performs a marker-based image segmentation using the watershed algorithm</documentation>
+  <input message="tns:watershedRequest"/>
+  <output message="tns:watershedResponse"/>
+ </operation>
+</portType>
+
+<binding name="Image_Transformations" type="tns:Image_TransformationsPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="Threshold">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="cvtColor">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="integral">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="adaptiveThreshold">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="adjustBrighnessAndContrast">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="watershed">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:trn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="Image_Transformations">
+ <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <port name="Image_Transformations" binding="tns:Image_Transformations">
+  <SOAP:address location="http://localhost/cgi-bin/ImageTransformationsServer"/>
+ </port>
+</service>
+
+</definitions>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Feature_Detection"
+ targetNamespace="http://localhost/Feature_Detection.wsdl"
+ xmlns:tns="http://localhost/Feature_Detection.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:fea"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:fea"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:fea"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="CannyRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__Canny::InputMatFilename -->
+ <part name="threshold1" type="xsd:double"/><!-- ns__Canny::threshold1 -->
+ <part name="threshold2" type="xsd:double"/><!-- ns__Canny::threshold2 -->
+ <part name="apertureSize-D" type="xsd:int"/><!-- ns__Canny::apertureSize_D -->
+ <part name="L2gradient-D" type="xsd:int"/><!-- ns__Canny::L2gradient_D -->
+</message>
+
+<message name="CannyResponse">
+ <part name="OutputMatFilenameE" type="xsd:string"/><!-- ns__Canny::OutputMatFilenameE -->
+</message>
+
+<portType name="Feature_DetectionPortType">
+ <operation name="Canny">
+  <documentation>Finds edges in an image using the Canny86 algorithm</documentation>
+  <input message="tns:CannyRequest"/>
+  <output message="tns:CannyResponse"/>
+ </operation>
+</portType>
+
+<binding name="Feature_Detection" type="tns:Feature_DetectionPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="Canny">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:fea" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:fea" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="Feature_Detection">
+ <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <port name="Feature_Detection" binding="tns:Feature_Detection">
+  <SOAP:address location="http://localhost/cgi-bin/FeatureDetectionServer"/>
+ </port>
+</service>
+
+</definitions>

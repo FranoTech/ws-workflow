@@ -1,0 +1,60 @@
+<serviceDescriptions xmlns="http://taverna.sf.net/2009/xml/servicedescription">
+  <providers>
+    <provider>
+      <providerId xmlns="http://taverna.sf.net/2008/xml/t2flow">http://taverna.sf.net/2010/service-provider/wsdl</providerId>
+      <configBean xmlns="http://taverna.sf.net/2008/xml/t2flow" encoding="xstream">
+        <net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig xmlns="">
+          <uri>http://localhost/Array_Operation.wsdl</uri>
+        </net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig>
+      </configBean>
+    </provider>
+    <provider>
+      <providerId xmlns="http://taverna.sf.net/2008/xml/t2flow">http://taverna.sf.net/2010/service-provider/wsdl</providerId>
+      <configBean xmlns="http://taverna.sf.net/2008/xml/t2flow" encoding="xstream">
+        <net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig xmlns="">
+          <uri>http://localhost/Drawing.wsdl</uri>
+        </net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig>
+      </configBean>
+    </provider>
+    <provider>
+      <providerId xmlns="http://taverna.sf.net/2008/xml/t2flow">http://taverna.sf.net/2010/service-provider/wsdl</providerId>
+      <configBean xmlns="http://taverna.sf.net/2008/xml/t2flow" encoding="xstream">
+        <net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig xmlns="">
+          <uri>http://localhost/Structural_Analysis.wsdl</uri>
+        </net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig>
+      </configBean>
+    </provider>
+    <provider>
+      <providerId xmlns="http://taverna.sf.net/2008/xml/t2flow">http://taverna.sf.net/2010/service-provider/wsdl</providerId>
+      <configBean xmlns="http://taverna.sf.net/2008/xml/t2flow" encoding="xstream">
+        <net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig xmlns="">
+          <uri>http://localhost/highGUI.wsdl</uri>
+        </net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig>
+      </configBean>
+    </provider>
+    <provider>
+      <providerId xmlns="http://taverna.sf.net/2008/xml/t2flow">http://taverna.sf.net/2010/service-provider/wsdl</providerId>
+      <configBean xmlns="http://taverna.sf.net/2008/xml/t2flow" encoding="xstream">
+        <net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig xmlns="">
+          <uri>http://localhost/Basic_Structures.wsdl</uri>
+        </net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig>
+      </configBean>
+    </provider>
+    <provider>
+      <providerId xmlns="http://taverna.sf.net/2008/xml/t2flow">http://taverna.sf.net/2010/service-provider/wsdl</providerId>
+      <configBean xmlns="http://taverna.sf.net/2008/xml/t2flow" encoding="xstream">
+        <net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig xmlns="">
+          <uri>http://localhost/Image_Filtering.wsdl</uri>
+        </net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig>
+      </configBean>
+    </provider>
+    <provider>
+      <providerId xmlns="http://taverna.sf.net/2008/xml/t2flow">http://taverna.sf.net/2010/service-provider/wsdl</providerId>
+      <configBean xmlns="http://taverna.sf.net/2008/xml/t2flow" encoding="xstream">
+        <net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig xmlns="">
+          <uri>http://localhost/Image_Transformations.wsdl</uri>
+        </net.sf.taverna.t2.activities.wsdl.servicedescriptions.WSDLServiceProviderConfig>
+      </configBean>
+    </provider>
+  </providers>
+</serviceDescriptions>
