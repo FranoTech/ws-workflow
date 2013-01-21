@@ -226,3 +226,180 @@ int ns__viewImage(  struct soap *soap,
 
 
 
+/* ########################################################### */
+/* ###############         helper function        ############ */
+/* ########################################################### */
+
+/* Save matrix to binary file */
+int saveMat( const std::string& filename, const Mat& M){
+    if (M.empty()){
+       return 0;
+    }
+    std::ofstream out(filename.c_str(), std::ios::out|std::ios::binary);
+    if (!out)
+       return 0;
+
+    int cols = M.cols;
+    int rows = M.rows;
+    int chan = M.channels();
+    int eSiz = (M.dataend-M.datastart)/(cols*rows*chan);
+
+    /* Write header */
+    out.write((char*)&cols,sizeof(cols));
+    out.write((char*)&rows,sizeof(rows));
+    out.write((char*)&chan,sizeof(chan));
+    out.write((char*)&eSiz,sizeof(eSiz));
+
+    /* Write data. */
+    if (M.isContinuous()){
+       out.write((char *)M.data,cols*rows*chan*eSiz);
+    }
+    else{
+       return 0;
+    }
+    out.close();
+    return 1;
+}
+
+/* Read matrix from binary file */
+int readMat( const std::string& filename, Mat& M)
+{
+    std::ifstream in(filename.c_str(), std::ios::in | std::ios::binary);
+    if (!in){
+       M.data = NULL;
+       return 0;
+    }
+    int cols;
+    int rows;
+    int chan;
+    int eSiz;
+
+    /* Read header */
+    in.read((char*)&cols,sizeof(cols));
+    in.read((char*)&rows,sizeof(rows));
+    in.read((char*)&chan,sizeof(chan));
+    in.read((char*)&eSiz,sizeof(eSiz));
+
+    /* Determine type of the matrix */
+    int type = 0;
+    switch (eSiz){
+    case sizeof(char):
+         type = CV_8UC(chan);
+         break;
+    case sizeof(float):
+         type = CV_32FC(chan);
+         break;
+    case sizeof(double):
+         type = CV_64FC(chan);
+         break;
+    }
+
+    /* Alocate Matrix. */
+    M = Mat(rows,cols,type,Scalar(1));
+
+    /* Read data. */
+    if (M.isContinuous()){
+       in.read((char *)M.data,cols*rows*chan*eSiz);
+    }
+    else{
+       return 0;
+    }
+    in.close();
+    return 1;
+}
+
+int getMatType ( const std::string& typeName)
+{
+    if(typeName.compare("CV_8UC1") == 0)
+        return CV_8UC1;
+    else if(typeName.compare("CV_8UC2") == 0)
+        return CV_8UC2;
+    else if(typeName.compare("CV_8UC3") == 0)
+        return CV_8UC3;
+    else if(typeName.compare("CV_32FC1") == 0)
+        return CV_32FC1;
+    else if(typeName.compare("CV_32FC2") == 0)
+        return CV_32FC2;
+    else if(typeName.compare("CV_32FC3") == 0)
+        return CV_32FC3;
+    else return -1;
+
+}
+
+int getMatDepth (const std::string& typeName)
+{
+    if(typeName.compare("CV_8U") == 0) return CV_8U;    
+    else if(typeName.compare("CV_8S") == 0) return CV_8S;
+    else if(typeName.compare("CV_16U") == 0) return CV_16U;
+    else if(typeName.compare("CV_16S") == 0) return CV_16S;
+    else if(typeName.compare("CV_32S") == 0) return CV_32S;
+    else if(typeName.compare("CV_32F") == 0) return CV_32F;
+    else if(typeName.compare("CV_64F") == 0) return CV_64F;
+    else return -1;
+    
+}
+
+
+int getColorFlag(int colorflag)
+{
+    switch (colorflag){
+            case 0:
+                return CV_LOAD_IMAGE_GRAYSCALE;
+                break;
+            case 1:
+                return CV_LOAD_IMAGE_COLOR;
+                break;
+            case -1:
+                return CV_LOAD_IMAGE_UNCHANGED;
+                break;
+            default :
+                return CV_LOAD_IMAGE_COLOR;
+        }
+}
+
+void getOutputFilename (std::string& filename, std::string& toAppend=ERROR_FILENAME)
+{
+    char tmp[60] = {0};
+    time_t now = time(0);
+    strftime(tmp, sizeof(tmp),"%Y%m%d_%H%M%S", localtime(&now));
+    filename = BASE_DIR + tmp + toAppend;
+    if(fileExists(filename)){
+        srand ( time(NULL) );
+        filename = BASE_DIR + tmp + NumberToString(rand() % 100) + toAppend;
+    }
+}
+
+void getMemoryUsage (double& vm_usage, double& resident_set)
+{
+    /* virtual mamory usage */
+    vm_usage     = 0.0;
+    /* The resident set size is the portion of a process's memory that is held in RAM */
+    resident_set = 0.0;
+
+    std::ifstream stat_stream("/proc/self/stat",std::ios::in);
+    std::string pid, comm, state, ppid, pgrp, session, tty_nr;
+    std::string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+    std::string utime, stime, cutime, cstime, priority, nice;
+    std::string O, itrealvalue, starttime;
+
+    unsigned long vsize;
+    long rss;
+
+    stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+               >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+               >> utime >> stime >> cutime >> cstime >> priority >> nice
+               >> O >> itrealvalue >> starttime >> vsize >> rss;
+
+    stat_stream.close();
+
+    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
+    vm_usage     = vsize / 1024.0;
+    resident_set = rss * page_size_kb;
+}
+
+void getConfig (bool &timeChecking, bool &memoryChecking)
+{
+    ConfigFile cfg( CONFIG_FILE.c_str() );
+    timeChecking = cfg.getValueOfKey<bool>("timeChecking", false);
+    memoryChecking = cfg.getValueOfKey<bool>("memoryChecking", false);
+}

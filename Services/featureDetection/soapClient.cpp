@@ -14,7 +14,7 @@ compiling, linking, and/or using OpenSSL is allowed.
 #endif
 #include "soapH.h"
 
-SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.8.8 2012-09-19 07:40:54 GMT")
+SOAP_SOURCE_STAMP("@(#) soapClient.cpp ver 2.8.8 2013-01-14 17:08:19 GMT")
 
 
 SOAP_FMAC5 int SOAP_FMAC6 soap_call_ns__Canny(struct soap *soap, const char *soap_endpoint, const char *soap_action, std::string InputMatFilename, double threshold1, double threshold2, int apertureSize_D, int L2gradient_D, std::string &OutputMatFilenameE)

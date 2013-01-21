@@ -45,7 +45,7 @@ int ns__dot(std::string InputMatFilename, std::string AnotherMatFilename, std::s
 int ns__zeros(int rows=0, int columns=0,std::string type, std::string &OutputMatFilename );        
 
 //gsoap ns service method-documentation: ones Returns an array of all 1’s of the specified size and type
-int ns__ones( int rows=0, int columns=0, std::string type, std::string &OutputMatFilename );
+int ns__ones( int rows=0, int columns=0, int fillWith=0, std::string type, std::string &OutputMatFilename );
 
 //gsoap ns service method-documentation: getMatDetail Get Mat detail (rows, cols, depth, data type, channels, empty)
 int ns__getMatDetail( std::string InputMatFilename, ns__MatDetail &detail);

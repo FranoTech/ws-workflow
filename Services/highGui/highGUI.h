@@ -12,10 +12,10 @@ class ns__base64Binary
 };
 
 
-//gsoap ns service method-documentation: imgToMat Convert Image to Mat data (8UC1 gray scale image is default)
+//gsoap ns service method-documentation: imRead Convert Image to Mat data (CV_8UC1 gray scale image is default)
 int ns__imRead(std::string InputMatFilename, int flag=0, std::string &OutputMatFilename);
 
-//gsoap ns service method-documentation: MatToJPG Saving Mat to JPG image
+//gsoap ns service method-documentation: imWrite Saving Mat to JPG image
 int ns__imWrite ( std::string InputMatFilename, std::string fileExtension, std::string &OutputMatFilename);
 
 //gsoap ns service method-documentation: viewImage View an image in workbench

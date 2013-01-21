@@ -686,7 +686,7 @@ int ns__GaussianBlur(  struct soap *soap,
         return soap_receiver_fault(soap, e.what(), NULL);
     }
 
-	std::string toAppend = "_blur";
+	std::string toAppend = "_GaussianBlur";
     getOutputFilename(OutputMatFilename, toAppend);
     if(!saveMat(OutputMatFilename, dst))
     {
@@ -994,6 +994,7 @@ void getOutputFilename (std::string& filename, std::string& toAppend=ERROR_FILEN
     strftime(tmp, sizeof(tmp),"%Y%m%d_%H%M%S", localtime(&now));
 	filename = BASE_DIR + tmp + toAppend;
     if(fileExists(filename)){
+        srand ( time(NULL) );
         filename += NumberToString(rand() % 10);
     }
 }
