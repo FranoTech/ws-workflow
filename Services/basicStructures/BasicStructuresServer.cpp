@@ -255,7 +255,7 @@ int ns__createMat(  struct soap *soap,
         
         if( scalar_ != -1){
             try{
-                src = Mat(Size(rows, cols), matType, cv::Scalar(scalar_));
+                src = Mat(Size(rows, cols), matType, Scalar::all(scalar_));
             } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
@@ -714,7 +714,7 @@ int ns__zeros(  struct soap *soap,
 
 /* Returns an array of all 1’s of the specified size and type.  */
 int ns__ones(  struct soap *soap, 
-			int rows=0, int cols=0,
+			int rows=0, int cols=0, int fillWith=1,
             std::string type=DEFAULTVAL,
 			std::string &OutputMatFilename=ERROR_FILENAME)
 {
@@ -727,7 +727,7 @@ int ns__ones(  struct soap *soap,
 	int matType = type == DEFAULTVAL ? CV_32F : getMatDepth(type);
 	if(rows != 0 && cols != 0){
         try{            
-            src = Mat::ones(rows, cols, matType);
+            src = Mat::ones(rows, cols, matType)*fillWith;
         } catch( cv::Exception& e ) {
             Log(logERROR) << e.what() << std::endl;
             return soap_receiver_fault(soap, e.what(), NULL);
@@ -977,6 +977,12 @@ int getMatDepth (const std::string& typeName)
 	else if(typeName.compare("CV_32S") == 0) return CV_32S;
 	else if(typeName.compare("CV_32F") == 0) return CV_32F;
 	else if(typeName.compare("CV_64F") == 0) return CV_64F;
+	else if(typeName.compare("CV_8UC1") == 0) return CV_8UC1;
+    else if(typeName.compare("CV_8UC2") == 0) return CV_8UC2;
+    else if(typeName.compare("CV_8UC3") == 0) return CV_8UC3;
+    else if(typeName.compare("CV_32FC1") == 0) return CV_32FC1;
+    else if(typeName.compare("CV_32FC2") == 0) return CV_32FC2;
+    else if(typeName.compare("CV_32FC3") == 0) return CV_32FC3;
     else return -1;
     
 }

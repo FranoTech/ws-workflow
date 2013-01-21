@@ -10,3 +10,11 @@
 int ns__Canny( std::string InputMatFilename, double threshold1, double threshold2,
             int apertureSize_D=3, int L2gradient_D=0,std::string &OutputMatFilenameE);
 
+// int ns__cornerHarris( std::string InputMatFilename, double threshold1, double threshold2,
+//             int apertureSize_D=3, int L2gradient_D=0,std::string &OutputMatFilenameE);
+
+// int ns__HoughCircles( std::string InputMatFilename, double threshold1, double threshold2,
+//             int apertureSize_D=3, int L2gradient_D=0,std::string &OutputMatFilenameE);
+
+
+
