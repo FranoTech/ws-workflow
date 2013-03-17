@@ -183,7 +183,7 @@
 </binding>
 
 <service name="Image_Transformations">
- <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <documentation>gSOAP 2.8.14 generated service definition</documentation>
  <port name="Image_Transformations" binding="tns:Image_Transformations">
   <SOAP:address location="http://localhost/cgi-bin/ImageTransformationsServer"/>
  </port>

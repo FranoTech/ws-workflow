@@ -355,7 +355,7 @@
 </binding>
 
 <service name="Image_Filtering">
- <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <documentation>gSOAP 2.8.14 generated service definition</documentation>
  <port name="Image_Filtering" binding="tns:Image_Filtering">
   <SOAP:address location="http://localhost/cgi-bin/ImageFilteringServer"/>
  </port>

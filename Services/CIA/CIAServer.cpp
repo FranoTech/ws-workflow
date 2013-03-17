@@ -1,55 +1,45 @@
+/* * to do list * *
+ * initial service => ตั้งค่า environment ทั้งหมด เรียกก่อนจะรัน workflow
+ *      - ตั้งค่า tmpfs , กำหนดจำนวน thread, base directory
+ * num thread variablle
+ *
+ */
+
+//home/lluu/thesis/CIA/T51-1549A23.jpg
+//home/lluu/thesis/cancer_image/T51-1549A23.jpg
+//sudo mount -t tmpfs -o size=1024M,mode=0777 tmpfs dir
+
 #include "../headerfile.cpp"
 #include "../myLog.h"
 #include "../config.h"
 #include "soapH.h"
-#include "CIA.nsmap"
 
+//init variable
+//#define BASE_DIR "/home/lluu/thesis/RESULT/"
 #define FILENAME_SIZE 75
 #define MAX_THREAD 4
 
+//namespace
+using namespace std;
 using namespace cv;
 
-/* helper function */
-int saveMat( const std::string& filename, const Mat& M);
-int readMat( const std::string& filename, Mat& M);
-int getMatType (const std::string& typeName);
+//helper function
+int saveMat( const char *filename, const Mat& M);
+int readMat( const char *filename, Mat& M);
+int getMatType (const char *typeName);
+int getThresholdType ( const char *typeName);
 int getColorFlag(int colorflag);
-void getOutputFilename (std::string& filename, std::string& toAppend);
-void getMemoryUsage (double& vm_usage, double& resident_set);
-void getConfig (bool &timeChecking, bool &memoryChecking);
-int getMatDepth (const std::string& depth);
-bool fileExists(const std::string& filename)
-{
-    struct stat buf;
-    if (stat(filename.c_str(), &buf) != -1)
-    {
-        return true;
-    }
-    return false;
-}
-template <typename T>
-std::string NumberToString ( T Number )
-{
-	std::stringstream ss;
-	ss << Number;
-	return ss.str();
-}
+int getMorphOperation ( const char *typeName);
+int ByteArrayToANN(char *annfile, CvANN_MLP* ann);
+void getOutputFilename (char **filename, const char *toAppend);
 
-
-/* Global Configuration */
-std::string BASE_DIR = "/home/lluu/thesis/result/";
-std::string ERROR_FILENAME = "";
-std::string DEFAULTVAL = "";
-std::string CONFIG_FILE = "/home/lluu/thesis/result/config.cfg";
-double start, end; /* time checking */
+const char* BASE_DIR = "/home/lluu/thesis/result/";
 
 
 int main(int argc, char **argv)
 {
-	LOG_FILENAME = "/home/lluu/thesis/result/SERVICE_LOG";
     struct soap soap;
     soap_init(&soap);
-	
     if (argc < 2)		// no args: assume this is a CGI application
     {
         soap_serve(&soap);	// serve request
@@ -60,21 +50,24 @@ int main(int argc, char **argv)
 }
 
 
-int ns__removeSmallCell(struct soap *soap,
-                        char  *InputMatFilename,
-                        ns__RemoveSmallCell &out)
-{
-    bool timeChecking, memoryChecking;
-    getConfig(timeChecking, memoryChecking);
-    
-    if(timeChecking){
-        start = omp_get_wtime();
-    }
 
-    Mat src; //input_morph
+//
+// name: removeSmallCell
+// @param
+// @return
+//
+
+int ns__removeSmallCell(struct soap *soap,
+						char *inputMatFilename,
+						ns__RemoveSmallCell &out)
+{
+    double start, end;
+    start = omp_get_wtime();
+
+	Mat src; //input_morph
     if(!readMat(inputMatFilename, src))
     {
-        Log(logERROR) << "removeSmallCell :: can not read bin file" << std::endl;
+        cerr << "removeSmallCell :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "removeSmallCell :: can not read bin file", NULL);
     }
 
@@ -86,112 +79,98 @@ int ns__removeSmallCell(struct soap *soap,
     }
 
     Mat outSingle = Mat::zeros(src.rows, src.cols, CV_32FC1);
-    vector<vector<cv::Point> > contours;
+	vector<vector<cv::Point> > contours;
     double area = 0;
     const cv::Point* p;
     int n = 0;
     
     
     try{
-        findContours(src, contours, CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE, Point(0,0));
-    } catch( cv::Exception& e ) {
-            Log(logERROR) << e.what() << std::endl;
-            return soap_receiver_fault(soap, e.what(), NULL);
-    }
+    findContours(src, contours, CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+	} catch (std::exception& e) { 
+		cerr<<"error "<<e.what()<<endl; 
+	}
 
     for(size_t i = 0; i< contours.size(); i++)
     {
-        p = &contours[i][0];
+		p = &contours[i][0];
         n = (int)contours[i].size();
-        area = fabs(contourArea(Mat(contours[i])));
+		area = fabs(contourArea(Mat(contours[i])));
 
-        if(area < 1500.0) //lower bound
-        {
-            fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
+		if(area < 1500.0) //lower bound
+		{
+			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src (put black area instead the old one)
 
-        } else if (area < 7500.0) {
-            fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
-            fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
+		} else if (area < 7500.0) {
+			fillPoly(outSingle, &p, &n, 1, Scalar(255, 255, 255)); // keep small area here with white color
+			fillPoly( tmp, &p, &n, 1, Scalar(0, 0, 0)); // remove from src
 
-        } else {
-            fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
+		} else {
+			fillPoly( tmp, &p, &n, 1, Scalar(255, 255, 255)); //left the bigger area in src
 
-        }
-        
-    }
+		}
+		
+	}
 
-    contours.clear();
+	contours.clear();
 
-    /* generate output file name */
-    out->keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
-    out->biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
+	/* generate output file name */
+    out.keepedArea = (char*)soap_malloc(soap, FILENAME_SIZE);
+    out.biggerArea = (char*)soap_malloc(soap, FILENAME_SIZE);
 
     time_t now = time(0);
     strftime(out.keepedArea, sizeof(out.keepedArea)*FILENAME_SIZE, "/home/lluu/thesis/result/%Y%m%d_%H%M%S_keepedArea", localtime(&now));
     strftime(out.biggerArea, sizeof(out.biggerArea)*FILENAME_SIZE, "/home/lluu/thesis/result/%Y%m%d_%H%M%S_biggerArea", localtime(&now));
-    
-    
-    
+	
+	
+	
     /* save to bin */
     if(!saveMat(out.keepedArea, outSingle))
     {
-        Log(logERROR) << "removeSmallCell:: saved mat to binary file" << std::endl;
-        return soap_receiver_fault(soap, "removeSmallCell:: saved mat to binary file", NULL);
+        cerr << "removeSmallCell:: save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "removeSmallCell:: save mat to binary file", NULL);
     }
 
     if(!saveMat(out.biggerArea, tmp))
     {
-        Log(logERROR) << "removeSmallCell:: saved mat to binary file" << std::endl;
-        return soap_receiver_fault(soap, "removeSmallCell:: saved mat to binary file", NULL);
+        cerr << "removeSmallCell:: save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "removeSmallCell:: save mat to binary file", NULL);
     }
 
     src.release();
     tmp.release();
     outSingle.release();
 
-    src.release();
-
-    if(timeChecking) 
-    { 
-        end = omp_get_wtime();
-        Log(logINFO) << "removeSmallCell :: " << "time elapsed " << end-start << std::endl;
-    }
-    
-    if(memoryChecking)
-    {   
-        double vm, rss;
-        getMemoryUsage(vm, rss);
-        Log(logINFO)<< "removeSmallCell :: VM usage :" << vm << std::endl 
-                    << "Resident set size :" << rss << std::endl;
-    }
-
+    end = omp_get_wtime();
+    cerr<<"ns__removeSmallCell"<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
+//
+// name: ns__scanningCell
+// @param char *inputMatFilename
+// @return char **outputMatFilename
+//
 
 int ns__scanningCell(struct soap *soap,
-                        char *biggerArea,
+						char *biggerArea,
                         char *keepArea,
-                        char **OutputMatFilename)
+						char **OutputMatFilename)
 {
+    double start, end;
+    start = omp_get_wtime();
 
-    bool timeChecking, memoryChecking;
-    getConfig(timeChecking, memoryChecking);
-    if(timeChecking){
-        start = omp_get_wtime();
-    }
-
-    Mat src; //input_morph
+	Mat src; //input_morph
     if(!readMat(biggerArea, src))
     {
-        Log(logERROR) << "scanningCell :: can not read bin file" << std::endl;
+        cerr << "scanningCell :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "scanningCell :: can not read bin file", NULL);
     }
     
     Mat out_single;
     if(!readMat(keepArea, out_single))
     {
-        Log(logERROR) << "scanningCell :: can not read bin file" << std::endl;
+        cerr << "scanningCell :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "scanningCell :: can not read bin file", NULL);
     }
     
@@ -240,15 +219,15 @@ int ns__scanningCell(struct soap *soap,
         }
     }
 
-    /* generate output file name */
+	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,"_scanningCell");
 
     /* save to bin */
     if(!saveMat(*OutputMatFilename, out_single))
     {
-        Log(logERROR) << "scanningCell :: save mat to binary file" << std::endl;
-        return soap_receiver_fault(soap, "scanningCell :: save mat to binary file", NULL);
+        cerr << "scanningCell:: save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "scanningCell:: save mat to binary file", NULL);
     }
 
     src.release();
@@ -256,38 +235,32 @@ int ns__scanningCell(struct soap *soap,
     src32FC1.release();
     out_single.release();
 
-    if(timeChecking) 
-    { 
-        end = omp_get_wtime();
-        Log(logINFO) << "scanningCell :: " << "time elapsed " << end-start << std::endl;
-    }
-    
-    if(memoryChecking)
-    {   
-        double vm, rss;
-        getMemoryUsage(vm, rss);
-        Log(logINFO)<< "scanningCell :: VM usage :" << vm << std::endl 
-                    << "Resident set size :" << rss << std::endl;
-    }
+    end = omp_get_wtime();
+    cerr<<"ns__scanningCell time elapsed "<<end-start<<endl;
 
     return SOAP_OK;
 }
 
-int ns__separateCell(struct soap *soap,
-                        char *input1, //outSingle
-                        char *input2, //outMorph
-                        char **OutputMatFilename)
-{
-    bool timeChecking, memoryChecking;
-    getConfig(timeChecking, memoryChecking);
-    if(timeChecking){
-        start = omp_get_wtime();
-    }
 
-    Mat outSingle;
+
+//
+// name: ns__separateCell
+// @param char *inputMatFilename
+// @return char **outputMatFilename
+//
+
+int ns__separateCell(struct soap *soap,
+						char *input1, //outSingle
+                        char *input2, //outMorph
+						char **OutputMatFilename)
+{
+    double start, end;
+    start = omp_get_wtime();
+
+	Mat outSingle;
     if(!readMat(input1, outSingle))
     {
-        Log(logERROR) "sep :: can not read bin file" << std::endl;
+        cerr << "sep :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
     }
 
@@ -298,18 +271,18 @@ int ns__separateCell(struct soap *soap,
     int c = 0;
     int n = 0;
     const Point *p;
-    vector<vector<Point> > contours;
-    findContours(   tmp, contours, CV_RETR_EXTERNAL,
-                    CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+	vector<vector<Point> > contours;
+    findContours(	tmp, contours, CV_RETR_EXTERNAL,
+					CV_CHAIN_APPROX_SIMPLE, Point(0,0));
 
     for(size_t i = 0; i< contours.size(); i++)
     {
-        p = &contours[i][0]; 
+		p = &contours[i][0]; 
         n = (int)contours[i].size();
         c = ((count++)%254)+1;
         fillPoly( outSingle, &p, &n, 1, Scalar(c, c, c)); 
-    }
-    contours.clear();
+	}
+	contours.clear();
     
     Mat inwater = Mat(outSingle.rows, outSingle.cols, CV_8UC3);
     //~ Mat outwater = Mat(outSingle.size(),CV_32SC1,outSingle.data);  //Is it correct?
@@ -320,9 +293,7 @@ int ns__separateCell(struct soap *soap,
     Mat cell; //output_morph
     if(!readMat(input2, cell))
     {
-        Log(logERROR) << "sep :: can not read bin file" << std::endl;
-        return soap_receiver_fault(soap, "sep :: can not read bin file", NULL);
-
+        cerr << "sepl :: can not read bin file" << endl;
     }
     
     Mat tmp8UC1;
@@ -344,59 +315,43 @@ int ns__separateCell(struct soap *soap,
 
     if(!imwrite("result_sepCell_3.jpg", cell))
     {
-        Log(logERROR) "can not save mat to jpg file" << std::endl;
-        return soap_receiver_fault(soap, "sep:: save mat to binary file", NULL);
+        cerr<< "can not save mat to jpg file" << endl;
     }
 
-    /* generate output file name */
+	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,"_sep");
 
     /* save to bin */
     if(!saveMat(*OutputMatFilename, cell))
     {
-        Log(logERROR) << "sep:: save mat to binary file" << std::endl;
-        return soap_receiver_fault(soap, "sep:: save mat to binary file", NULL);
+        cerr << "result:: save mat to binary file" << endl;
+        return soap_receiver_fault(soap, "result:: save mat to binary file", NULL);
     }
 
     tmp8UC1.release();
     cell.release();
     outSingle.release();
 
-    if(timeChecking) 
-    { 
-        end = omp_get_wtime();
-        Log(logINFO) << "sep :: " << "time elapsed " << end-start << std::endl;
-    }
-    
-    if(memoryChecking)
-    {   
-        double vm, rss;
-        getMemoryUsage(vm, rss);
-        Log(logINFO)<< "sep:: VM usage :" << vm << std::endl 
-                    << "Resident set size :" << rss << std::endl;
-    }
-
+    end = omp_get_wtime();
+    cerr<<"ns__sep"<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
     
 }
 
-int ns__prepareResult(struct soap *soap,
-                        char *inputMatFilename,
-                        char *afterthresNN,
-                        char **OutputMatFilename)
-{
-    bool timeChecking, memoryChecking;
-    getConfig(timeChecking, memoryChecking);
-    if(timeChecking){
-        start = omp_get_wtime();
-    }
 
+int ns__prepareResult(struct soap *soap,
+						char *inputMatFilename,
+                        char *afterthresNN,
+						char **OutputMatFilename)
+{
+    double start, end;
+    start = omp_get_wtime();
 
     Mat src;
     if(!readMat(inputMatFilename, src))
     {
-        Log(logERROR) << "prepareResult :: can not read bin file" << std::endl;
+        cerr << "prepareResult :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "prepareResult :: can not read bin file", NULL);
     }
 
@@ -412,7 +367,7 @@ int ns__prepareResult(struct soap *soap,
     Mat output1ChSrc;
     if(!readMat(afterthresNN, output1ChSrc))
     {
-        Log(logERROR) << "output1Ch:: can not read bin file" << std::endl;
+        cerr << "output1Ch:: can not read bin file" << endl;
         return soap_receiver_fault(soap, "output1Ch :: can not read bin file", NULL);
     }
 
@@ -431,8 +386,8 @@ int ns__prepareResult(struct soap *soap,
     cvConvertScale(output_morph, tmp8UC1);
     
     CvMemStorage *storage = cvCreateMemStorage();
-    CvSeq *first_con = NULL;
-    CvSeq *cur = NULL;
+	CvSeq *first_con = NULL;
+	CvSeq *cur = NULL;
     
     cvFindContours(tmp8UC1, storage, &first_con, sizeof(CvContour), CV_RETR_EXTERNAL);
     
@@ -467,33 +422,21 @@ int ns__prepareResult(struct soap *soap,
     
     Mat result = cvarrToMat(tmpImage, false);
 
-    /* generate output file name */
+	/* generate output file name */
     *OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
     getOutputFilename(OutputMatFilename,"_result");
 
     /* save to bin */
     if(!saveMat(*OutputMatFilename, result))
     {
-        Log(logERROR) << "prepareResult :: save mat to binary file" << std::endl;
+        cerr << "result:: save mat to binary file" << endl;
         return soap_receiver_fault(soap, "result:: save mat to binary file", NULL);
     }
 
     src.release();
 
-    if(timeChecking) 
-    { 
-        end = omp_get_wtime();
-        Log(logINFO) << "prepareResult :: " << "time elapsed " << end-start << std::endl;
-    }
-    
-    if(memoryChecking)
-    {   
-        double vm, rss;
-        getMemoryUsage(vm, rss);
-        Log(logINFO)<< "prepareResult :: VM usage :" << vm << std::endl 
-                    << "Resident set size :" << rss << std::endl;
-    }
-
+    end = omp_get_wtime();
+    cerr<<"ns__waterShed"<<"time elapsed "<<end-start<<endl;
     return SOAP_OK;
 }
 
@@ -511,16 +454,13 @@ int ns__trainANN(struct soap *soap,
                 char *neuralFile,
                 char **OutputMatFilename)
 {
-    bool timeChecking, memoryChecking;
-    getConfig(timeChecking, memoryChecking);
-    if(timeChecking){
-        start = omp_get_wtime();
-    }
+    double start, end;
+    start = omp_get_wtime();
 
-    Mat src; //must be 3ch image
+	Mat src; //must be 3ch image
     if(!readMat(inputMatFilename, src))
     {
-        Log(logERROR) << "trainANN :: can not read bin file" << std::endl;
+        cerr << "trainANN :: can not read bin file" << endl;
         return soap_receiver_fault(soap, "trainANN :: can not read bin file", NULL);
     }
 
@@ -536,11 +476,11 @@ int ns__trainANN(struct soap *soap,
     CvANN_MLP* neuron = NULL ;
     if (neuron == NULL )
         neuron = new CvANN_MLP();
-    else
+	else
         neuron->clear();
 
     if(!ByteArrayToANN(neuralFile, neuron)){
-        Log(logERROR) << "trainANN :: can not load byte array to neural" << std::endl;
+        cerr << "trainANN :: can not load byte array to neural" << endl;
         return soap_receiver_fault(soap, "trainANN :: can not load byte array to neural", NULL);
     }
 
@@ -558,7 +498,7 @@ int ns__trainANN(struct soap *soap,
     /* save to bin */
     if(!saveMat(*OutputMatFilename, resultNN))
     {
-        Log(logERROR) << "trainANN :: save mat to binary file" << std::endl;
+        cerr << "trainANN :: save mat to binary file" << endl;
         return soap_receiver_fault(soap, "trainANN :: save mat to binary file", NULL);
     }
 
@@ -566,23 +506,141 @@ int ns__trainANN(struct soap *soap,
     resultNN.release();
     cvReleaseMat(&output1Ch);
 
-
-    if(timeChecking) 
-    { 
-        end = omp_get_wtime();
-        Log(logINFO) << "trainANN :: " << "time elapsed " << end-start << std::endl;
-    }
-    
-    if(memoryChecking)
-    {   
-        double vm, rss;
-        getMemoryUsage(vm, rss);
-        Log(logINFO)<< "trainANN :: VM usage :" << vm << std::endl 
-                    << "Resident set size :" << rss << std::endl;
-    }
+    end = omp_get_wtime();
+    cerr<<"ns__trainANN  time elapsed "<<end-start<<endl;
 
     return SOAP_OK;
 }
+
+
+int ns__viewImage(  struct soap *soap, 
+                    char *inputMatFilename, 
+                    ns__base64Binary &image)
+{
+    double start, end;
+    start = omp_get_wtime();
+
+    Mat src;
+    if(!readMat(inputMatFilename, src))
+    {
+        cerr << "viewImage:: can not read bin file" << endl;
+        return soap_receiver_fault(soap, "viewImage:: can not read bin file", NULL);
+    }
+
+    /* check if it is not 8U then convert to 8UC(n) */
+    int chan = src.channels();
+    if( src.type() != 0 || src.type() != 8 || src.type() != 16 )
+    {
+       src.convertTo(src, CV_8UC(chan));
+    }
+////////////////////////////////////
+    if(!imwrite("/home/lluu/thesis/result/output.jpg", src))
+    {
+        cerr<< "viewImage:: can not save mat to jpg file" << endl;
+    }
+
+    FILE *fd = fopen("/home/lluu/thesis/result/output.jpg", "r");
+    if(fd){
+        int i =0, c = 0;
+        fseek(fd,0,SEEK_END); // seek to end of file
+        int size = ftell(fd); // get current file pointer
+        fseek(fd, 0, SEEK_SET); // seek back to beginning of file
+        
+        image.__ptr = (unsigned char*)soap_malloc(soap, size);
+        for (i = 0; i < size; i++)
+        { if ((c = fgetc(fd)) == EOF)
+            break;
+          image.__ptr[i] = c;
+        }
+        image.__size = i;
+    } else {
+        cerr<<"viewImage:: image file read error"<<endl;
+    }
+    
+    return SOAP_OK;
+}
+
+
+
+
+//
+// name: colorRatioMethod
+// @param
+// @return
+//
+
+//int ns__colorRatioMethod(struct soap *soap,
+						//char *inputMatFilename,
+						//char **OutputMatFilename)
+//{
+    //double start, end;
+    //start = omp_get_wtime();
+
+	//Mat src;
+    //if(!readMat(inputMatFilename, src))
+    //{
+        //soap_fault(soap);
+        //cerr << "colorRatioMethod :: can not read bin file" << endl;
+        //soap->fault->faultstring = "colorRatioMethod :: can not read bin file";
+        //return SOAP_FAULT;
+    //}
+
+    //src.convertTo(src, CV_32FC3);
+    //vector<Mat> splited;
+
+    //cv::split(src, splited);
+
+    ///* splited[0] = B
+    //* splited[1] = G
+    //* splited[2] = R
+    //*/
+
+    //Mat RB (splited[0].rows, splited[0].cols, CV_32FC1);
+    //Mat BR (splited[0].rows, splited[0].cols, CV_32FC1);
+    //Mat result = Mat::zeros(splited[0].rows, splited[0].cols, CV_32FC1);
+
+    ///* find R:B */
+    //cv::divide(splited[2], splited[0], RB, 1);
+
+    ///* find B:R */
+    //cv::divide(splited[0], splited[2], BR, 1);
+
+    ///* Find POS Cell */
+    //for( int y = 0; y < RB.rows; y++ )
+    //{   for( int x = 0; x < RB.cols; x++ ){
+            //if(RB.at<float>(y,x) >= 1.2 && BR.at<float>(y,x) < 1)
+                //result.at<float>(y,x) = 0;   // pos cell is black
+            //else
+                //result.at<float>(y,x) = 255;
+        //}
+    //}
+
+
+    ///* generate output file name */
+	//*OutputMatFilename = (char*)soap_malloc(soap, FILENAME_SIZE);
+    //time_t now = time(0);
+    //strftime(*OutputMatFilename, sizeof(OutputMatFilename)*FILENAME_SIZE, "/home/lluu/dir/%Y%m%d_%H%M%S_posCells", localtime(&now));
+
+	///* save to bin */
+    //if(!saveMat(*OutputMatFilename, result))
+    //{
+        //soap_fault(soap);
+        //cerr << "colorRatioMethod :: can not save mat to binary file" << endl;
+		//soap->fault->faultstring = "colorRatioMethod :: can not save mat to binary file";
+        //return SOAP_FAULT;
+    //}
+
+    //src.release();
+    //splited.clear();
+    //RB.release();
+    //BR.release();
+    //result.release();
+
+    //end = omp_get_wtime();
+    //cerr<<"ns__colorRatioMethod "<<"time elapsed "<<end-start<<endl;
+    //return SOAP_OK;
+//}
+
 
 
 /* helper function */
@@ -697,18 +755,18 @@ int getThresholdType ( const char *typeName)
 int getColorFlag(int colorflag)
 {
     switch (colorflag){
-            case 0:
+			case 0:
                 return CV_LOAD_IMAGE_GRAYSCALE;
-                break;
-            case 1:
+				break;
+			case 1:
                 return CV_LOAD_IMAGE_COLOR;
-                break;
-            case -1:
-                return CV_LOAD_IMAGE_UNCHANGED;
-                break;
-            default :
-                return CV_LOAD_IMAGE_COLOR;
-        }
+				break;
+			case -1:
+				return CV_LOAD_IMAGE_UNCHANGED;
+				break;
+			default :
+				return CV_LOAD_IMAGE_COLOR;
+	    }
 }
 
 int getMorphOperation ( const char *typeName)
@@ -729,7 +787,7 @@ int ByteArrayToANN(char *annfile, CvANN_MLP* ann)
 {
     char *buffer;
     long size;
-    ifstream file (annfile, ios::in|ios::binary|ios::ate);
+	ifstream file (annfile, ios::in|ios::binary|ios::ate);
     if(!file){ return 0; }
 
     size = file.tellg();
@@ -738,11 +796,11 @@ int ByteArrayToANN(char *annfile, CvANN_MLP* ann)
     file.read (buffer, size);
     file.close();
 
-    CvFileStorage *cvfs = cvOpenFileStorage(annfile, NULL, CV_STORAGE_READ);
-    if (cvfs != NULL) {
-        ann->read(cvfs, cvGetFileNodeByName(cvfs, NULL, "CIA_Neuron"));
-        cvReleaseFileStorage(&cvfs);
-    } else {
+	CvFileStorage *cvfs = cvOpenFileStorage(annfile, NULL, CV_STORAGE_READ);
+	if (cvfs != NULL) {
+		ann->read(cvfs, cvGetFileNodeByName(cvfs, NULL, "CIA_Neuron"));
+		cvReleaseFileStorage(&cvfs);
+	} else {
         return 0;
     }
 }
@@ -761,42 +819,4 @@ void getOutputFilename (char **filename, const char *toAppend)
     strcat(temp, *filename);
     strcpy(*filename, temp);
     free(temp);
-}
-
-
-void getMemoryUsage (double& vm_usage, double& resident_set)
-{
-    /* virtual mamory usage */
-    vm_usage     = 0.0;
-    /* The resident set size is the portion of a process's memory that is held in RAM */
-    resident_set = 0.0;
-
-    std::ifstream stat_stream("/proc/self/stat",std::ios::in);
-    std::string pid, comm, state, ppid, pgrp, session, tty_nr;
-    std::string tpgid, flags, minflt, cminflt, majflt, cmajflt;
-    std::string utime, stime, cutime, cstime, priority, nice;
-    std::string O, itrealvalue, starttime;
-
-    unsigned long vsize;
-    long rss;
-
-    stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
-               >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
-               >> utime >> stime >> cutime >> cstime >> priority >> nice
-               >> O >> itrealvalue >> starttime >> vsize >> rss;
-
-    stat_stream.close();
-
-    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
-    vm_usage     = vsize / 1024.0;
-    resident_set = rss * page_size_kb;
-}
-
-
-
-void getConfig (bool &timeChecking, bool &memoryChecking)
-{
-    ConfigFile cfg( CONFIG_FILE.c_str() );
-    timeChecking = cfg.getValueOfKey<bool>("timeChecking", false);
-    memoryChecking = cfg.getValueOfKey<bool>("memoryChecking", false);
 }

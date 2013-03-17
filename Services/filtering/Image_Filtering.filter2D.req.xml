@@ -12,7 +12,7 @@
    <kernelFname></kernelFname>
    <anchorX-D>-1</anchorX-D>
    <anchorY-D>-1</anchorY-D>
-   <delta-D>0.000000</delta-D>
+   <delta-D>0</delta-D>
    <borderType-D></borderType-D>
   </ns:filter2D>
  </SOAP-ENV:Body>

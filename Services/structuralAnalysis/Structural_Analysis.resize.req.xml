@@ -10,8 +10,8 @@
    <InputMatFilename></InputMatFilename>
    <dstRows>0</dstRows>
    <dstCols>0</dstCols>
-   <fx-D>0.000000</fx-D>
-   <fy-D>0.000000</fy-D>
+   <fx-D>0</fx-D>
+   <fy-D>0</fy-D>
    <interpolation-D></interpolation-D>
   </ns:resize>
  </SOAP-ENV:Body>
