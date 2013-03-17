@@ -12,9 +12,9 @@
    <centerY>10</centerY>
    <axeX>1</axeX>
    <axeY>1</axeY>
-   <angle>0.000000</angle>
-   <startAngle>0.000000</startAngle>
-   <endAngle>360.000000</endAngle>
+   <angle>0</angle>
+   <startAngle>0</startAngle>
+   <endAngle>360</endAngle>
    <scalarColor0>0</scalarColor0>
    <scalarColor1>0</scalarColor1>
    <scalarColor2>0</scalarColor2>

@@ -10,8 +10,8 @@
    <InputMatFilename></InputMatFilename>
    <ddepth>CV_8U</ddepth>
    <kSize-D>3</kSize-D>
-   <scale-D>1.000000</scale-D>
-   <delta-D>0.000000</delta-D>
+   <scale-D>1</scale-D>
+   <delta-D>0</delta-D>
    <dx>0</dx>
    <dy>0</dy>
    <borderType-D></borderType-D>

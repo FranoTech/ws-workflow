@@ -10,8 +10,8 @@
    <InputMatFilename></InputMatFilename>
    <kernelRows>1</kernelRows>
    <kernelCols>1</kernelCols>
-   <sigmaX>0.000000</sigmaX>
-   <sigmaY-D>0.000000</sigmaY-D>
+   <sigmaX>0</sigmaX>
+   <sigmaY-D>0</sigmaY-D>
    <borderType-D></borderType-D>
   </ns:GaussianBlur>
  </SOAP-ENV:Body>

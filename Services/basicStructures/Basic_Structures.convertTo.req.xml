@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:bs">
+ <SOAP-ENV:Body SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <ns:convertTo>
+   <InputMatFilename></InputMatFilename>
+   <types>CV_32FC1</types>
+   <alpha-D>1</alpha-D>
+   <beta-D>0</beta-D>
+  </ns:convertTo>
+ </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

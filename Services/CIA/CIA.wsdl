@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="CIA"
+ targetNamespace="urn:mali/CIA.wsdl"
+ xmlns:tns="urn:mali/CIA.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:mali"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:mali"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:mali"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <simpleType name="base64Binary"><!-- ns__base64Binary -->
+
+   <restriction base="xsd:base64Binary">
+    <maxLength value="9223372036854775807"/>
+   </restriction>
+  </simpleType>
+ </schema>
+
+</types>
+
+<message name="removeSmallCell">
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__removeSmallCell::inputMatFilename -->
+</message>
+
+<message name="RemoveSmallCell">
+ <part name="keepedArea" type="xsd:string"/><!-- ns__removeSmallCell::keepedArea -->
+ <part name="biggerArea" type="xsd:string"/><!-- ns__removeSmallCell::biggerArea -->
+</message>
+
+<message name="scanningCellRequest">
+ <part name="biggerArea" type="xsd:string"/><!-- ns__scanningCell::biggerArea -->
+ <part name="keepArea" type="xsd:string"/><!-- ns__scanningCell::keepArea -->
+</message>
+
+<message name="scanningCellResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__scanningCell::OutputMatFilename -->
+</message>
+
+<message name="trainANNRequest">
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__trainANN::inputMatFilename -->
+ <part name="neuralFile" type="xsd:string"/><!-- ns__trainANN::neuralFile -->
+</message>
+
+<message name="trainANNResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__trainANN::OutputMatFilename -->
+</message>
+
+<message name="separateCellRequest">
+ <part name="input1" type="xsd:string"/><!-- ns__separateCell::input1 -->
+ <part name="input2" type="xsd:string"/><!-- ns__separateCell::input2 -->
+</message>
+
+<message name="separateCellResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__separateCell::OutputMatFilename -->
+</message>
+
+<message name="prepareResultRequest">
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__prepareResult::inputMatFilename -->
+ <part name="afterthresNN" type="xsd:string"/><!-- ns__prepareResult::afterthresNN -->
+</message>
+
+<message name="prepareResultResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__prepareResult::OutputMatFilename -->
+</message>
+
+<message name="viewImageRequest">
+ <part name="inputMatFilename" type="xsd:string"/><!-- ns__viewImage::inputMatFilename -->
+</message>
+
+<message name="viewImageResponse">
+ <part name="image" type="ns:base64Binary"/><!-- ns__viewImage::image -->
+</message>
+
+<portType name="CIAPortType">
+ <operation name="removeSmallCell">
+  <documentation>Service definition of function ns__removeSmallCell</documentation>
+  <input message="tns:removeSmallCell"/>
+  <output message="tns:RemoveSmallCell"/>
+ </operation>
+ <operation name="scanningCell">
+  <documentation>Service definition of function ns__scanningCell</documentation>
+  <input message="tns:scanningCellRequest"/>
+  <output message="tns:scanningCellResponse"/>
+ </operation>
+ <operation name="trainANN">
+  <documentation>Service definition of function ns__trainANN</documentation>
+  <input message="tns:trainANNRequest"/>
+  <output message="tns:trainANNResponse"/>
+ </operation>
+ <operation name="separateCell">
+  <documentation>Service definition of function ns__separateCell</documentation>
+  <input message="tns:separateCellRequest"/>
+  <output message="tns:separateCellResponse"/>
+ </operation>
+ <operation name="prepareResult">
+  <documentation>Service definition of function ns__prepareResult</documentation>
+  <input message="tns:prepareResultRequest"/>
+  <output message="tns:prepareResultResponse"/>
+ </operation>
+ <operation name="viewImage">
+  <documentation>Service definition of function ns__viewImage</documentation>
+  <input message="tns:viewImageRequest"/>
+  <output message="tns:viewImageResponse"/>
+ </operation>
+</portType>
+
+<binding name="CIA" type="tns:CIAPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="removeSmallCell">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="scanningCell">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="trainANN">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="separateCell">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="prepareResult">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="viewImage">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:mali" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="CIA">
+ <documentation>gSOAP 2.8.14 generated service definition</documentation>
+ <port name="CIA" binding="tns:CIA">
+  <SOAP:address location="http://localhost/cgi-bin/CIAServer"/>
+ </port>
+</service>
+
+</definitions>

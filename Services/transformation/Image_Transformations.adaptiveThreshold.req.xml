@@ -9,10 +9,10 @@
   <ns:adaptiveThreshold>
    <InputMatFilename></InputMatFilename>
    <adaptiveMethod></adaptiveMethod>
-   <maxValue>255.000000</maxValue>
+   <maxValue>255</maxValue>
    <thresholdType></thresholdType>
    <blockSize>3</blockSize>
-   <C>1.000000</C>
+   <C>1</C>
   </ns:adaptiveThreshold>
  </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>

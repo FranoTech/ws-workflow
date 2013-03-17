@@ -63,12 +63,12 @@
 
 <portType name="highGUIPortType">
  <operation name="imRead">
-  <documentation>Service definition of function ns__imRead</documentation>
+  <documentation>Convert Image to Mat data (CV_8UC1 gray scale image is default)</documentation>
   <input message="tns:imReadRequest"/>
   <output message="tns:imReadResponse"/>
  </operation>
  <operation name="imWrite">
-  <documentation>Service definition of function ns__imWrite</documentation>
+  <documentation>Saving Mat to JPG image</documentation>
   <input message="tns:imWriteRequest"/>
   <output message="tns:imWriteResponse"/>
  </operation>
@@ -111,7 +111,7 @@
 </binding>
 
 <service name="highGUI">
- <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <documentation>gSOAP 2.8.14 generated service definition</documentation>
  <port name="highGUI" binding="tns:highGUI">
   <SOAP:address location="http://localhost/cgi-bin/highGUIServer"/>
  </port>

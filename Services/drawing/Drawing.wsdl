@@ -103,7 +103,7 @@
 </binding>
 
 <service name="Drawing">
- <documentation>gSOAP 2.8.8 generated service definition</documentation>
+ <documentation>gSOAP 2.8.14 generated service definition</documentation>
  <port name="Drawing" binding="tns:Drawing">
   <SOAP:address location="http://localhost/cgi-bin/DrawingServer"/>
  </port>

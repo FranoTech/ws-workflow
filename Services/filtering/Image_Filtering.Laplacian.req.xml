@@ -10,8 +10,8 @@
    <InputMatFilename></InputMatFilename>
    <ddepth></ddepth>
    <ksize-D>1</ksize-D>
-   <scale-D>1.000000</scale-D>
-   <delta-D>0.000000</delta-D>
+   <scale-D>1</scale-D>
+   <delta-D>0</delta-D>
    <borderType-D></borderType-D>
   </ns:Laplacian>
  </SOAP-ENV:Body>

@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="Basic_Structures"
+ targetNamespace="http://localhost/Basic_Structures.wsdl"
+ xmlns:tns="http://localhost/Basic_Structures.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns="urn:bs"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:MIME="http://schemas.xmlsoap.org/wsdl/mime/"
+ xmlns:DIME="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:bs"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns="urn:bs"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+ </schema>
+
+</types>
+
+<message name="rowRangeRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__rowRange::InputMatFilename -->
+ <part name="startCol" type="xsd:int"/><!-- ns__rowRange::startCol -->
+ <part name="endCol" type="xsd:int"/><!-- ns__rowRange::endCol -->
+</message>
+
+<message name="rowRangeResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__rowRange::OutputMatFilename -->
+</message>
+
+<message name="colRangeRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__colRange::InputMatFilename -->
+ <part name="startCol" type="xsd:int"/><!-- ns__colRange::startCol -->
+ <part name="endCol" type="xsd:int"/><!-- ns__colRange::endCol -->
+</message>
+
+<message name="colRangeResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__colRange::OutputMatFilename -->
+</message>
+
+<message name="convertToRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__convertTo::InputMatFilename -->
+ <part name="types" type="xsd:string"/><!-- ns__convertTo::types -->
+ <part name="alpha-D" type="xsd:double"/><!-- ns__convertTo::alpha_D -->
+ <part name="beta-D" type="xsd:double"/><!-- ns__convertTo::beta_D -->
+</message>
+
+<message name="convertToResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__convertTo::OutputMatFilename -->
+</message>
+
+<message name="createMatRequest">
+ <part name="rows" type="xsd:int"/><!-- ns__createMat::rows -->
+ <part name="columns" type="xsd:int"/><!-- ns__createMat::columns -->
+ <part name="type" type="xsd:string"/><!-- ns__createMat::type -->
+ <part name="scalar" type="xsd:int"/><!-- ns__createMat::scalar -->
+</message>
+
+<message name="createMatResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__createMat::OutputMatFilename -->
+</message>
+
+<message name="InverseRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__Inverse::InputMatFilename -->
+ <part name="InvMethod-D" type="xsd:string"/><!-- ns__Inverse::InvMethod_D -->
+</message>
+
+<message name="InverseResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__Inverse::OutputMatFilename -->
+</message>
+
+<message name="mulRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__mul::InputMatFilename -->
+ <part name="AnotherMatFilename" type="xsd:string"/><!-- ns__mul::AnotherMatFilename -->
+ <part name="scale-D" type="xsd:double"/><!-- ns__mul::scale_D -->
+</message>
+
+<message name="mulResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__mul::OutputMatFilename -->
+</message>
+
+<message name="crossRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__cross::InputMatFilename -->
+ <part name="AnotherMatFilename" type="xsd:string"/><!-- ns__cross::AnotherMatFilename -->
+</message>
+
+<message name="crossResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__cross::OutputMatFilename -->
+</message>
+
+<message name="dotRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__dot::InputMatFilename -->
+ <part name="AnotherMatFilename" type="xsd:string"/><!-- ns__dot::AnotherMatFilename -->
+</message>
+
+<message name="dotResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__dot::OutputMatFilename -->
+</message>
+
+<message name="zerosRequest">
+ <part name="rows" type="xsd:int"/><!-- ns__zeros::rows -->
+ <part name="columns" type="xsd:int"/><!-- ns__zeros::columns -->
+ <part name="type" type="xsd:string"/><!-- ns__zeros::type -->
+</message>
+
+<message name="zerosResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__zeros::OutputMatFilename -->
+</message>
+
+<message name="onesRequest">
+ <part name="rows" type="xsd:int"/><!-- ns__ones::rows -->
+ <part name="columns" type="xsd:int"/><!-- ns__ones::columns -->
+ <part name="fillWith" type="xsd:int"/><!-- ns__ones::fillWith -->
+ <part name="type" type="xsd:string"/><!-- ns__ones::type -->
+</message>
+
+<message name="onesResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__ones::OutputMatFilename -->
+</message>
+
+<message name="getMatDetail">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__getMatDetail::InputMatFilename -->
+</message>
+
+<message name="MatDetail">
+ <part name="columns" type="xsd:int"/><!-- ns__getMatDetail::columns -->
+ <part name="rows" type="xsd:int"/><!-- ns__getMatDetail::rows -->
+ <part name="depth" type="xsd:string"/><!-- ns__getMatDetail::depth -->
+ <part name="type" type="xsd:string"/><!-- ns__getMatDetail::type -->
+ <part name="channel" type="xsd:int"/><!-- ns__getMatDetail::channel -->
+ <part name="empty" type="xsd:boolean"/><!-- ns__getMatDetail::empty -->
+</message>
+
+<message name="printAllMatValueRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__printAllMatValue::InputMatFilename -->
+</message>
+
+<message name="printAllMatValueResponse">
+ <part name="OutputMat" type="xsd:string"/><!-- ns__printAllMatValue::OutputMat -->
+</message>
+
+<message name="accessPixelValueRequest">
+ <part name="InputMatFilename" type="xsd:string"/><!-- ns__accessPixelValue::InputMatFilename -->
+ <part name="returnType" type="xsd:string"/><!-- ns__accessPixelValue::returnType -->
+ <part name="intToSet" type="xsd:int"/><!-- ns__accessPixelValue::intToSet -->
+ <part name="floatToSet" type="xsd:float"/><!-- ns__accessPixelValue::floatToSet -->
+ <part name="pixelI" type="xsd:int"/><!-- ns__accessPixelValue::pixelI -->
+ <part name="pixelJ" type="xsd:int"/><!-- ns__accessPixelValue::pixelJ -->
+ <part name="channel" type="xsd:int"/><!-- ns__accessPixelValue::channel -->
+</message>
+
+<message name="accessPixelValueResponse">
+ <part name="OutputMatFilename" type="xsd:string"/><!-- ns__accessPixelValue::OutputMatFilename -->
+</message>
+
+<portType name="Basic_StructuresPortType">
+ <operation name="rowRange">
+  <documentation>Creates a matrix header for the specified row span</documentation>
+  <input message="tns:rowRangeRequest"/>
+  <output message="tns:rowRangeResponse"/>
+ </operation>
+ <operation name="colRange">
+  <documentation>Creates a matrix header for the specified column span</documentation>
+  <input message="tns:colRangeRequest"/>
+  <output message="tns:colRangeResponse"/>
+ </operation>
+ <operation name="convertTo">
+  <documentation>Service definition of function ns__convertTo</documentation>
+  <input message="tns:convertToRequest"/>
+  <output message="tns:convertToResponse"/>
+ </operation>
+ <operation name="createMat">
+  <documentation>Allocates new array data if needed</documentation>
+  <input message="tns:createMatRequest"/>
+  <output message="tns:createMatResponse"/>
+ </operation>
+ <operation name="Inverse">
+  <documentation>Inverses a matrix</documentation>
+  <input message="tns:InverseRequest"/>
+  <output message="tns:InverseResponse"/>
+ </operation>
+ <operation name="mul">
+  <documentation>Performs an element-wise multiplication or division of the two matrices</documentation>
+  <input message="tns:mulRequest"/>
+  <output message="tns:mulResponse"/>
+ </operation>
+ <operation name="cross">
+  <documentation>Computes a cross-product of two 3-element vectors</documentation>
+  <input message="tns:crossRequest"/>
+  <output message="tns:crossResponse"/>
+ </operation>
+ <operation name="dot">
+  <documentation>Computes a dot-product of two vectors</documentation>
+  <input message="tns:dotRequest"/>
+  <output message="tns:dotResponse"/>
+ </operation>
+ <operation name="zeros">
+  <documentation>Returns a zero array of the specified size and type</documentation>
+  <input message="tns:zerosRequest"/>
+  <output message="tns:zerosResponse"/>
+ </operation>
+ <operation name="ones">
+  <documentation>Returns an array of all 1’s of the specified size and type</documentation>
+  <input message="tns:onesRequest"/>
+  <output message="tns:onesResponse"/>
+ </operation>
+ <operation name="getMatDetail">
+  <documentation>Get Mat detail (rows, cols, depth, data type, channels, empty)</documentation>
+  <input message="tns:getMatDetail"/>
+  <output message="tns:MatDetail"/>
+ </operation>
+ <operation name="printAllMatValue">
+  <documentation>Service definition of function ns__printAllMatValue</documentation>
+  <input message="tns:printAllMatValueRequest"/>
+  <output message="tns:printAllMatValueResponse"/>
+ </operation>
+ <operation name="accessPixelValue">
+  <documentation>Service definition of function ns__accessPixelValue</documentation>
+  <input message="tns:accessPixelValueRequest"/>
+  <output message="tns:accessPixelValueResponse"/>
+ </operation>
+</portType>
+
+<binding name="Basic_Structures" type="tns:Basic_StructuresPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="rowRange">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="colRange">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="convertTo">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="createMat">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="Inverse">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="mul">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="cross">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="dot">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="zeros">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="ones">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="getMatDetail">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="printAllMatValue">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="accessPixelValue">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+     <SOAP:body use="encoded" namespace="urn:bs" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="Basic_Structures">
+ <documentation>gSOAP 2.8.14 generated service definition</documentation>
+ <port name="Basic_Structures" binding="tns:Basic_Structures">
+  <SOAP:address location="http://localhost/cgi-bin/BasicStructuresServer"/>
+ </port>
+</service>
+
+</definitions>
